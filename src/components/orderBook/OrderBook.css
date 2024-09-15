@@ -1,0 +1,31 @@
+
+.ob__container {
+    max-width: 200px;
+}
+
+.ob__symbol-name {
+    width: 100%;
+    font-weight: bold;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.ob__data-container {
+    width: 100%;
+}
+
+.op__each-data {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-price {
+    padding-right: 10px;
+}
+
+.ob__quantity-data {
+    
+}
