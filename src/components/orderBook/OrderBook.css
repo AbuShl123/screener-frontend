@@ -1,11 +1,24 @@
+/* Order book */
 
-.ob__container {
-    max-width: 200px;
+.order-book__container {
+    padding-top: 10%;
+    margin: 0 auto;
 }
+
+.order-book {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+}
+
+/* order book box */
 
 .ob__symbol-name {
     width: 100%;
     font-weight: bold;
+    padding: 5px;
+    border: 1px solid;
 
     display: flex;
     justify-content: space-around;
@@ -16,16 +29,55 @@
     width: 100%;
 }
 
-.op__each-data {
+.ob__each-data {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 2px;
+}
+
+.ob__quantity-data {
+    padding-right: 100px;
 }
 
 .order-price {
     padding-right: 10px;
 }
 
-.ob__quantity-data {
-    
+/* settings form */
+
+.settings-form {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    max-width: 200px;
+    min-height: 200px;
+}
+
+.settings-input {
+    margin: 0;
+}
+
+.settings-submit-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.settings-submit-input {
+    margin: 0;
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid green;
+    background-color: inherit;
+    min-width: 100px;
+    min-height: 30px;
+    padding: 0;
+}
+
+.settings-submit-input:hover {
+    background-color: #13731d;
+    color: white;
+    transition: .2s;
+    transform: .1s;
 }

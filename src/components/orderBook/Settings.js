@@ -1,44 +1,46 @@
 import { useState } from 'react'
 
-const Login = ({ onSubmit }) => {
+const Settings = ({ onSubmit }) => {
     const [ticker, setTicker] = useState("");
     const [size, setSize] = useState("");
     const [range, setRange] = useState("");
 
     return (
-        <div>
-            <h1> Settings </h1>
-            <form
+        <>
+            <form className='settings-form'
                 onSubmit = {(e) => {
                     e.preventDefault();
                     onSubmit(ticker, size, range);
                 }}
             >
-                <input
+                <input className='settings-input'
                     type="text"
                     value={ticker}
                     placeholder="Ticker"
                     onChange={(e) => setTicker(e.target.value)}
                 />
 
-                <input
+                <input className='settings-input'
                     type="text"
                     value={size}
                     placeholder="Size"
                     onChange={(e) => setSize(e.target.value)}
                 />
 
-                <input
+                <input className='settings-input'
                     type="text"
                     value={range}
                     placeholder="range %"
                     onChange={(e) => setRange(e.target.value)}
                 />
 
-                <input type="submit"></input>
+                <div className='settings-submit-container settings-input'> 
+                    <input type="submit" className='settings-submit-input'/>
+                </div>
+
             </form>
-        </div>
+        </>
     )
 }
 
-export default Login;
+export default Settings;

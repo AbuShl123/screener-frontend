@@ -3,7 +3,7 @@ import OrderBook from './components/orderBook/OrderBook';
 
 function App() {
   return (
-    <OrderBook symbol={"BNXUSDT"}/>
+    <OrderBook></OrderBook>
   )
 }
 
