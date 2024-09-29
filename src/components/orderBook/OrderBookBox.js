@@ -1,14 +1,15 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import useWebSocket from 'react-use-websocket'
+import OrderBooKHeader from './OrderBookHeader'
 
-const OrderBookBox = ({symbol, size, range}) => {
+const OrderBookBox = ({symbol}) => {
     const [bids, setBids] = useState([]);
     const [asks, setAsks] = useState([]);
+    const [isDollar, setDollar] = useState(false);
+    const [range, setRange] = useState(10);
 
-    const WS_URL = `ws://localhost:8080/orderbook/${symbol.toLowerCase()}?dataSize=${size}&priceSpan=${range}`;
-
-    console.log(WS_URL)
+    const WS_URL = `ws://localhost:8080/orderbook/${symbol.toLowerCase()}?priceSpan=${range}`;
 
     const {lastJsonMessage} = useWebSocket(WS_URL, {
         shouldReconnect: () => true,
@@ -17,27 +18,67 @@ const OrderBookBox = ({symbol, size, range}) => {
 
     useEffect(() => {
         if (lastJsonMessage) {
-            const { b: bidsData } = lastJsonMessage;
+            const { b: bidsData, a: asksData } = lastJsonMessage;
             setBids(bidsData);
-            console.log("recevied bids data: " + bidsData)
+            setAsks(asksData);
         }
     }, [lastJsonMessage]);
 
     const formatNumber = (number) => {
-        const prasedNumber = parseFloat(number);
-        return prasedNumber.toFixed(2);
+        return Math.round(number);
+    }
+
+    // data[0] = price, data[1] = quantity, data[2] = percentage
+    const getData = (data) => {
+        return isDollar ? "$ " + formatNumber(data[0] * data[1])
+                        : formatNumber(data[1])
+    }
+
+    const handleDollar = (isDollar) => {
+        setDollar(isDollar);
+    }
+
+    const handleRange = (newRange) => {
+        setRange(newRange);
+        console.log('Range has changed: ', newRange);
     }
     
     return (
         <div className='ob__container'>
-            <span className='ob__symbol-name'><div>{symbol.toUpperCase()}</div></span>
+            
+            <OrderBooKHeader symbol={symbol} onDollar={handleDollar} onRange={handleRange}></OrderBooKHeader>
+
+            <hr className='ob__line'></hr>
+
             <div className='ob__data-container'>
+                {asks.map((data, index) => (
+                    <div className="ob__each-data" key={index}>
+                        <div className='ob__quantity-ask'> 
+                            <span>{getData(data)}</span>
+                        </div>
+                        <div className='ob__price-data-box'>
+                            <div className='ob__price-data'>
+                                <span> {data[0]} </span>
+                            </div>
+                            <div className='ob__percentage-data'> 
+                                <span> {data[2]}% </span>
+                            </div>
+                        </div>                        
+                    </div>
+                ))}
+                <div className='ob__separator'><p></p></div>
                 {bids.map((data, index) => (
                     <div className="ob__each-data" key={index}>
-                        <span className='ob__quantity-data'> {formatNumber(data[1])} </span>
-                        <div className='ob__price-data'>
-                            <span className='ob__data order-price'> {formatNumber(data[0])} </span>
-                            <span className='ob__data'> {formatNumber(data[2])}% </span>
+                        <div className='ob__quantity-bid'> 
+                            <span>{getData(data)}</span>
+                        </div>
+                        <div className='ob__price-data-box'>
+                            <div className='ob__price-data'>
+                                <span> {data[0]} </span>
+                            </div>
+                            <div className='ob__percentage-data'> 
+                                <span>{data[2]}%</span>
+                            </div>
                         </div>                        
                     </div>
                 ))}

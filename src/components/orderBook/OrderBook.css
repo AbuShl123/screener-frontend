@@ -1,62 +1,178 @@
 /* Order book */
 
 .order-book__container {
-    padding-top: 10%;
-    margin: 0 auto;
+    margin-top: 160px;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .order-book {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    width: 100%;
+    /* display: flex;
+    justify-content: space-evenly; */
 }
 
 /* order book box */
 
-.ob__symbol-name {
-    width: 100%;
-    font-weight: bold;
+.ob__container {
+    display: inline-block;
+    min-width: 250px;
+    min-height: 270px;
     padding: 5px;
-    border: 1px solid;
 
+    border: 1px solid rgb(99, 99, 95);
+    border-radius: 7px;
+
+}
+
+.ob__header {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 15px 0 15px;
     align-items: center;
 }
 
+.dollar-container {
+    display: flex;
+    position: relative;
+}
+
+.dollar-icon {
+    font-size: 27px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.dollar-icon:hover {
+    transform: scale(1.2);
+}
+
+.settings-icon {
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.settings-icon:hover {
+    transform: rotate(45deg) scale(1.1);
+    font-weight: 600;
+}
+
+.ob__symbol-name {
+    color: rgb(255, 204, 0);
+    font-weight: bold;
+    padding: 17px 0 14px 0;
+}
+
+.ob__line {
+    margin: 0 5px 20px 5px;
+    color: white;
+}
+
 .ob__data-container {
-    width: 100%;
+    padding: 0 5px 0 5px;
 }
 
 .ob__each-data {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 2px;
+    padding: 1px;
 }
 
-.ob__quantity-data {
-    padding-right: 100px;
+.ob__quantity-ask {
+    color: rgb(200, 70, 70);
 }
 
-.order-price {
-    padding-right: 10px;
+.ob__quantity-bid {
+    color: rgb(60, 145, 60);
+}
+
+.ob__price-data-box {
+    margin-left: 40px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ob__price-data {
+    margin-right: 20px;
+}
+
+.ob__percentage-data {
+    display: flex;
+    justify-content: flex-end;
 }
 
 /* settings form */
 
-.settings-form {
-    width: 100%;
+.settings-popup {
+    position: absolute;
+    top: 100%;
+    left: 26px;
+    z-index: 1000;
+
+    background-color: #283250;
+    border-radius: 5px;
+    width: 0;
+    height: 0; 
+    animation: expandSquare .2s ease forwards;
+
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    max-width: 200px;
-    min-height: 200px;
+}
+
+.settings-collapsed {
+    animation: collapseSquare .2s ease forwards;
+}
+
+@keyframes expandSquare {
+    0% {
+        width: 0;
+        height: 0;
+    }
+    100% {
+        width: 130px;
+        height: 110px;
+    }
+}
+
+@keyframes collapseSquare {
+    0% {
+        width: 100px;
+        height: 100px;
+    }
+    100% {
+        width: 0;
+        height: 0;
+    }
+}
+
+.settings-header-title {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 10px 0;
+}
+
+.settings-form {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .settings-input {
     margin: 0;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    border: none;
+    width: inherit;
+    padding: 1px 0 1px 10px;
+    margin: 15px 15px 0 15px;
+}
+
+.settings-input:active {
+    border: none;
 }
 
 .settings-submit-container {
