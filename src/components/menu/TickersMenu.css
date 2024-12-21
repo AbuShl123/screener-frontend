@@ -1,0 +1,164 @@
+.tickers-menu {
+    position: sticky;
+    top: 0;
+    right: 0;
+    padding-bottom: 20px;
+
+    background-color: #21222794;
+    border-left: 0.1px solid rgba(255, 255, 255, 0.162);
+    height: 100vh;
+    max-height: 100vh;
+}
+
+.menu-container {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+.connected-tickers-title {
+    flex: 0 1 auto;
+    font-size: 18px;
+    padding: 20px 0 20px 10px;
+    color: rgba(255, 255, 255, 0.747);
+}
+
+/* connected symbols */
+
+.connected-tickers-list {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    min-height: 50%;
+    max-height: 50%;
+    margin-bottom: 20px;
+}
+
+.connected-ticker-container {
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px;
+}
+
+.connected-ticker-container:hover {
+    background-color: rgba(108, 107, 107, 0.096);
+}
+
+.connected-ticker-container > p {
+    margin: 10px;
+}
+
+.ticker-action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: center;
+}
+
+.market-checkbox {
+    border-radius: 10px;
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.market-checkbox > p {
+    margin: 2px 10px;
+}
+
+.spot-checkbox {
+    border: 1px solid rgba(123, 123, 123, 0.8);
+}
+
+.spot-checkbox:hover {
+    border: 1px solid rgba(255, 248, 58, 0.8);
+}
+
+.spot-selected {
+    border: none;
+    background-color: #dbb742;
+    color: black;
+}
+
+.futures-checkbox {
+    border: 1px solid rgba(123, 123, 123, 0.8);
+}
+
+.futures-checkbox:hover {
+    border: 1px solid rgba(102, 255, 0, 0.6);
+}
+
+.futures-selected {
+    border: none;
+    background-color: rgb(164, 205, 136);
+    color: black;
+}
+
+.close-icon {
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* add new ticker */
+
+input.add-ticker-container {
+    flex: 0 1 auto;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-top: 0.1px solid rgba(255, 255, 255, 0.317);
+    border-bottom: 0.1px solid rgba(255, 255, 255, 0.317);
+
+    background-color: inherit;
+    color: white;
+    font-size: 15px;
+}
+
+input.add-ticker-container:focus {
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid rgb(196, 239, 197, 0.7);
+    border-bottom: 1px solid rgb(196, 239, 197, 0.7);
+}
+
+.search-list {
+    flex: 1 1 auto;
+    margin-top: 20px;
+    overflow-y: auto;
+    max-height: 100vh;
+    font-size: 14px;
+}
+
+.search-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px 0 10px;
+    cursor: pointer;
+}
+
+.search-container:hover {
+    background-color: rgba(255, 255, 255, 0.062);
+    color: rgba(255, 214, 7, 0.87);
+}
+
+.search-name {
+    margin: 5px 0;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    .menu-scroller::-webkit-scrollbar-thumb {
+        background-color: #fbfbfc87;
+    }
+
+    .menu-scroller::-webkit-scrollbar-truck {
+        background-color: #181A20;
+    }
+
+    .menu-scroller::-webkit-scrollbar {
+        width: 7px;
+    }
+}

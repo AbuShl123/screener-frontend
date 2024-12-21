@@ -1,0 +1,25 @@
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 19%;
+    position: relative;
+}
+
+.content-left {
+    max-height: 100vh;
+    overflow-y: scroll;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    .content-left::-webkit-scrollbar-thumb {
+        background-color: inherit;
+    }
+
+    .content-left::-webkit-scrollbar-truck {
+        background-color: inherit;
+    }
+
+    .content-left::-webkit-scrollbar {
+        width: auto;
+    }
+}

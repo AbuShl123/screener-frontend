@@ -1,22 +1,27 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import OrderBookBox from './OrderBookBox'
-import './/OrderBook.css'
+import MarketHeader from './MarketHeader'
+import './OrderBook.css'
 
-const OrderBook = () => {
+const OrderBook = ({ connectedTickers, onClose }) => {
+    const [selectedTickers, setSelectedTickers] = useState([]);
 
-    const tickers = ["BTCUSDT", "BNXUSDT", "ETHUSDT", "AVAXUSDT", "TRXUSDT"];
+    useEffect(() => {
+        setSelectedTickers(connectedTickers);
+    }, [connectedTickers]);
 
     return (
-        <>
-            <div className='order-book__container'>
-                {tickers.map((symbol, index) => (
-                    <div className='order-book' key={index}>
-                        <OrderBookBox symbol={symbol}/>
-                    </div>  
+        <div className='order-book-container'>
+            <div className='order-book'>
+                {selectedTickers.map((symbol, index) => (
+                    <div className='order-book-cup' key={index}>
+                        <MarketHeader ticker={symbol} onClose={onClose}/>
+                        <OrderBookBox ticker={symbol} />
+                    </div>
                 ))}
             </div>
-        </>
+        </div>
     )
 }
 

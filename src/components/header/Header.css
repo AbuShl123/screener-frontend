@@ -1,0 +1,11 @@
+
+main.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+
+    width: 81%;
+    height: 70px;
+    background-color: #212227;
+}
