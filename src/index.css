@@ -34,3 +34,68 @@ input:focus {
   border: 1px solid #6c6666;
   box-shadow: none;
 }
+
+@supports selector(::-webkit-scrollbar) {
+  .menu-scroller::-webkit-scrollbar-thumb {
+      background-color: #fbfbfc87;
+  }
+
+  .menu-scroller::-webkit-scrollbar-truck {
+      background-color: #181A20;
+  }
+
+  .menu-scroller::-webkit-scrollbar {
+      width: 7px;
+  }
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .menu-invisible-scroller::-webkit-scrollbar-thumb {
+      background-color: inherit;
+  }
+
+  .menu-invisible-scroller::-webkit-scrollbar-truck {
+      background-color: inherit;
+  }
+
+  .menu-invisible-scroller::-webkit-scrollbar {
+      width: 7px;
+  }
+}
+
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip {
+    visibility: hidden;
+    background-color: rgb(227, 227, 227);
+    color: #000;
+    text-align: center;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+
+    position: absolute;
+    top: 110%;
+    left: 10%;
+
+    white-space: nowrap;
+    z-index: 1;
+    opacity: 0;
+}
+
+.tooltip-container:hover .tooltip {
+    animation: opacity-change .1s linear 2s forwards;
+    visibility: visible;
+}
+
+@keyframes opacity-change {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

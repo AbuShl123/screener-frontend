@@ -2,7 +2,9 @@
 /* Order book */
 
 .order-book-container {
-    padding: 110px 0 50px 40px;
+    flex: 1 1 auto;
+    padding: 40px 0 50px 40px;
+    overflow-y: auto;
 }
 
 .order-book {
@@ -11,71 +13,15 @@
     gap: 50px;
 }
 
-.order-book-cup {
-
-}
-
-/* market header */
-
-.market-header {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    position: relative;
-}
-
-.market-text {
-    min-width: 100px;
-    font-size: 12px;
-    text-align: center;
-
-    border: 1px solid rgb(99, 99, 95);
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-}
-
-.delete-cup {
-    position: absolute;
-    bottom: 0;
-    right: 0px;
-    height: 100%;
-
-    min-width: 30px;
-    text-align: center;
-    
-    border: 1px solid rgb(99, 99, 95);
-    border-bottom: none;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-}
-
-.delete-cup-icon {
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.spot-header {
-    border: 1px solid rgba(220, 220, 52, 0.594);
-    border-bottom: none;
-    color: rgba(220, 220, 52, 0.95);
-}
-
-.futures-header {
-    border: 1px solid rgba(55, 220, 52, 0.594);
-    border-bottom: none;
-    color: rgba(40, 202, 26, 0.998);
-}
-
 /* order book box */
 
 .ob__container {
     display: inline-block;
-    min-width: 250px;
+    min-width: 300px;
     min-height: 360px;
 
     border: 1px solid rgb(99, 99, 95);
-    border-radius: 7px;
-    border-top-right-radius: 0;
+    border-radius: 5px;
 }
 
 .ob__body {
@@ -89,8 +35,9 @@
     align-items: center;
 }
 
-.dollar-container {
+.ob__icons {
     display: flex;
+    align-items: center;
 }
 
 .dollar-icon {
@@ -114,9 +61,22 @@
     font-weight: 600;
 }
 
+.delete-cup-icon {
+    font-size: 20px;
+    cursor: pointer;
+}
+
 .ob__symbol-name {
-    color: rgb(245, 245, 245);
+    font-weight: bold;
     padding: 17px 0 14px 0;
+}
+
+.ob__spot-symbol {
+    color: rgb(255, 204, 0);
+}
+
+.ob__perp-symbol {
+    color: rgb(147 231 90);
 }
 
 .ob__line {
@@ -125,7 +85,7 @@
 }
 
 .ob__data-container {
-    padding: 0 10px 0 10px;
+    padding: 0 10px;
 }
 
 .ob__each-data {
@@ -133,16 +93,8 @@
     width: 100%;
     justify-content: space-between;
     padding: 1px;
-}
 
-.ob__quantity-ask {
-    color: rgb(200, 70, 70);
-    margin-right: 30px;
-}
-
-.ob__quantity-bid {
-    color: rgb(60, 145, 60);
-    margin-right: 30px;
+    position: relative;
 }
 
 .quantity-level-0 {
@@ -162,16 +114,26 @@
 }
 
 .ob__price-data-box {
-    width: 100%;
-    max-width: 130px;
-    min-width: 130px;
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
+    gap: 10px;
 }
 
 .ob__percentage-data {
     display: flex;
     justify-content: flex-end;
+}
+
+.ob__footer {
+    display: flex;
+    padding: 10px 0 10px 10px;
+    text-wrap: nowrap;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.676); 
+}
+
+.ob__footer__line {
+    margin: 10px 0 0 0;
 }
 
 /* settings form */
@@ -259,7 +221,7 @@
 
 .range-constraints {
     margin-left: 15px;
-    color: rgb(183, 183, 183);
+    color: rgb(117, 117, 117);
 }
 
 .level-input {
@@ -302,3 +264,4 @@
     transition: .2s;
     transform: .1s;
 }
+

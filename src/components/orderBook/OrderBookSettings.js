@@ -1,30 +1,30 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
+import { DEFAULT_SETTINGS } from '../../utils/Utils';
+import { useCacheContext } from '../context/Context.js';
 
-const OrderBookSettings = ({ isSettings, onNewSettings, onSubmit }) => {
+const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
     const RANGE_PLACEHOLDER = "%";
-    const LOW_BOUND_DEFAULT = "-10%";
-    const HIGH_BOUND_DEFAULT = "10%";
+    const LOW_BOUND_DEFAULT = -10;
+    const HIGH_BOUND_DEFAULT = 10;
     const LEVEL_PLACEHOLDER = "auto";
     const LEVEL_DEFAULT = "";
-    const DEFAULT_SETTINGS = {
-        lowBound: -10,
-        highBound: 10,
-        level1: -1,
-        level2: -1,
-        level3: -1
-    };
 
-    const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-    const [lowBound, setLowBound] = useState(LOW_BOUND_DEFAULT);
-    const [highBound, setHighBound] = useState(HIGH_BOUND_DEFAULT);
-    const [level1, setLevel1] = useState(LEVEL_DEFAULT);
-    const [level2, setLevel2] = useState(LEVEL_DEFAULT);
-    const [level3, setLevel3] = useState(LEVEL_DEFAULT);
+    const {settingsMap, getSettings, setSettings} = useCacheContext();
+    const [lowBound, setLowBound] = useState();
+    const [highBound, setHighBound] = useState();
+    const [level1, setLevel1] = useState();
+    const [level2, setLevel2] = useState();
+    const [level3, setLevel3] = useState();
 
     useEffect(() => {
-        onNewSettings(settings);
-    }, [settings]);
+        const settings = getSettings(ticker);
+        setLowBound(settings.lowBound);
+        setHighBound(settings.highBound)
+        setLevel1(settings.level1 < 0 ? '' : settings.level1);
+        setLevel2(settings.level2 < 0 ? '' : settings.level2);
+        setLevel3(settings.level3 < 0 ? '' : settings.level3);
+    }, [settingsMap]);
 
     const handleReset = () => {
         setLowBound(LOW_BOUND_DEFAULT);
@@ -32,88 +32,100 @@ const OrderBookSettings = ({ isSettings, onNewSettings, onSubmit }) => {
         setLevel1(LEVEL_DEFAULT);
         setLevel2(LEVEL_DEFAULT);
         setLevel3(LEVEL_DEFAULT);
-        setSettings(DEFAULT_SETTINGS);
         onSubmit();
     }
 
     const submitSettings = () => {
-        if (lowBound > highBound) {
+        let low = Number(lowBound);
+        let high = Number(highBound);
+
+        if (isNaN(lowBound) || isNaN(highBound) || lowBound > highBound) {
             setLowBound(LOW_BOUND_DEFAULT);
             setHighBound(HIGH_BOUND_DEFAULT);
-        } else {
-            handleRangeBlur(true);
-            handleRangeBlur(false);
+            low = LOW_BOUND_DEFAULT;
+            high = HIGH_BOUND_DEFAULT;
         }
 
-        let L = lowBound.replace(/[^0-9-]/g, '');
-        let H = highBound.replace(/[^0-9-]/g, '');
-        let lev1 = !level1 ? -1 : level1.replace(/[^0-9-]/g, '');
-        let lev2 = !level2 ? -1 : level2.replace(/[^0-9-]/g, '');
-        let lev3 = !level3 ? -1 : level3.replace(/[^0-9-]/g, '');
+        const lev1 = level1 === '' ? -1 : level1;
+        const lev2 = level2 === '' ? -1 : level2;
+        const lev3 = level3 === '' ? -1 : level3;
 
-        setSettings({
-            lowBound: L,
-            highBound: H,
+        let newSettings = {
+            lowBound: low,
+            highBound: high,
             level1: lev1,
             level2: lev2,
-            level3: lev3
-        });
+            level3: lev3,
+            audio: false,
+            isDollar: false
+        };
+
+        setSettings(ticker, newSettings);
         onSubmit();
     }
 
-    // this function doesn't allow users to enter letters
     const handleRangeChange = (event, isLowBound) => {
-        let inputValue = event.target.value;
-        inputValue = inputValue.replace(/[^0-9-% ]/g, '');
-        
+        let value = event.target.value.replace(/[^0-9-]/g, '');
         if (isLowBound) {
-            setLowBound(inputValue);
+            setLowBound(value);
         } else {
-            setHighBound(inputValue);
+            setHighBound(value);
         }
     }
 
-    // this function checks the constraints of the entered value
     const handleRangeBlur = (isLowBound) => {
-        let inputValue = isLowBound ? lowBound : highBound;
-        inputValue = inputValue.replace(/[^0-9-]/g, '');
-        if (inputValue < -30) inputValue = -30;
-        if (inputValue > 30) inputValue = 30;
+        let value = Number(isLowBound ? lowBound : highBound);
+        if (isNaN(value)) {
+            if (isLowBound) {
+                setLowBound(LOW_BOUND_DEFAULT);
+            } else {
+                setHighBound(HIGH_BOUND_DEFAULT);
+            }
+            return;
+        }
 
-        if (isLowBound && lowBound) {
-            setLowBound(`${inputValue}%`);
-        }
-        else if (isLowBound && !lowBound) {
+        let anotherValue = isLowBound ? highBound : lowBound;
+        if (isLowBound && value > anotherValue) {
             setLowBound(LOW_BOUND_DEFAULT);
-        }
-        else if (!isLowBound && highBound) {
-            setHighBound(`${inputValue}%`);
-        }
-        else if (!isLowBound && !highBound) {
+            return;
+        } 
+
+        if (!isLowBound && value < anotherValue) {
             setHighBound(HIGH_BOUND_DEFAULT);
+            return;
+        }
+
+        if (isLowBound) {
+            setLowBound(value);
+        } else {
+            setHighBound(value);
         }
     };
 
+    const handleLevelChange = (event, level) => {
+        let value = event.target.value;
+        value = value.replace(/[^0-9 ]/g, '');
+        switch (level) {
+            case 1: setLevel1(value); break;
+            case 2: setLevel2(value); break;
+            case 3: setLevel3(value); break;
+        }
+    }
+
     // this function doesn't allow users to enter letters
     const handleLevelBlur = (event, level) => {
-        let inputValue = event.target.value;
+        let inputValue = event.target.value.replace(/[^0-9]/g, '');
+        let value = Number(inputValue);
 
-        inputValue = inputValue.replace(/[^0-9 -]/g, '');
-        let value = (!inputValue || inputValue < 0) ? LEVEL_DEFAULT : inputValue;
+        if (isNaN(value) || inputValue === '') {
+            value = LEVEL_DEFAULT;
+        }
 
         switch (level) {
-            case 1: 
-                setLevel1(value)
-                break;
-            case 2: 
-                setLevel2(value)
-                break;
-            case 3: 
-                setLevel3(value)
-                break;
-            default:
-                console.warn("Invalid level");
-       }
+            case 1: setLevel1(value); break;
+            case 2: setLevel2(value); break;
+            case 3: setLevel3(value); break;
+        }
     }
 
     return (
@@ -173,7 +185,7 @@ const OrderBookSettings = ({ isSettings, onNewSettings, onSubmit }) => {
                                     type="text"
                                     value={level1}
                                     placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => setLevel1(e.target.value)}
+                                    onChange={e => handleLevelChange(e, 1)}
                                     onBlur={(e) => handleLevelBlur(e, 1)}
                                 />
                             </div>
@@ -188,7 +200,7 @@ const OrderBookSettings = ({ isSettings, onNewSettings, onSubmit }) => {
                                     type="text"
                                     value={level2}
                                     placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => setLevel2(e.target.value)}
+                                    onChange={e => handleLevelChange(e, 2)}
                                     onBlur={(e) => handleLevelBlur(e, 2)}
                                 />
                             </div>
@@ -203,7 +215,7 @@ const OrderBookSettings = ({ isSettings, onNewSettings, onSubmit }) => {
                                     type="text"
                                     value={level3}
                                     placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => setLevel3(e.target.value)}
+                                    onChange={e => handleLevelChange(e, 3)}
                                     onBlur={(e) => handleLevelBlur(e, 3)}
                                 />
                             </div>

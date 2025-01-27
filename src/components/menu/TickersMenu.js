@@ -1,55 +1,32 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import api from '../../api/AxiosConfig.js'
-import './TickersMenu.css'
+import './Menu.css'
+import { useCacheContext } from '../context/Context.js';
+import { SPOT_SIGN, FUT_SIGN } from '../../utils/Utils.js';
 
-const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
-    const SPOT_SIGN = ".p";
-    const FUT_SIGN  = ".f";
-
-    const DEFAULT_TICKERS = ["btcusdt", "xrpusdt", "trxusdt", "ethusdt", "avaxusdt", "bnxusdt"];
-    const DEFAULT_MARKET_TICKERS = [`btcusdt${SPOT_SIGN}`, `xrpusdt${SPOT_SIGN}`, `trxusdt${SPOT_SIGN}`, 
-                                    `ethusdt${SPOT_SIGN}`, `avaxusdt${SPOT_SIGN}`, `bnxusdt${SPOT_SIGN}`];
-
-    const [tickers, setTickers] = useState([]);
+const TickersMenu = ({deleteTicker, deleteionCompleted, allTickers, props}) => {
+    const tickerProperties = props;
+    const tickers = allTickers;
     const [suggestions, setSuggestions] = useState([]);
-    const [selectedTickers, setSelectedTickers] = useState(DEFAULT_TICKERS);
-    const [marketTickers, setMarketTickers] = useState(DEFAULT_MARKET_TICKERS);
-    const token = localStorage.getItem('token');
-
-    useEffect(() => {
-        const fetchTickers = async () => {
-            try {
-                const response = await api.get('/tickers', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const arr = response.data.map(item => item.symbol);
-                setTickers(arr);
-                setSuggestions(arr);
-            } catch (error) {
-                console.error('Error fetching tickers:', error);
-            }
-        };
-
-        fetchTickers();
-    }, [token]);
-
-    useEffect(() => {
-        console.log(marketTickers);
-        marketTickers.forEach((t) => activateMarket(t, true));
-        onTickersUpdate(marketTickers);
-    }, [marketTickers]);
+    const {selectedTickers, setSelectedTickers} = useCacheContext();
+    const {marketTickers, setMarketTickers} = useCacheContext();
 
     useEffect(() => {
         if (deleteTicker) {
-            console.log("Deleting cup ", deleteTicker);
             activateMarket(deleteTicker, false, true);
-            setMarketTickers( (prevMarketTickers) => prevMarketTickers.filter((t) => t !== deleteTicker));
+            let newMarketTickers = marketTickers.filter((t) => t !== deleteTicker);
+            updateMarketTickers(newMarketTickers);
             deleteionCompleted();
         }
     }, [deleteTicker]);
+
+    function updateSelectedTickers(value) {
+        setSelectedTickers(value);
+    }
+
+    function updateMarketTickers(value) {
+        setMarketTickers(value);
+    }
 
     const activateMarket = (ticker, activate=false, deactivate=false) => {
         let locator = `div[id='${ticker}']`;
@@ -65,17 +42,25 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
             if (deactivate) return false;
             classList.add(marketSelected);
             return true;
-       }
+        }
     }
 
     const handleMarketSelection = (symbol, isSpot) => {
         let ticker = isSpot ? `${symbol}${SPOT_SIGN}` : `${symbol}${FUT_SIGN}`;
-        let hasActivated = activateMarket(ticker);
-        if (hasActivated) {
-            setMarketTickers( (prevMarketTickers) => [...prevMarketTickers, ticker]);
-        } else {
-            setMarketTickers( (prevMarketTickers) => prevMarketTickers.filter((t) => t !== ticker));
+        let el = document.querySelector(`div[id='${ticker}']`);
+        if (!el || el.classList.contains('disabled')) {
+            return;
         }
+
+        let hasActivated = activateMarket(ticker);
+        let newMarketTickers;
+        if (hasActivated) {
+            newMarketTickers = [...marketTickers, ticker];
+        } else {
+            newMarketTickers = marketTickers.filter((t) => t !== ticker);
+        }
+
+        updateMarketTickers(newMarketTickers)
     }
 
     const handleClose = (symbol) => {
@@ -83,29 +68,49 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
         let tickerp = symbol + SPOT_SIGN;
         activateMarket(tickerf, false, true);
         activateMarket(tickerp, false, true);
-        setMarketTickers( (prevMarketTickers) => prevMarketTickers.filter((t) => t !== tickerp && t !== tickerf));
-        setSelectedTickers( (prevSelectedTicker) => prevSelectedTicker.filter((t) => t !== symbol));
+        let newSelectedTickers = selectedTickers.filter((t) => t !== symbol);
+        let newMarketTickers = marketTickers.filter((t) => t !== tickerp && t !== tickerf);
+        updateSelectedTickers(newSelectedTickers);
+        updateMarketTickers(newMarketTickers);
     }
 
     const handleInputChange = (event) => {
         const query = event.target.value;
         const filteredSuggestions = tickers.filter(ticker =>
-            ticker.toLowerCase().includes(query.toLowerCase())
+            ticker.toLowerCase().includes(query.toLowerCase()) 
+            && !selectedTickers.includes(ticker)
         );
         setSuggestions(filteredSuggestions);
     }
 
     const handleNewSymbol = (symbol) => {
         if (!selectedTickers.includes(symbol)) {
-            setSelectedTickers( tickers => [...tickers, symbol]);
+            let newSelectedTickers = [...selectedTickers, symbol];
+            updateSelectedTickers(newSelectedTickers);
         }
     }
 
+    const getMarketStyle = (ticker, isSpot=true) => {
+        let props = tickerProperties.get(ticker);
+        if (props) {
+            let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
+            if (!marketExists) return 'disabled';
+        }
+
+        let marketSymbol = ticker + (isSpot ? SPOT_SIGN : FUT_SIGN);
+        if (marketTickers.includes(marketSymbol)) {
+            let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
+            return classValue;
+        }
+
+        return '';
+    }
+ 
     return (
-        <div className='tickers-menu'>
+        <>
             <div className='menu-container'>
-                <div className='connected-tickers-title'>
-                    Connected symbols 
+                <div className='menu-title'>
+                    Выбранные тикеры 
                 </div>
                 <div className='connected-tickers-list menu-scroller'>
                     {selectedTickers.length > 0 && selectedTickers.map((ticker, index) => (       
@@ -113,7 +118,7 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
                             <p> {ticker.toUpperCase()} </p>
                             <div className='ticker-action-buttons'>
                                 <div
-                                    className='market-checkbox spot-checkbox'
+                                    className={'market-checkbox spot-checkbox ' + getMarketStyle(ticker)}
                                     id={`${ticker}${SPOT_SIGN}`}
                                     onClick={() => handleMarketSelection(ticker, true)}
                                 >
@@ -121,7 +126,7 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
                                 </div>
 
                                 <div
-                                    className='market-checkbox futures-checkbox'
+                                    className={'market-checkbox futures-checkbox ' + getMarketStyle(ticker, false)}
                                     id={`${ticker}${FUT_SIGN}`}
                                     onClick={() => handleMarketSelection(ticker, false)}
                                 >
@@ -135,7 +140,7 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
                 </div>
                 <input 
                     className='add-ticker-container' 
-                    placeholder='+ add ticker'
+                    placeholder='+ добавить тикер'
                     onChange={handleInputChange}
                 />
                 <div className='search-list menu-scroller'>
@@ -149,7 +154,7 @@ const TickersMenu = ( {onTickersUpdate, deleteTicker, deleteionCompleted} ) => {
                     ))}
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 

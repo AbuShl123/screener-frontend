@@ -12,7 +12,7 @@ const signUpUser = async (firstname, lastname, email, password) => {
 
         let token = response.data.token;
 
-        localStorage.setItem('token', token);
+        localStorage.setItem('screener-auth-token', token);
 
         window.location.href = '/main';
     } catch (error) {
@@ -29,7 +29,7 @@ const logInUser = async (email, password) => {
 
         let token = response.data.token;
 
-        localStorage.setItem('token', token);
+        localStorage.setItem('screener-auth-token', token);
 
         window.location.href = '/main';
     } catch (error) {
@@ -38,7 +38,7 @@ const logInUser = async (email, password) => {
 };
 
 const checkTokenExpiration = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('screener-auth-token');
 
   if (token) {
     const decodedToken = jwtDecode(token);
@@ -57,7 +57,7 @@ const checkTokenExpiration = () => {
 };
 
 const checkConnection = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('screener-auth-token');
     
     if (token) {
         const response = await axios.get('/demo', {

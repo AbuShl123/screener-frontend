@@ -1,11 +1,83 @@
 
-main.header {
-    position: absolute;
+.header {
+    position: sticky;
     top: 0;
     left: 0;
-    z-index: 10;
+    z-index: 1;
 
-    width: 81%;
-    height: 70px;
+    width: 100%;
+    min-height: 70px;
     background-color: #212227;
+}
+
+.header-container {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-left-elements {
+    position: relative;
+    display: flex;
+    justify-content: start; 
+    gap: 10px;
+    align-items: center;
+
+    width: 100%;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.header-right-elements {
+    position: relative;
+    display: flex;
+    justify-content: end; 
+    gap: 10px;
+    align-items: center;
+
+    width: 100%;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.header-item {
+    border-radius: 5px;
+}
+
+.header-item:hover {
+    background-color: #3b3c4393;
+}
+
+.toggle-icon {
+    font-size: 20px;
+    cursor: pointer;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 40px;
+    height: 40px;
+}
+
+.volume-icon {
+    font-variation-settings: normal;
+}
+
+.menu-button {
+    background-color: #212227;
+    border: none;
+    color: white;
+    padding: 10px;
+    border: 1px solid #212227;
+}
+
+.menu-selected {
+    cursor: default !important;
+    color: #73cf73;
+    border: 1px solid #73cf73;
+}
+
+.menu-selected:hover {
+    background-color: inherit;
 }

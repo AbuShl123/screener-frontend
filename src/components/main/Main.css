@@ -1,25 +1,23 @@
 
 .main {
     display: grid;
-    grid-template-columns: 1fr 19%;
-    position: relative;
+    grid-template-columns: 1fr 292px;
 }
 
 .content-left {
+    display: flex;
+    flex-flow: column;
     max-height: 100vh;
-    overflow-y: scroll;
+    position: relative;
 }
 
-@supports selector(::-webkit-scrollbar) {
-    .content-left::-webkit-scrollbar-thumb {
-        background-color: inherit;
-    }
+.content-right {
+    position: sticky;
+    top: 0;
+    right: 0;
+    padding-bottom: 20px;
 
-    .content-left::-webkit-scrollbar-truck {
-        background-color: inherit;
-    }
-
-    .content-left::-webkit-scrollbar {
-        width: auto;
-    }
+    background-color: #21222794;
+    height: 100vh;
+    max-height: 100vh;
 }
