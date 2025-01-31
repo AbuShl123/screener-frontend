@@ -10,8 +10,7 @@ import OIMenu from '../menu/OIMenu'
 import OrderBook from '../orderBook/OrderBook'
 import SettingsModal from '../settings/SettingsModal'
 import api from '../../api/AxiosConfig'
-import { setSpeech, speak, DEFAULT_MARKET_TICKERS } from '../../utils/Utils'
-import { cache } from '../../utils/CacheUtils'
+import { setSpeech, speak } from '../../utils/Utils'
 
 const Main = () => {
     const token = localStorage.getItem('screener-auth-token');
@@ -20,7 +19,6 @@ const Main = () => {
     const [activeMenu, setActiveMenu] = useState(Menu.tickers);
     const [isDollar, setIsDollar] = useState(true);
     const [isVoiceOn, setIsVoiceOn] = useState(true);
-    const [marketTickers, setMarketTickers] = useState([]);
     const [tickerToDelete, setTickerToDelete] = useState("");
     const [notification, setNotification] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,11 +62,6 @@ const Main = () => {
         }
     }, [isVoiceOn]);
 
-    useEffect(() => {
-        console.log('Main called useEffect for updating marketTickers');
-        setMarketTickers(cache.getMarketTickers() || DEFAULT_MARKET_TICKERS, false);
-    }, [cache.marketTickersUpdate]);
-
     const addNewNotification = (newNotification) => {
         if (isVoiceOn) {
             speak(newNotification, isDollar);
@@ -96,7 +89,6 @@ const Main = () => {
                         />
                         <OrderBook
                             isDollar={isDollar}
-                            connectedTickers={marketTickers}
                             onNotification={addNewNotification}
                             onClose={setTickerToDelete}
                         />

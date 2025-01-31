@@ -5,8 +5,9 @@ import OrderBookSettings from './OrderBookSettings'
 import { TailSpin } from 'react-loader-spinner'
 import axios from '../../api/AxiosConfig.js'
 import { useCacheContext } from '../context/Context.js'
+import { websocket } from '../../api/WebSocketManager.js'
 
-const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClose }) => {
+const OrderBookBox = ({ ticker, isDollar, onNotification, onClose }) => {
     const isSpot = ticker.endsWith(SPOT_SIGN);
     const symbolText = ticker.replace(SPOT_SIGN, "").replace(FUT_SIGN, "");
 
@@ -17,31 +18,7 @@ const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClo
     const [asks, setAsks] = useState([]);
     const [isSettings, setIsSettings] = useState(false);
     const {getSettings} = useCacheContext();
-
-    useEffect(() => {
-        if (lastJsonMessage) {
-            const { symbol: symbol, b: bidsData, a: asksData } = lastJsonMessage;
-            if (symbol !== ticker.replace(SPOT_SIGN, "")) return;
-            try {
-                if (!bidsData || !asksData || bidsData.length == 0 || asksData.length == 0) return;
-                const settings = getSettings(ticker);
-                let lowBound = settings.lowBound;
-                let highBound = settings.highBound;
-                let bids = bidsData.filter(trade => parseFloat(trade[2]) >= lowBound && parseFloat(trade[2]) <= highBound);
-                let asks = asksData.filter(trade => parseFloat(trade[2]) >= lowBound && parseFloat(trade[2]) <= highBound);
-                const sortedBids = bids.sort((a, b) => b[1] - a[1]).slice(0, 5).sort((a, b) => a[2] - b[2]);
-                const sortedAsks = asks.sort((a, b) => b[1] - a[1]).slice(0, 5).sort((a, b) => b[2] - a[2]);
-                checkNotifications(sortedAsks, sortedBids);
-                setBids(sortedBids || []);
-                setAsks(sortedAsks || []);
-            } catch (error) {
-                console.warn("Failed to read bids and/or ask data, ", error);
-                setBids([]);
-                setAsks([]);
-            }
-        }
-    }, [lastJsonMessage]);
-
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -62,6 +39,10 @@ const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClo
     }, []);
 
     useEffect(() => {
+        websocket.subscribe([ticker], handleData);
+    }, [ticker]);
+
+     useEffect(() => {
         let dataContainer = document.querySelector(`div[id='data_container_${ticker}']`);
         if (isSettings) {
             dataContainer.style = 'filter: blur(3px)';
@@ -69,6 +50,30 @@ const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClo
             dataContainer.style = 'filter: blur(0)';
         }
     }, [isSettings])
+    
+    const handleData = (lastJsonMessage) => {
+        if (lastJsonMessage === undefined) return;
+
+        const { symbol: symbol, b: bidsData, a: asksData } = lastJsonMessage;
+
+        if (symbol !== ticker.replace(SPOT_SIGN, "")) return;
+        if (!bidsData || !asksData || bidsData.length == 0 || asksData.length == 0) return;
+
+        try {
+            const settings = getSettings(ticker);
+            let lowBound = settings.lowBound;
+            let highBound = settings.highBound;
+            let bids = bidsData.filter(trade => parseFloat(trade[2]) >= lowBound && parseFloat(trade[2]) <= highBound);
+            let asks = asksData.filter(trade => parseFloat(trade[2]) >= lowBound && parseFloat(trade[2]) <= highBound);
+            const sortedBids = bids.sort((a, b) => b[1] - a[1]).slice(0, 5).sort((a, b) => a[2] - b[2]);
+            const sortedAsks = asks.sort((a, b) => b[1] - a[1]).slice(0, 5).sort((a, b) => b[2] - a[2]);
+            checkNotifications(sortedAsks, sortedBids);
+            setBids(sortedBids || []);
+            setAsks(sortedAsks || []);
+        } catch (error) {
+            console.warn("Failed to read bids and/or ask data, ", error);
+        }
+    }
 
     const checkNotifications = (asks, bids) => {
         const currentOrderBook = new Map(pastOrderBook);

@@ -27,11 +27,7 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
     }, [settingsMap]);
 
     const handleReset = () => {
-        setLowBound(LOW_BOUND_DEFAULT);
-        setHighBound(HIGH_BOUND_DEFAULT);
-        setLevel1(LEVEL_DEFAULT);
-        setLevel2(LEVEL_DEFAULT);
-        setLevel3(LEVEL_DEFAULT);
+        setSettings(ticker, DEFAULT_SETTINGS);
         onSubmit();
     }
 
