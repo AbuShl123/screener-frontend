@@ -5,16 +5,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins, faDollarSign, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import './Header.css'
+import { useCacheContext } from '../context/Context';
 
 const Header = ({ onNewDollar, onVoiceToggle, onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
-    const [isDollar, setIsDollar] = useState(true);
+    const {isDollar, setIsDollar} = useCacheContext();
     const [isVoiceOn, setIsVoiceOn] = useState(localStorage.getItem('screener-isVoiceOn') === 'true');
     const [activeMenu, setActiveMenu] = useState(localStorage.getItem('screener-active-menu') || Menu.tickers);
 
     const handleDollarToggle = () => {
-        setIsDollar(prev => !prev);
-        onNewDollar(!isDollar);
+        let newIsDollar = !isDollar;
+        setIsDollar(newIsDollar);
     }
 
     const handleVoiceToggle = () => {

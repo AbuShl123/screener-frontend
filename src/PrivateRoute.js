@@ -1,16 +1,21 @@
-import { Route, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { checkTokenExpiration } from './components/login/Authentication'
+import { cache } from './utils/CacheUtils';
+import { CacheProvider } from './components/context/Context';
 
 const PrivateRoute = ({ Component }) => {
-  const token = localStorage.getItem('screener-auth-token');
+	const token = cache.getToken();
+	const isAuthenticated = !!token && checkTokenExpiration(token);
 
-  const isAuthenticated = !!token && checkTokenExpiration(token);
+	if (!isAuthenticated) {
+		return <Navigate to="/login" replace />
+	}
 
-  if ( !isAuthenticated ) {
-    return <Navigate to="/login" replace/>
-  }
- 
-  return <Component/>;
+	return (
+		<CacheProvider>
+			<Component />
+		</CacheProvider>
+	);
 };
 
 export default PrivateRoute; 

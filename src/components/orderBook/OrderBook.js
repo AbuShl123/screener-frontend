@@ -1,17 +1,16 @@
 import React from 'react'
-import { useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { SPOT_SIGN } from '../../utils/Utils'
+import { BASE_WS_URL } from '../../utils/EnvParams'
 import OrderBookBox from './OrderBookBox'
 import './OrderBook.css'
 import '../../index.css'
 import { useCacheContext } from '../context/Context'
 
-const OrderBook = ({ isDollar, onNotification, onClose }) => {
-    const {marketTickers} = useCacheContext();
+const OrderBook = ({onNotification, onClose }) => {
+    const {token, marketTickers} = useCacheContext();
 
-    let token = localStorage.getItem('screener-auth-token');
-    let wsUrl = `ws://localhost:1105/binance/depth?token=${token}&symbols=`;
+    let wsUrl = `${BASE_WS_URL}/binance/depth?token=${token}&symbols=`;
     wsUrl += [...marketTickers].map(symbol => symbol.replace(SPOT_SIGN, "")).join("/");
 
     const { lastJsonMessage } = useWebSocket(wsUrl, {
@@ -25,7 +24,7 @@ const OrderBook = ({ isDollar, onNotification, onClose }) => {
             <div className='order-book'>
                 {marketTickers.map((symbol, index) => (
                     <div className='order-book-cup' key={index}>
-                        <OrderBookBox lastJsonMessage={lastJsonMessage} ticker={symbol} isDollar={isDollar} onNotification={onNotification} onClose={onClose} />
+                        <OrderBookBox lastJsonMessage={lastJsonMessage} ticker={symbol} onNotification={onNotification} onClose={onClose} />
                     </div>
                 ))}
             </div>

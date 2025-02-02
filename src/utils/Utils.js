@@ -95,10 +95,18 @@ const speak = (data, isDollar) => {
     // пример: моента биткоин спот - в лонг обнаружено 2тыс (долларов)
     let message = 'монета ' + coin + ' ' + spotFut + ' - в ' + longShort + ' обнаружено ' + number + dollars;
     
-    // Speak the text
+    // Find the Russian female voice
     const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    const voiceFound = voices.find(
+        (voice) => voice.lang.startsWith('ru') && voice.name.toLowerCase().includes('irina')
+    );
+    // Fallback to a default voice if no Russian female voice is found
+    const russianFemaleVoice = voiceFound || voices[0];
+
+    // Speak the text
     const utterance = new SpeechSynthesisUtterance(message);
-    utterance.voice = synth.getVoices()[3]; // Select a voice
+    utterance.voice = russianFemaleVoice; 
     utterance.pitch = 1; // Range: 0 to 2
     utterance.rate = 1; // Range: 0.1 to 10
     utterance.onstart = () => console.log('starting to talk.');
