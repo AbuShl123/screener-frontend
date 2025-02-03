@@ -93,26 +93,31 @@ const speak = (data, isDollar) => {
     let dollars = isDollar ? ' долларов' : '';
 
     // пример: моента биткоин спот - в лонг обнаружено 2тыс (долларов)
-    let message = 'монета ' + coin + ' ' + spotFut + ' - в ' + longShort + ' обнаружено ' + number + dollars;
+    let message = coin + ' ' + spotFut + ' ' + number + dollars + ' - в ' + longShort;
     
     // Find the Russian female voice
     const synth = window.speechSynthesis;
     const voices = synth.getVoices();
-    const voiceFound = voices.find(
-        (voice) => voice.lang.startsWith('ru') && voice.name.toLowerCase().includes('irina')
-    );
-    // Fallback to a default voice if no Russian female voice is found
-    const russianFemaleVoice = voiceFound || voices[0];
+    let russianFemaleVoice = voices[0];
+
+    const russianVoices = voices.filter((voice) => voice.lang.startsWith('ru'));
+    const googleVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('google'));
+    const irinaVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('irina'));
+    if (googleVoice) russianFemaleVoice = googleVoice;
+    else if (irinaVoice) russianFemaleVoice = irinaVoice;
+    else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
+    console.log('Russian voices are ', russianVoices);
 
     // Speak the text
     const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'ru-RU';
     utterance.voice = russianFemaleVoice; 
     utterance.pitch = 1; // Range: 0 to 2
     utterance.rate = 1; // Range: 0.1 to 10
     utterance.onstart = () => console.log('starting to talk.');
     console.log("Voicing: ", message);
-    console.log('utterance is: ', utterance);
-    window.utterances.push( utterance );
+    console.log("Utterance is ", utterance);
+    window.utterances.push(utterance);
     synth.speak(utterance);
 }
 

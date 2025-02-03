@@ -173,11 +173,8 @@ const SettingsModal = ({onClose}) => {
                             { currentTicker !== '' &&
                                 <TickerSettings 
                                     ticker={currentTicker} 
-                                    spotSettings={settingsMap.get(currentTicker + SPOT_SIGN)} 
-                                    futSettings={settingsMap.get(currentTicker + FUT_SIGN)} 
-                                    marketTickers={marketTickers} 
-                                    onMarketSelection={handleMarketSelection}
                                     onNewSettings={handleNewSetting}
+                                    onMarketSelection={handleMarketSelection}
                                     onClose={handleCloseSelectedTicker}
                                     onDelete={handleDelete}
                                 />

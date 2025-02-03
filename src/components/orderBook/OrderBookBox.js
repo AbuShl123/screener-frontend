@@ -18,6 +18,9 @@ const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
     const [isSettings, setIsSettings] = useState(false);
     const {getSettings, isDollar} = useCacheContext();
 
+    // indexes:             0      1      2        3      4
+    // bid/ask data ===== [price, qty, incline, density, time]
+
     useEffect(() => {
         if (lastJsonMessage) {
             const { symbol: symbol, b: bidsData, a: asksData } = lastJsonMessage;
@@ -148,21 +151,25 @@ const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
         let lev1 = settings.level1;
         let lev2 = settings.level2;
         let lev3 = settings.level3;
+        const isDollar = settings.isDollar;
 
         if (lev1 < 0 || lev2 < 0 || lev3 < 0 || lev1 === '' || lev2 === '' || lev3 == '') {
             return data[3];
         }
 
-        let qty = parseFloat(data[1]);
-        if (qty < lev1) {
+        // if is dollar, then value = qty * price, else value = qty;
+        let value = isDollar ? parseFloat(data[1]) * parseFloat(data[0]) : parseFloat(data[0]);
+
+        if (value < lev1) {
             return 0;
         }
-        if (qty < lev2) {
+        if (value < lev2) {
             return 1;
         }
-        if (qty < lev3) {
+        if (value < lev3) {
             return 2;
         }
+
         return 3;
     }
 

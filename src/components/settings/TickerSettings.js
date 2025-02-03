@@ -82,7 +82,8 @@ const TickerSettings = ({
         setFutLevel1(getLevel(futSettings, 1));
         setFutLevel2(getLevel(futSettings, 2));
         setFutLevel3(getLevel(futSettings, 3));
-
+        
+        setIsDollar(spotSettings.isDollar || true);
     }, [ticker]);
 
     const setSettingsProperty = (property, value, isSpot) => {
@@ -268,12 +269,21 @@ const TickerSettings = ({
     }
 
     const handleLevelBlur = (e, isSpot, level) => {
-        let rawValue = e.target.value;
+        let rawValue = e.target.value.replace(/[^0-9]/g, '');
         const value = Number(rawValue === '' ? -1 : rawValue);
         switch (level) {
-            case 1: setSettingsProperty('level1', value, isSpot); break;
-            case 2: setSettingsProperty('level2', value, isSpot); break;
-            case 3: setSettingsProperty('level3', value, isSpot); break;
+            case 1:
+                setSettingsProperty('level1', value, isSpot);
+                isSpot ? setSpotLevel1(rawValue) : setFutLevel1(rawValue);
+                break;
+            case 2:
+                setSettingsProperty('level2', value, isSpot);
+                isSpot ? setSpotLevel2(rawValue) : setFutLevel2(rawValue);
+                break;
+            case 3: 
+                setSettingsProperty('level3', value, isSpot); 
+                isSpot ? setSpotLevel3(rawValue) : setFutLevel3(rawValue);
+                break;
         }
     }
 

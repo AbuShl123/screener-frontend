@@ -67,7 +67,7 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
             level2: lev2,
             level3: lev3,
             audio: false,
-            isDollar: false
+            isDollar: true
         };
 
         setSettings(ticker, newSettings);
