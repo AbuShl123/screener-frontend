@@ -1,5 +1,6 @@
 import axios from '../../api/AxiosConfig.js'
-import { jwtDecode }     from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import { cache } from '../../utils/CacheUtils.js'
 
 const signUpUser = async (firstname, lastname, email, password) => {
     try {
@@ -11,10 +12,9 @@ const signUpUser = async (firstname, lastname, email, password) => {
         });
 
         let token = response.data.token;
-
-        localStorage.setItem('screener-auth-token', token);
-
+        cache.setToken(token);
         window.location.href = '/main';
+
     } catch (error) {
         console.log('Sign-up failed: ', error);
     }
@@ -28,24 +28,23 @@ const logInUser = async (email, password) => {
         });
 
         let token = response.data.token;
-
-        localStorage.setItem('screener-auth-token', token);
-
+        cache.setToken(token);
         window.location.href = '/main';
+
     } catch (error) {
         console.log('Login failed: ', error);
     }
 };
 
 const checkTokenExpiration = () => {
-  const token = localStorage.getItem('screener-auth-token');
+  const token = cache.getToken();
 
   if (token) {
     const decodedToken = jwtDecode(token);
     const currentTime = Date.now() / 1000;
 
     if (decodedToken.exp < currentTime) {
-      localStorage.removeItem('token');
+      cache.removeToken();
       console.log('Token expired.');
       return false;
     }
@@ -57,7 +56,7 @@ const checkTokenExpiration = () => {
 };
 
 const checkConnection = async () => {
-    const token = localStorage.getItem('screener-auth-token');
+    const token = cache.getToken();
     
     if (token) {
         const response = await axios.get('/demo', {

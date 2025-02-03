@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { getShortFormNumber, roundNumber, getDate, SPOT_SIGN, FUT_SIGN } from '../../utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
+import { useCacheContext } from '../context/Context';
 
-const NotificationsMenu = ({isDollar, newNotifications, isVoiceOn}) => {
+const NotificationsMenu = ({newNotifications, isVoiceOn}) => {
 
     // indexes:                              0       1      2     3      4        5      6
     // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
     const [notifications, setNotifications] = useState([]);
+    const {isDollar} = useCacheContext();
 
     useEffect(() => {
         if (newNotifications.length > 0) {

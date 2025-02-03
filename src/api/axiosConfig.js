@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { BASE_URL } from '../utils/EnvParams';
 
 export default axios.create({
-    baseURL: 'http://localhost:1105/api/v1/',
-    // headers: {"Access-Control-Allow-Origin": "true"}
+    baseURL: BASE_URL
 });

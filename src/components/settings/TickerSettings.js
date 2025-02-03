@@ -2,15 +2,11 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWrench, faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 import { getMarketStyle } from "../../utils/TickerActions";
-import { DEFAULT_SETTINGS } from "../../utils/Utils";
-import { pro } from "ccxt";
+import { DEFAULT_SETTINGS, FUT_SIGN, SPOT_SIGN } from "../../utils/Utils";
+import { useCacheContext } from "../context/Context";
 
 const TickerSettings = ({
     ticker, 
-    spotSettings,
-    futSettings,
-    tickerProps,
-    marketTickers,
     onNewSettings,
     onMarketSelection,
     onClose,
@@ -20,6 +16,10 @@ const TickerSettings = ({
     const RANGE_PLACEHOLDER = "%";
     const LOW_RANGE_LIMIT = -30;
     const HIGH_RANGE_LIMIT = 30;
+
+    const {tickerProps} = useCacheContext();
+    const {marketTickers} = useCacheContext();
+    const {settingsMap} = useCacheContext();
 
     const [settingsSpot, setSettingsSpot] = useState({});
     const [settingsFut, setSettingsFut] = useState({});
@@ -41,6 +41,10 @@ const TickerSettings = ({
     
     useEffect(() => {
         console.log('ticker settings useEffect called');
+        
+        const spotSettings = settingsMap.get(ticker + SPOT_SIGN);
+        const futSettings = settingsMap.get(ticker + FUT_SIGN);
+
         setSettingsSpot(spotSettings);
         setSettingsFut(futSettings);
         setCurrentTicker(ticker);
@@ -79,7 +83,7 @@ const TickerSettings = ({
         setFutLevel2(getLevel(futSettings, 2));
         setFutLevel3(getLevel(futSettings, 3));
 
-    }, [spotSettings, futSettings, ticker]);
+    }, [ticker]);
 
     const setSettingsProperty = (property, value, isSpot) => {
         let newSpotSettings = {...settingsSpot};

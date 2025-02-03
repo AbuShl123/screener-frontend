@@ -32,6 +32,16 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
         setLevel1(LEVEL_DEFAULT);
         setLevel2(LEVEL_DEFAULT);
         setLevel3(LEVEL_DEFAULT);
+        let newSettings = {
+            lowBound: LOW_BOUND_DEFAULT,
+            highBound: HIGH_BOUND_DEFAULT,
+            level1: -1,
+            level2: -1,
+            level3: -1,
+            audio: false,
+            isDollar: false
+        };
+        setSettings(ticker, newSettings);
         onSubmit();
     }
 

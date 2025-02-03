@@ -6,7 +6,7 @@ import { TailSpin } from 'react-loader-spinner'
 import axios from '../../api/AxiosConfig.js'
 import { useCacheContext } from '../context/Context.js'
 
-const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClose }) => {
+const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
     const isSpot = ticker.endsWith(SPOT_SIGN);
     const symbolText = ticker.replace(SPOT_SIGN, "").replace(FUT_SIGN, "");
 
@@ -16,7 +16,7 @@ const OrderBookBox = ({ ticker, isDollar, lastJsonMessage, onNotification, onClo
     const [bids, setBids] = useState([]);
     const [asks, setAsks] = useState([]);
     const [isSettings, setIsSettings] = useState(false);
-    const {getSettings} = useCacheContext();
+    const {getSettings, isDollar} = useCacheContext();
 
     useEffect(() => {
         if (lastJsonMessage) {

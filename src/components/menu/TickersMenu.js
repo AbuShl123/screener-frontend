@@ -4,10 +4,9 @@ import './Menu.css'
 import { useCacheContext } from '../context/Context.js';
 import { SPOT_SIGN, FUT_SIGN } from '../../utils/Utils.js';
 
-const TickersMenu = ({deleteTicker, deleteionCompleted, allTickers, props}) => {
-    const tickerProperties = props;
-    const tickers = allTickers;
+const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
     const [suggestions, setSuggestions] = useState([]);
+    const {allTickers, tickerProps} = useCacheContext();
     const {selectedTickers, setSelectedTickers} = useCacheContext();
     const {marketTickers, setMarketTickers} = useCacheContext();
 
@@ -76,7 +75,7 @@ const TickersMenu = ({deleteTicker, deleteionCompleted, allTickers, props}) => {
 
     const handleInputChange = (event) => {
         const query = event.target.value;
-        const filteredSuggestions = tickers.filter(ticker =>
+        const filteredSuggestions = allTickers.filter(ticker =>
             ticker.toLowerCase().includes(query.toLowerCase()) 
             && !selectedTickers.includes(ticker)
         );
@@ -91,7 +90,7 @@ const TickersMenu = ({deleteTicker, deleteionCompleted, allTickers, props}) => {
     }
 
     const getMarketStyle = (ticker, isSpot=true) => {
-        let props = tickerProperties.get(ticker);
+        let props = tickerProps.get(ticker);
         if (props) {
             let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
             if (!marketExists) return 'disabled';

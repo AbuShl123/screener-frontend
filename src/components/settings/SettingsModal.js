@@ -7,14 +7,12 @@ import { getMarketStyle, switchMarketStatus } from "../../utils/TickerActions";
 import { useCacheContext } from "../context/Context";
 import TickerSettings from "./TickerSettings";
 
-const SettingsModal = ({onClose, allTickers, props}) => {
-    const tickerProps = props;
-    const tickers = allTickers;
+const SettingsModal = ({onClose}) => {
 
+    const {allTickers, tickerProps} = useCacheContext();
     const {selectedTickers, setSelectedTickers} = useCacheContext();
     const {marketTickers, setMarketTickers} = useCacheContext();
     const {settingsMap, setSettingsMap} = useCacheContext();
-
     const [isOpen, setIsOpen] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [currentTicker, setCurrentTicker] = useState('');
@@ -57,7 +55,7 @@ const SettingsModal = ({onClose, allTickers, props}) => {
 
     const handleSearchSuggesstions = (event) => {
         let query = event.target.value;
-        const filteredSuggestions = tickers.filter(ticker =>
+        const filteredSuggestions = allTickers.filter(ticker =>
             ticker.includes(query.toLowerCase())
             && !selectedTickers.includes(ticker)
         ).slice(0, 5);
@@ -97,7 +95,7 @@ const SettingsModal = ({onClose, allTickers, props}) => {
 
     const handleNewTicker = (ticker) => {
         let props = tickerProps.get(ticker);
-        if (!props || !tickers.includes(ticker)) return;
+        if (!props || !allTickers.includes(ticker)) return;
         let newSelectedTickers = [ticker, ...selectedTickers];
         updateSelectedTickers(newSelectedTickers);
 
@@ -175,7 +173,6 @@ const SettingsModal = ({onClose, allTickers, props}) => {
                             { currentTicker !== '' &&
                                 <TickerSettings 
                                     ticker={currentTicker} 
-                                    tickerProps={tickerProps} 
                                     spotSettings={settingsMap.get(currentTicker + SPOT_SIGN)} 
                                     futSettings={settingsMap.get(currentTicker + FUT_SIGN)} 
                                     marketTickers={marketTickers} 

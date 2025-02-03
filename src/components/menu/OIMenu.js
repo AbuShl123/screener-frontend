@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { getShortFormNumber, getDate } from '../../utils/Utils';
+import { BASE_WS_URL } from '../../utils/EnvParams';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
+import { useCacheContext } from '../context/Context';
 
-const OIMenu = ({isDollar}) => {
+const OIMenu = () => {
+    const {token, isDollar} = useCacheContext();
     const [notifications, setNotifications] = useState(JSON.parse(localStorage.getItem('openInterest')) || [])
     const [level1, setLevel1] = useState(100_000);
     const [level2, setLevel2] = useState(250_000);
     const [level3, setLevel3] = useState(1_000_000);
-
-    let token = localStorage.getItem('screener-auth-token');
-    const wsUrl = `ws://localhost:1105/bitget/openInterest?token=${token}`;
+    
+    const wsUrl = `${BASE_WS_URL}/bitget/openInterest?token=${token}`;
     const { lastJsonMessage } = useWebSocket(wsUrl, {
         shouldReconnect: () => true,
         onOpen: () => console.log('Connected to open interest websocket'),
