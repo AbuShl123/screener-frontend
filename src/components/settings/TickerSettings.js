@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWrench, faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
+import { faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 import { getMarketStyle } from "../../utils/TickerActions";
 import { DEFAULT_SETTINGS, FUT_SIGN, SPOT_SIGN } from "../../utils/Utils";
 import { useCacheContext } from "../context/Context";
@@ -309,256 +309,233 @@ const TickerSettings = ({
 
     return (
         <>
-            {currentTicker ? (
-                <>
-                    <div className="settings-header">
-                        <div className="selected-ticker">
-                            <div className="pill-container">
-                                <span className="selected-ticker-name">
-                                    {currentTicker.toUpperCase().replace("USDT", '') + " / USDT"}
-                                </span>
+            <div className="settings-header">
+                <div className="selected-ticker">
+                    <div className="pill-container">
+                        <span className="selected-ticker-name">
+                            {currentTicker.toUpperCase().replace("USDT", '') + " / USDT"}
+                        </span>
 
-                                <div className="small-vertical-separator" />
+                        <div className="small-vertical-separator" />
 
-                                <div className="selected-ticker-right-elements">
-                                    <div className="swtich-elements">
-                                        <div className='audio-toggle' onClick={handleVoiceToggle}>
-                                            {settingsSpot?.audio ? (
-                                                <span className="material-symbols-outlined volume-icon audio-setting">
-                                                    volume_up
-                                                </span>
-                                            ) : (
-                                                <span className="material-symbols-outlined volume-icon audio-setting">
-                                                    volume_off
-                                                </span>
-                                            )}
-                                        </div>
+                        <div className="selected-ticker-right-elements">
+                            <div className="swtich-elements">
+                                <div className='audio-toggle' onClick={handleVoiceToggle}>
+                                    {settingsSpot?.audio ? (
+                                        <span className="material-symbols-outlined volume-icon audio-setting">
+                                            volume_up
+                                        </span>
+                                    ) : (
+                                        <span className="material-symbols-outlined volume-icon audio-setting">
+                                            volume_off
+                                        </span>
+                                    )}
+                                </div>
 
-                                        <div className={'market-checkbox spot-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, true)}
-                                            onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, true)}
-                                        >
-                                            <p>spot</p>
-                                        </div>
-                                        <div className={'market-checkbox futures-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, false)}
-                                            onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, false)}
-                                        >
-                                            <p>futures</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="small-vertical-separator" />
-                                    <div className="delete-icon" onClick={() => onDelete(currentTicker)}> 
-                                        <FontAwesomeIcon icon={faTrashCan} /> 
-                                    </div>
+                                <div className={'market-checkbox spot-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, true)}
+                                    onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, true)}
+                                >
+                                    <p>spot</p>
+                                </div>
+                                <div className={'market-checkbox futures-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, false)}
+                                    onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, false)}
+                                >
+                                    <p>futures</p>
                                 </div>
                             </div>
-                            <div className="close-ticker-settings">
-                                <span className="material-symbols-outlined close-icon close-selected-ticker" onClick={onClose}>close</span>
+
+                            <div className="small-vertical-separator" />
+                            <div className="delete-icon" onClick={() => onDelete(currentTicker)}>
+                                <FontAwesomeIcon icon={faTrashCan} />
                             </div>
                         </div>
                     </div>
-
-                    <div className="settings-body">
-                        <div className="settings-container">
-                            <div className="settings-market-type">
-                                spot
-                                <div className="reset-icon-layer">
-                                    <div className="reset-icon-container tooltip-container" onClick={() => handleReset(true)}>
-                                        <span className="material-symbols-outlined">
-                                            undo
-                                        </span>
-                                        <span className="tooltip reset-settings-tooltip">
-                                            Сбросить настройки
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="settings-section form-container-2">
-                                <div className="setting-mini-title"> 
-                                    Диапазон
-                                    <span className="range-constraints">
-                                        (мин: {LOW_RANGE_LIMIT}%
-                                    </span>
-                                    <span className="range-constraints">
-                                        макс: {HIGH_RANGE_LIMIT}%)
-                                    </span>
-                                </div>
-
-                                <div className='modal-range-inputs settings-element'>
-                                    <input className='modal-input range-input'
-                                        type="text"
-                                        value={spotLowBound}
-                                        placeholder={RANGE_PLACEHOLDER}
-                                        onFocus={handleRangeFocus}
-                                        onChange={(e) => handleRangeChange(e, true, true)}
-                                        onBlur={(e) => handleRangeBlur(e, true, true)}
-                                    />
-
-                                    <hr className='settings-line' />
-
-                                    <input className='modal-input range-input'
-                                        type="text"
-                                        value={spotHighBound}
-                                        placeholder={RANGE_PLACEHOLDER}
-                                        onFocus={handleRangeFocus}
-                                        onChange={(e) => handleRangeChange(e, true, false)}
-                                        onBlur={(e) => handleRangeBlur(e, true, false)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="settings-section section-after form-container-2">
-                                <div className="setting-mini-title">
-                                    Отоброжение плотностей
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: 'green'}} />
-                                    <span className="form-title">Ур. 1</span>
-                                    <input className="modal-input level-input"
-                                        value={spotLevel1}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, true, 1)}
-                                        onBlur={(e) => handleLevelBlur(e, true, 1)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: '#bdbd07'}} />
-                                    <span className="form-title">Ур. 2</span>
-                                    <input className="modal-input level-input"
-                                        value={spotLevel2}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, true, 2)}
-                                        onBlur={(e) => handleLevelBlur(e, true, 2)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: '#df3838'}} />
-                                    <span className="form-title">Ур. 3</span>
-                                    <input className="modal-input level-input"
-                                        value={spotLevel3}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, true, 3)}
-                                        onBlur={(e) => handleLevelBlur(e, true, 3)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                            </div>
-                            { !tickerProps.get(currentTicker).hasSpot && <div className="disable-cover"/> }
-                        </div>
-
-                        <div className="vertical-line" />
-
-                        <div className="settings-container">
-                            <div className="settings-market-type">
-                                futures
-                                <div className="reset-icon-layer">
-                                    <div className="reset-icon-container tooltip-container" onClick={() => handleReset(false)}>
-                                        <span className="material-symbols-outlined">
-                                            undo
-                                        </span>
-                                        <span className="tooltip reset-settings-tooltip">
-                                            Сбросить настройки
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="settings-section form-container-2">
-                                <div className="setting-mini-title"> 
-                                    Диапазон
-                                        <span className="range-constraints">
-                                            (мин: {LOW_RANGE_LIMIT}%
-                                        </span>
-                                        <span className="range-constraints">
-                                            макс: {HIGH_RANGE_LIMIT}%)
-                                        </span>
-                                </div>
-
-                                <div className='modal-range-inputs settings-element'>
-                                    <input className='modal-input range-input'
-                                        type="text"
-                                        value={futLowBound}
-                                        placeholder={RANGE_PLACEHOLDER}
-                                        onFocus={handleRangeFocus}
-                                        onChange={(e) => handleRangeChange(e, false, true)}
-                                        onBlur={(e) => handleRangeBlur(e, false, true)}
-                                    />
-
-                                    <hr className='settings-line' />
-
-                                    <input className='modal-input range-input'
-                                        type="text"
-                                        value={futHighBound}
-                                        placeholder={RANGE_PLACEHOLDER}
-                                        onFocus={handleRangeFocus}
-                                        onChange={(e) => handleRangeChange(e, false, false)}
-                                        onBlur={(e) => handleRangeBlur(e, false, false)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="settings-section section-after form-container-2">
-                                <div className="setting-mini-title">
-                                    Отоброжение плотностей
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: 'green'}} />
-                                    <span className="form-title">Ур. 1</span>
-                                    <input className="modal-input level-input"
-                                        value={futLevel1}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, false, 1)}
-                                        onBlur={(e) => handleLevelBlur(e, false, 1)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: '#bdbd07'}} />
-                                    <span className="form-title">Ур. 2</span>
-                                    <input className="modal-input level-input"
-                                        value={futLevel2}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, false, 2)}
-                                        onBlur={(e) => handleLevelBlur(e, false, 2)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                                <div className="level-entry">
-                                    <div className="small-circle" style={{backgroundColor: '#df3838'}} />
-                                    <span className="form-title">Ур. 3</span>
-                                    <input className="modal-input level-input"
-                                        value={futLevel3}
-                                        placeholder={LEVEL_PLACEHOLDER}
-                                        onChange={(e) => handleLevelChange(e, false, 3)}
-                                        onBlur={(e) => handleLevelBlur(e, false, 3)}
-                                    />
-                                    {getCoinOrDollar()}
-                                </div>
-                            </div>
-                            { !tickerProps.get(currentTicker).hasFut && <div className="disable-cover"/> }
-                        </div>
-                    </div>
-                </>
-            ) : (
-                <div className="noTickerSelected-background">
-                    <div className="noTickerSelected-container">
-                        <div className="noTickerSelected-icons">
-                            <span className="material-symbols-outlined settings-background">
-                                settings
-                            </span>
-                            <FontAwesomeIcon icon={faWrench} className="wrench-icon" />
-                        </div>
-                        <div>
-                            <p className="noTickerSelected-text">
-                                Здесь можно настроить тикеры 
-                            </p>
-                            <p className="noTickerSelected-text">
-                                Нажмите на нужный символ
-                            </p>
-                        </div>
+                    <div className="close-ticker-settings">
+                        <span className="material-symbols-outlined close-icon close-selected-ticker" onClick={onClose}>close</span>
                     </div>
                 </div>
-            )}
-        </> 
+            </div>
+
+            <div className="settings-body">
+                <div className="settings-container">
+                    <div className="settings-market-type">
+                        spot
+                        <div className="reset-icon-layer">
+                            <div className="reset-icon-container tooltip-container" onClick={() => handleReset(true)}>
+                                <span className="material-symbols-outlined">
+                                    undo
+                                </span>
+                                <span className="tooltip reset-settings-tooltip">
+                                    Сбросить настройки
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="settings-section form-container-2">
+                        <div className="setting-mini-title">
+                            Диапазон
+                            <span className="range-constraints">
+                                (мин: {LOW_RANGE_LIMIT}%
+                            </span>
+                            <span className="range-constraints">
+                                макс: {HIGH_RANGE_LIMIT}%)
+                            </span>
+                        </div>
+
+                        <div className='modal-range-inputs settings-element'>
+                            <input className='modal-input range-input'
+                                type="text"
+                                value={spotLowBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={handleRangeFocus}
+                                onChange={(e) => handleRangeChange(e, true, true)}
+                                onBlur={(e) => handleRangeBlur(e, true, true)}
+                            />
+
+                            <hr className='settings-line' />
+
+                            <input className='modal-input range-input'
+                                type="text"
+                                value={spotHighBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={handleRangeFocus}
+                                onChange={(e) => handleRangeChange(e, true, false)}
+                                onBlur={(e) => handleRangeBlur(e, true, false)}
+                            />
+                        </div>
+                    </div>
+                    <div className="settings-section section-after form-container-2">
+                        <div className="setting-mini-title">
+                            Отоброжение плотностей
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: 'green' }} />
+                            <span className="form-title">Ур. 1</span>
+                            <input className="modal-input level-input"
+                                value={spotLevel1}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, true, 1)}
+                                onBlur={(e) => handleLevelBlur(e, true, 1)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: '#bdbd07' }} />
+                            <span className="form-title">Ур. 2</span>
+                            <input className="modal-input level-input"
+                                value={spotLevel2}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, true, 2)}
+                                onBlur={(e) => handleLevelBlur(e, true, 2)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: '#df3838' }} />
+                            <span className="form-title">Ур. 3</span>
+                            <input className="modal-input level-input"
+                                value={spotLevel3}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, true, 3)}
+                                onBlur={(e) => handleLevelBlur(e, true, 3)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                    </div>
+                    {!tickerProps.get(currentTicker)?.hasSpot && <div className="disable-cover" />}
+                </div>
+
+                <div className="vertical-line" />
+
+                <div className="settings-container">
+                    <div className="settings-market-type">
+                        futures
+                        <div className="reset-icon-layer">
+                            <div className="reset-icon-container tooltip-container" onClick={() => handleReset(false)}>
+                                <span className="material-symbols-outlined">
+                                    undo
+                                </span>
+                                <span className="tooltip reset-settings-tooltip">
+                                    Сбросить настройки
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="settings-section form-container-2">
+                        <div className="setting-mini-title">
+                            Диапазон
+                            <span className="range-constraints">
+                                (мин: {LOW_RANGE_LIMIT}%
+                            </span>
+                            <span className="range-constraints">
+                                макс: {HIGH_RANGE_LIMIT}%)
+                            </span>
+                        </div>
+
+                        <div className='modal-range-inputs settings-element'>
+                            <input className='modal-input range-input'
+                                type="text"
+                                value={futLowBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={handleRangeFocus}
+                                onChange={(e) => handleRangeChange(e, false, true)}
+                                onBlur={(e) => handleRangeBlur(e, false, true)}
+                            />
+
+                            <hr className='settings-line' />
+
+                            <input className='modal-input range-input'
+                                type="text"
+                                value={futHighBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={handleRangeFocus}
+                                onChange={(e) => handleRangeChange(e, false, false)}
+                                onBlur={(e) => handleRangeBlur(e, false, false)}
+                            />
+                        </div>
+                    </div>
+                    <div className="settings-section section-after form-container-2">
+                        <div className="setting-mini-title">
+                            Отоброжение плотностей
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: 'green' }} />
+                            <span className="form-title">Ур. 1</span>
+                            <input className="modal-input level-input"
+                                value={futLevel1}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, false, 1)}
+                                onBlur={(e) => handleLevelBlur(e, false, 1)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: '#bdbd07' }} />
+                            <span className="form-title">Ур. 2</span>
+                            <input className="modal-input level-input"
+                                value={futLevel2}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, false, 2)}
+                                onBlur={(e) => handleLevelBlur(e, false, 2)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                        <div className="level-entry">
+                            <div className="small-circle" style={{ backgroundColor: '#df3838' }} />
+                            <span className="form-title">Ур. 3</span>
+                            <input className="modal-input level-input"
+                                value={futLevel3}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={(e) => handleLevelChange(e, false, 3)}
+                                onBlur={(e) => handleLevelBlur(e, false, 3)}
+                            />
+                            {getCoinOrDollar()}
+                        </div>
+                    </div>
+                    {!tickerProps.get(currentTicker)?.hasFut && <div className="disable-cover" />}
+                </div>
+            </div>
+        </>
     )
 }
 

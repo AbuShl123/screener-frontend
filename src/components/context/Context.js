@@ -18,6 +18,8 @@ export const CacheProvider = ({ children }) => {
     const [isDollar, updateIsDollar] = useState(true);
     const [allTickers, updateAllTickers] = useState([]);
     const [tickerProps, updateTickerProps] = useState(new Map());
+    const [notifications, setNotifications] = useState([]);
+    const [processedNotifications, setProcessedNotifications] = useState([]);
 
     useEffect(() => {
         const initialTickers = getSelectedTickers() || DEFAULT_TICKERS;
@@ -169,7 +171,9 @@ export const CacheProvider = ({ children }) => {
             selectedTickers, setSelectedTickers, 
             marketTickers, setMarketTickers, 
             settingsMap, setSettingsMap, getSettings, setSettings,
-            isDollar, setIsDollar
+            isDollar, setIsDollar,
+            notifications, setNotifications,
+            processedNotifications, setProcessedNotifications
         }}>
             {children}
         </ScreenerContext.Provider>
@@ -189,7 +193,9 @@ export function useCacheContext() {
         selectedTickers, setSelectedTickers, 
         marketTickers, setMarketTickers,
         settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar
+        isDollar, setIsDollar,
+        notifications, setNotifications,
+        processedNotifications, setProcessedNotifications
     } = context;
 
     if (selectedTickers === undefined || marketTickers === undefined || settingsMap === undefined) {
@@ -202,6 +208,8 @@ export function useCacheContext() {
         selectedTickers, setSelectedTickers, 
         marketTickers, setMarketTickers, 
         settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar
+        isDollar, setIsDollar,
+        notifications, setNotifications,
+        processedNotifications, setProcessedNotifications
     };
 }

@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS = {
     level2: -1,
     level3: -1,
     isDollar: false,
-    audio: false
+    audio: true
 }
 const DEFAULT_TICKERS = ['btcusdt', 'bnbusdt', 'ethusdt', 'dogeusdt', 'xrpusdt', 'bnxusdt', 'avaxusdt'];
 const DEFAULT_MARKET_TICKERS = DEFAULT_TICKERS.map(t => t + SPOT_SIGN);
@@ -80,11 +80,13 @@ function setSpeech() {
 }
 
 const speak = (data, isDollar) => {
+    // indexes:                              0       1      2     3      4        5      6
+    // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
     let symbol = data[0];
     let symbolName = symbol.replace(SPOT_SIGN, "").replace(FUT_SIGN, "").replace('usdt', '');
     let coin = convertSymbolToRussian(symbolName);
     let spotFut = symbol.endsWith(SPOT_SIGN) ? 'спот' : 'фьючерс';
-    let longShort = data[1] ? 'лонг' : 'шорт';
+    let longShort = data[1] ? 'шорт' : 'лонг';
 
     let qty = data[3];
     let price = data[2];

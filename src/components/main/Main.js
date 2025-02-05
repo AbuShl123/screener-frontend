@@ -18,6 +18,7 @@ const Main = () => {
     const [notification, setNotification] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {isDollar} = useCacheContext();
+    const {notifications, processedNotifications, setProcessedNotifications} = useCacheContext();
 
     useEffect(() => {
         const waitForVoicesToLoad = async () => await setSpeech();
@@ -30,12 +31,14 @@ const Main = () => {
         }
     }, [isVoiceOn]);
 
-    const addNewNotification = (newNotification) => {
-        if (isVoiceOn) {
-            speak(newNotification, isDollar);
+    useEffect(() => {
+        console.log('notifications updated: ', notifications);
+        for (const notification of notifications) {
+            if (processedNotifications.includes(notification[6])) continue;
+            if (isVoiceOn) speak(notification, isDollar);
+            setProcessedNotifications(prev => [notification[6], ...prev]);
         }
-        setNotification(prev => [newNotification, ...prev]);
-    }
+    }, [notifications]);
 
     const switchSettingsModal = () => {
         setIsModalOpen(prev => !prev);
@@ -53,7 +56,6 @@ const Main = () => {
                         onSettings={switchSettingsModal}
                     />
                     <OrderBook
-                        onNotification={addNewNotification}
                         onClose={setTickerToDelete}
                     />
                 </div>

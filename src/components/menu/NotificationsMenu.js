@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { getShortFormNumber, roundNumber, getDate, SPOT_SIGN, FUT_SIGN } from '../../utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import { useCacheContext } from '../context/Context';
 
-const NotificationsMenu = ({newNotifications, isVoiceOn}) => {
+const NotificationsMenu = ({isVoiceOn}) => {
 
     // indexes:                              0       1      2     3      4        5      6
     // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
-    const [notifications, setNotifications] = useState([]);
+    const {notifications, setNotifications} = useCacheContext();
     const {isDollar} = useCacheContext();
 
     useEffect(() => {
-        if (newNotifications.length > 0) {
-            let pastNotifications = notifications;
-            if (notifications.length > 15) {
-                pastNotifications = notifications.slice(0, 15);
-            }
-            setNotifications(newNotifications)
+        if (notifications.length > 15) {
+            const pastNotifications = notifications.slice(0, 15);
+            setNotifications(pastNotifications)
         }
-    }, [newNotifications]);
+    }, [notifications]);
 
     const formatSymbol = (ticker) => {
         return (ticker.replace(SPOT_SIGN, "").replace(FUT_SIGN, "").replace("usdt", "") + "/usdt").toUpperCase();
@@ -54,7 +51,7 @@ const NotificationsMenu = ({newNotifications, isVoiceOn}) => {
                     Уведомления
                 </div>
                 <div className='menu-notification-container menu-invisible-scroller'>
-                    {notifications?.length > 0 && notifications.map((data, index) => (    
+                    {notifications.map((data, index) => (    
                         <div key={index}>
                             <div className='notification-container'>
                                 <div className={'notification-1 notification-line ' + getSymbolStyle(data)}>

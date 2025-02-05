@@ -7,7 +7,7 @@ import './OrderBook.css'
 import '../../index.css'
 import { useCacheContext } from '../context/Context'
 
-const OrderBook = ({onNotification, onClose }) => {
+const OrderBook = ({onClose}) => {
     const {token, marketTickers} = useCacheContext();
 
     let wsUrl = `${BASE_WS_URL}/binance/depth?token=${token}&symbols=`;
@@ -24,7 +24,7 @@ const OrderBook = ({onNotification, onClose }) => {
             <div className='order-book'>
                 {marketTickers.map((symbol, index) => (
                     <div className='order-book-cup' key={index}>
-                        <OrderBookBox lastJsonMessage={lastJsonMessage} ticker={symbol} onNotification={onNotification} onClose={onClose} />
+                        <OrderBookBox lastJsonMessage={lastJsonMessage} ticker={symbol} onClose={onClose} />
                     </div>
                 ))}
             </div>

@@ -38,6 +38,7 @@ input:focus {
 @supports selector(::-webkit-scrollbar) {
   .menu-scroller::-webkit-scrollbar-thumb {
       background-color: #fbfbfc87;
+      border-radius: 20px;
   }
 
   .menu-scroller::-webkit-scrollbar-truck {
@@ -45,7 +46,7 @@ input:focus {
   }
 
   .menu-scroller::-webkit-scrollbar {
-      width: 7px;
+      width: 5px;
   }
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './SettingsModal.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faWrench, faStar, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { SPOT_SIGN, FUT_SIGN, DEFAULT_SETTINGS } from "../../utils/Utils";
 import { getMarketStyle, switchMarketStatus } from "../../utils/TickerActions";
 import { useCacheContext } from "../context/Context";
@@ -170,14 +170,34 @@ const SettingsModal = ({onClose}) => {
                             </div>
                         </div>
                         <div className="ticker-settings-container">
-                            { currentTicker !== '' &&
-                                <TickerSettings 
-                                    ticker={currentTicker} 
-                                    onNewSettings={handleNewSetting}
-                                    onMarketSelection={handleMarketSelection}
-                                    onClose={handleCloseSelectedTicker}
-                                    onDelete={handleDelete}
-                                />
+                            {currentTicker !== undefined && currentTicker !== '' ? (
+                                    <TickerSettings
+                                        ticker={currentTicker}
+                                        onNewSettings={handleNewSetting}
+                                        onMarketSelection={handleMarketSelection}
+                                        onClose={handleCloseSelectedTicker}
+                                        onDelete={handleDelete}
+                                    />
+                                ) : (
+                                    <div className="noTickerSelected-background">
+                                        <div className="noTickerSelected-container">
+                                            <div className="noTickerSelected-icons">
+                                                <span className="material-symbols-outlined settings-background">
+                                                    settings
+                                                </span>
+                                                <FontAwesomeIcon icon={faWrench} className="wrench-icon" />
+                                            </div>
+                                            <div>
+                                                <p className="noTickerSelected-text">
+                                                    Здесь можно настроить тикеры
+                                                </p>
+                                                <p className="noTickerSelected-text">
+                                                    Нажмите на нужный символ
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
                             }
                         </div>
                     </div>
@@ -186,7 +206,7 @@ const SettingsModal = ({onClose}) => {
                             <span style={{ padding: '0 5px 0 0' }}> Избранные Тикеры </span>
                             <FontAwesomeIcon icon={faStar} style={{ color: "yellow" }}/>
                         </div>
-                        <div className="modal-content-body">
+                        <div className="modal-content-body menu-scroller">
                             {selectedTickers?.length > 0 && selectedTickers.map((ticker, index) => (
                                 <div 
                                     key={index} 

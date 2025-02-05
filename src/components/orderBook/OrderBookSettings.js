@@ -151,12 +151,12 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
 
                         <div className='form-container'>
                             <div className='form-title'>
-                                Range
+                                Диапазон
                                 <span className='range-constraints'>
-                                    (min: –30
+                                    (мин: –30
                                 </span>
                                 <span className='range-constraints'>
-                                    max: 30)
+                                    макс: 30)
                                 </span>
                             </div>
 
@@ -185,9 +185,7 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
                         
                         <div className='form-container'>
                             <div className='level-entry'>
-                                <span className='form-title'>
-                                    Level 1
-                                </span>
+                                <span className="form-title">Ур. 1</span>
 
                                 <hr className='settings-line' />
 
@@ -200,9 +198,7 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
                                 />
                             </div>
                             <div className='level-entry'>
-                                <span className='form-title'>
-                                    Level 2
-                                </span>
+                                <span className="form-title">Ур. 2</span>
 
                                 <hr className='settings-line' />
                                 
@@ -215,9 +211,7 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
                                 />
                             </div>
                             <div className='level-entry'>
-                                <span className='form-title'>
-                                    Level 3
-                                </span>
+                                <span className="form-title">Ур. 3</span>
 
                                 <hr className='settings-line' />
                                 

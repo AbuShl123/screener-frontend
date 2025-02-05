@@ -6,7 +6,7 @@ import { TailSpin } from 'react-loader-spinner'
 import axios from '../../api/AxiosConfig.js'
 import { useCacheContext } from '../context/Context.js'
 
-const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
+const OrderBookBox = ({ ticker, lastJsonMessage, onClose }) => {
     const isSpot = ticker.endsWith(SPOT_SIGN);
     const symbolText = ticker.replace(SPOT_SIGN, "").replace(FUT_SIGN, "");
 
@@ -17,6 +17,7 @@ const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
     const [asks, setAsks] = useState([]);
     const [isSettings, setIsSettings] = useState(false);
     const {getSettings, isDollar} = useCacheContext();
+    const {setNotifications} = useCacheContext();
 
     // indexes:             0      1      2        3      4
     // bid/ask data ===== [price, qty, incline, density, time]
@@ -86,7 +87,8 @@ const OrderBookBox = ({ ticker, lastJsonMessage, onNotification, onClose }) => {
             let oldLevel = pastOrderBookState.get(price);
             let level = getDensity(trade);
             if (oldLevel !== level && level === 3) {
-                onNotification([ticker, isAsk, ...trade]);
+                const newNotification = [ticker, isAsk, ...trade];
+                setNotifications(prev => [newNotification, ...prev]);
             }
         }
     }
