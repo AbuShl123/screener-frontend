@@ -89,6 +89,10 @@
     min-height: 280px;
 }
 
+.data-section {
+    min-height: 130px;
+}
+
 .ob__each-data {
     display: flex;
     width: 100%;

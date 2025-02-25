@@ -2,8 +2,8 @@ const SPOT_SIGN = '.p';
 const FUT_SIGN = '.f';
 
 const DEFAULT_SETTINGS = {
-    lowBound: -10,
-    highBound: 10,
+    lowBound: -15,
+    highBound: 15,
     level1: -1,
     level2: -1,
     level3: -1,
@@ -23,6 +23,8 @@ const vowels = 'aeiou';
 window.utterances = [];
 
 const roundNumber = (num, dec = 5) => {
+    let result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+    if (result === 0) return Number(num);
     return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
 }
 

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 import { getMarketStyle } from "../../utils/TickerActions";
 import { DEFAULT_SETTINGS, FUT_SIGN, SPOT_SIGN } from "../../utils/Utils";
-import { useCacheContext } from "../context/Context";
+import useCacheContext from "../context/Context";
 
 const TickerSettings = ({
     ticker, 
@@ -31,13 +31,13 @@ const TickerSettings = ({
     const [futLowBound, setFutLowBound] = useState('');
     const [futHighBound, setFutHighBound] = useState('');
 
-    const [spotLevel1, setSpotLevel1] = useState();
-    const [spotLevel2, setSpotLevel2] = useState();
-    const [spotLevel3, setSpotLevel3] = useState();
+    const [spotLevel1, setSpotLevel1] = useState('');
+    const [spotLevel2, setSpotLevel2] = useState('');
+    const [spotLevel3, setSpotLevel3] = useState('');
 
-    const [futLevel1, setFutLevel1] = useState();
-    const [futLevel2, setFutLevel2] = useState();
-    const [futLevel3, setFutLevel3] = useState();
+    const [futLevel1, setFutLevel1] = useState('');
+    const [futLevel2, setFutLevel2] = useState('');
+    const [futLevel3, setFutLevel3] = useState('');
     
     useEffect(() => {
         console.log('ticker settings useEffect called');

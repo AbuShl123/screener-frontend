@@ -1,12 +1,12 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import './Menu.css'
-import { useCacheContext } from '../context/Context.js';
+import useCacheContext from '../context/Context.js';
 import { SPOT_SIGN, FUT_SIGN } from '../../utils/Utils.js';
 
 const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
-    const [suggestions, setSuggestions] = useState([]);
     const {allTickers, tickerProps} = useCacheContext();
+    const [suggestions, setSuggestions] = useState(allTickers);
     const {selectedTickers, setSelectedTickers} = useCacheContext();
     const {marketTickers, setMarketTickers} = useCacheContext();
 
@@ -112,8 +112,8 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
                     Выбранные тикеры 
                 </div>
                 <div className='connected-tickers-list menu-scroller'>
-                    {selectedTickers.length > 0 && selectedTickers.map((ticker, index) => (       
-                        <div key={index} className='connected-ticker-container'>
+                    {selectedTickers.length > 0 && selectedTickers.map((ticker) => (       
+                        <div key={ticker} className='connected-ticker-container'>
                             <p> {ticker.toUpperCase()} </p>
                             <div className='ticker-action-buttons'>
                                 <div

@@ -12,9 +12,9 @@ export const ScreenerContext = createContext(undefined);
 
 export const CacheProvider = ({ children }) => {
     const [token, updateToken] = useState('');
-    const [selectedTickers, updateSelectedTickers] = useState(DEFAULT_TICKERS);
-    const [marketTickers, updateMarketTickers] = useState(DEFAULT_MARKET_TICKERS);
-    const [settingsMap, updateSettingsMap] = useState(DEFAULT_SETTINGS_MAP);
+    const [selectedTickers, updateSelectedTickers] = useState([]);
+    const [marketTickers, updateMarketTickers] = useState([]);
+    const [settingsMap, updateSettingsMap] = useState(null);
     const [isDollar, updateIsDollar] = useState(true);
     const [allTickers, updateAllTickers] = useState([]);
     const [tickerProps, updateTickerProps] = useState(new Map());
@@ -22,13 +22,13 @@ export const CacheProvider = ({ children }) => {
     const [processedNotifications, setProcessedNotifications] = useState([]);
 
     useEffect(() => {
-        const initialTickers = getSelectedTickers() || DEFAULT_TICKERS;
+        const initialTickers = [];
         updateSelectedTickers(initialTickers);
 
-        const initialMarketTickers = getMarketTickers() || DEFAULT_MARKET_TICKERS;
+        const initialMarketTickers = [];
         updateMarketTickers(initialMarketTickers);
 
-        const initialSettnings = getSettingsMap() || DEFAULT_SETTINGS_MAP;
+        const initialSettnings = getSettingsMap() || new Map();
         updateSettingsMap(initialSettnings);
 
         const initialToken = getToken() || '';
@@ -86,7 +86,6 @@ export const CacheProvider = ({ children }) => {
 
     async function getAllTickersAndProps() {
         const token = getToken();
-        console.log("token is here: ", token);
         let fetchedTickers = [];
         let fetchedProps = new Map();
 
@@ -101,7 +100,8 @@ export const CacheProvider = ({ children }) => {
                     let symbol = item.symbol;
                     let hasSpot = item.hasSpot;
                     let hasFut = item.hasFut;
-                    fetchedProps.set(symbol, { hasSpot, hasFut });
+                    let price = item.price;
+                    fetchedProps.set(symbol, { hasSpot, hasFut, price });
                 });
             })
             .catch(error => {
@@ -127,7 +127,7 @@ export const CacheProvider = ({ children }) => {
 
     function getSelectedTickers() {
         let rawValue = localStorage.getItem(SELECTED_TICKERS_CACHE_ID);
-        if (rawValue !== "undefined") {
+        if (rawValue && rawValue !== "undefined") {
             return JSON.parse(rawValue);
         } else {
             return undefined;
@@ -180,7 +180,7 @@ export const CacheProvider = ({ children }) => {
     )
 }
 
-export function useCacheContext() {
+export default function useCacheContext() {
     const context = useContext(ScreenerContext);
 
     if (!context) {

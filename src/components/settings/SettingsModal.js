@@ -4,11 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWrench, faStar, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { SPOT_SIGN, FUT_SIGN, DEFAULT_SETTINGS } from "../../utils/Utils";
 import { getMarketStyle, switchMarketStatus } from "../../utils/TickerActions";
-import { useCacheContext } from "../context/Context";
+import useCacheContext from "../context/Context";
 import TickerSettings from "./TickerSettings";
 
 const SettingsModal = ({onClose}) => {
-
     const {allTickers, tickerProps} = useCacheContext();
     const {selectedTickers, setSelectedTickers} = useCacheContext();
     const {marketTickers, setMarketTickers} = useCacheContext();
@@ -209,7 +208,7 @@ const SettingsModal = ({onClose}) => {
                         <div className="modal-content-body menu-scroller">
                             {selectedTickers?.length > 0 && selectedTickers.map((ticker, index) => (
                                 <div 
-                                    key={index} 
+                                    key={ticker} 
                                     className={'connected-ticker-container chosen-one ' + (currentTicker === ticker ? 'selected' : '')} 
                                     id={`favorite-${ticker}`} 
                                     onClick={() => {
@@ -245,7 +244,7 @@ const SettingsModal = ({onClose}) => {
                                             <p>futures</p>
                                         </div>
 
-                                        <span className="material-symbols-outlined close-icon close-chosen-one" 
+                                        <span className="material-symbols-outlined close-icon" 
                                             onClick={(e) => {
                                                 handleDelete(ticker)
                                                 e.stopPropagation();

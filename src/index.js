@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import Main from './components/main/Main';
 import Login from './components/login/Login';
+import SignUp from './components/login/SignUp';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -18,6 +18,7 @@ root.render(
                 }
                 />
                 <Route path="login" element={<Login />} />
+                <Route path="signup" element={<SignUp />} />
                 <Route path="main" element={
                     <PrivateRoute Component={Main} />
                 }

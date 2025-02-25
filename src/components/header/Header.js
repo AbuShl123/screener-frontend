@@ -1,11 +1,11 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { Menu } from '../menu/Menu'
+import Menu from '../menu/Menu'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins, faDollarSign, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import './Header.css'
-import { useCacheContext } from '../context/Context';
+import useCacheContext from '../context/Context';
 
 const Header = ({ onNewDollar, onVoiceToggle, onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
@@ -53,7 +53,6 @@ const Header = ({ onNewDollar, onVoiceToggle, onMenuSelection, onSettings }) => 
                     <div className='header-left-elements'>
                         <button className='menu-button header-item' onClick={handleSignOut}> выйти </button>
                         <button className='menu-button header-item' onClick={onSettings}> настройки </button>
-                        <button className='menu-button header-item'> фильтры </button>
                         <div className='toggle-icon header-item' onClick={handleDollarToggle}>
                             {isDollar ? (
                                 <FontAwesomeIcon icon={faDollarSign} style={{ color: "#FFD43B", }} />

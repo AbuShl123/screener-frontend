@@ -1,42 +1,37 @@
 import React, { useState, useEffect } from 'react'
-import useWebSocket from 'react-use-websocket'
 import { getShortFormNumber, getDate } from '../../utils/Utils';
-import { BASE_WS_URL } from '../../utils/EnvParams';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
-import { useCacheContext } from '../context/Context';
+import useCacheContext from '../context/Context';
+import useApiContext from '../context/ApiContext';
+import Menu from './Menu';
 
-const OIMenu = () => {
-    const {token, isDollar} = useCacheContext();
-    const [notifications, setNotifications] = useState(JSON.parse(localStorage.getItem('openInterest')) || [])
-    const [level1, setLevel1] = useState(100_000);
-    const [level2, setLevel2] = useState(250_000);
-    const [level3, setLevel3] = useState(1_000_000);
-    
-    const wsUrl = `${BASE_WS_URL}/bitget/openInterest?token=${token}`;
-    const { lastJsonMessage } = useWebSocket(wsUrl, {
-        shouldReconnect: () => true,
-        onOpen: () => console.log('Connected to open interest websocket'),
-        onError: (error) => console.error('Error while connecting to open interest websocket: ', error),
-        onClose: () => console.warn('Disconnected from open interest websocket')
-    });
+const OIMenu = ({activeMenu}) => {
+    const [notifications, setNotifications] = useState([])
+    const {isDollar} = useCacheContext();
+    const {openInterestEvent} = useApiContext();
+    const level1 = 100_000;
+    const level2 = 250_000;
+    const level3 = 1_000_000;
 
     useEffect(() => {
-        if (lastJsonMessage) {
-            const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
-            // remove notifications that appeared more than 30m ago:
-            let filteredNotifications = notifications.filter( n => !n || n.timestamp > thirtyMinutesAgo).slice(0, 50);
-            let newNotifications = [{
-                symbol: lastJsonMessage.symbol,
-                percentage: lastJsonMessage.deltaPercentage,
-                coins: lastJsonMessage.deltaCoins,
-                dollars: lastJsonMessage.deltaDollars,
-                timestamp: lastJsonMessage.timestamp
-            }, ...filteredNotifications];
-            setNotifications(newNotifications);
-            localStorage.setItem('openInterest', JSON.stringify(newNotifications));
+        if (!openInterestEvent || !openInterestEvent.symbol) {
+            return;
         }
-    }, [lastJsonMessage]);
+        
+        const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+        const filteredNotifications = notifications.filter(n => !n || n.timestamp > thirtyMinutesAgo).slice(0, 50);
+        const newNotification = {
+            symbol: openInterestEvent.symbol,
+            percentage: openInterestEvent.deltaPercentage,
+            coins: openInterestEvent.deltaCoins,
+            dollars: openInterestEvent.deltaDollars,
+            timestamp: openInterestEvent.timestamp
+        };
+
+        let newNotifications = [newNotification, ...filteredNotifications];
+        setNotifications(newNotifications);
+    }, [openInterestEvent]);
 
     const getQty = (data) => {
         let coins = data.coins;
@@ -68,7 +63,7 @@ const OIMenu = () => {
 
     return (
         <>
-            <div className='menu-container'>
+            <div className='menu-container' style={{ 'display': activeMenu !== Menu.oi ? 'none' : 'block'}}>
                 <div className='menu-title'>
                     Открытый Интерес - BitGet
                 </div>

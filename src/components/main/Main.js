@@ -1,9 +1,9 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import './Main.css'
-import {useCacheContext } from '../context/Context';
+import useCacheContext from '../context/Context';
 import Header from '../header/Header'
-import { Menu } from '../menu/Menu'
+import Menu from '../menu/Menu'
 import TickersMenu from '../menu/TickersMenu'
 import NotificationsMenu from '../menu/NotificationsMenu'
 import OIMenu from '../menu/OIMenu'
@@ -14,8 +14,6 @@ import { setSpeech, speak } from '../../utils/Utils'
 const Main = () => {
     const [activeMenu, setActiveMenu] = useState(Menu.tickers);
     const [isVoiceOn, setIsVoiceOn] = useState(true);
-    const [tickerToDelete, setTickerToDelete] = useState("");
-    const [notification, setNotification] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {isDollar} = useCacheContext();
     const {notifications, processedNotifications, setProcessedNotifications} = useCacheContext();
@@ -32,7 +30,6 @@ const Main = () => {
     }, [isVoiceOn]);
 
     useEffect(() => {
-        console.log('notifications updated: ', notifications);
         for (const notification of notifications) {
             if (processedNotifications.includes(notification[6])) continue;
             if (isVoiceOn) speak(notification, isDollar);
@@ -50,25 +47,17 @@ const Main = () => {
 
             <div className='main' style={{ filter: isModalOpen ? 'blur(.8px)' : 'none' }}>
                 <div className='content-left'>
-                    <Header
-                        onVoiceToggle={setIsVoiceOn}
-                        onMenuSelection={setActiveMenu}
-                        onSettings={switchSettingsModal}
-                    />
-                    <OrderBook
-                        onClose={setTickerToDelete}
-                    />
+                    <Header onVoiceToggle={setIsVoiceOn} onMenuSelection={setActiveMenu} onSettings={switchSettingsModal} />
+                    <OrderBook />
                 </div>
                 <div className='content-right'>
                     {activeMenu === Menu.tickers &&
-                        <TickersMenu deleteTicker={tickerToDelete} deleteionCompleted={() => setTickerToDelete("")} />
+                        <TickersMenu />
                     }
                     {activeMenu === Menu.notifications &&
-                        <NotificationsMenu isVoiceOn={isVoiceOn} newNotifications={notification} />
+                        <NotificationsMenu />
                     }
-                    {activeMenu === Menu.oi &&
-                        <OIMenu />
-                    }
+                    <OIMenu activeMenu={activeMenu}/>
                 </div>
             </div>
         </>

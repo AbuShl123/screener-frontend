@@ -1,6 +1,6 @@
 
-const IP_ADDRESS = '185.39.31.76';
-// const IP_ADDRESS = 'localhost';
+// const IP_ADDRESS = '185.39.31.76';
+const IP_ADDRESS = 'localhost';
 const PORT = 1105;
 
 export const BASE_WS_URL='ws://' + IP_ADDRESS + ':' + PORT;

@@ -1,12 +1,11 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { DEFAULT_SETTINGS } from '../../utils/Utils';
-import { useCacheContext } from '../context/Context.js';
+import useCacheContext from '../context/Context.js';
 
 const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
     const RANGE_PLACEHOLDER = "%";
-    const LOW_BOUND_DEFAULT = -10;
-    const HIGH_BOUND_DEFAULT = 10;
+    const LOW_BOUND_DEFAULT = -15;
+    const HIGH_BOUND_DEFAULT = 15;
     const LEVEL_PLACEHOLDER = "auto";
     const LEVEL_DEFAULT = "";
 
