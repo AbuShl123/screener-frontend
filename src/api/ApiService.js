@@ -1,5 +1,4 @@
 import { BASE_WS_URL } from '../utils/EnvParams';
-import { SPOT_SIGN } from '../utils/Utils';
 import api from './AxiosConfig'
 
 const clientSideReason = "client initiated closure";
@@ -36,7 +35,7 @@ class ApiService {
 
     createOBConnection(marketTickers, callback, token) {
         let obUrl = `${BASE_WS_URL}/binance/depth?token=${token}&symbols=`;
-        obUrl += [...marketTickers].map(symbol => symbol.replace(SPOT_SIGN, "")).join("/");
+        obUrl += marketTickers.join("/");
 
         this.obSocket = new WebSocket(obUrl);
 

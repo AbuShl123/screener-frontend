@@ -63,7 +63,7 @@ const OIMenu = ({activeMenu}) => {
 
     return (
         <>
-            <div className='menu-container' style={{ 'display': activeMenu !== Menu.oi ? 'none' : 'block'}}>
+            <div className='menu-container' style={{ 'display': activeMenu !== Menu.oi ? 'none' : ''}}>
                 <div className='menu-title'>
                     Открытый Интерес - BitGet
                 </div>

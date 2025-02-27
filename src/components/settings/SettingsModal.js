@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import './SettingsModal.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWrench, faStar, faSearch } from '@fortawesome/free-solid-svg-icons';
-import { SPOT_SIGN, FUT_SIGN, DEFAULT_SETTINGS } from "../../utils/Utils";
+import { FUT_SIGN, DEFAULT_SETTINGS } from "../../utils/Utils";
 import { getMarketStyle, switchMarketStatus } from "../../utils/TickerActions";
 import useCacheContext from "../context/Context";
 import TickerSettings from "./TickerSettings";
@@ -42,7 +42,7 @@ const SettingsModal = ({onClose}) => {
         }
 
         let hasActivated = switchMarketStatus(element, isSpot);
-        let marketSymbol = ticker + ( isSpot ? SPOT_SIGN : FUT_SIGN);
+        let marketSymbol = ticker + ( isSpot ? '' : FUT_SIGN);
         if (hasActivated) {
             let newValue = [...marketTickers, marketSymbol];
             updateMarketTickers(newValue);
@@ -62,8 +62,7 @@ const SettingsModal = ({onClose}) => {
     }
 
     const handleNewSetting = (newSetting, ticker, isSpot) => {
-        let sign = isSpot ? SPOT_SIGN : FUT_SIGN;
-        let marketTicker = ticker + sign;
+        let marketTicker = ticker + (isSpot ? '' : FUT_SIGN);
         console.log(`${marketTicker} - new settings here: `, newSetting);
 
         let newSettingsMap = new Map(settingsMap);
@@ -83,7 +82,7 @@ const SettingsModal = ({onClose}) => {
         let newSelectedTickers = selectedTickers.filter(t => t !== ticker);
         let newMarketTickers = marketTickers.filter(t => !t.includes(ticker));
         let newSettings = new Map(settingsMap);
-        newSettings.delete(ticker + SPOT_SIGN);
+        newSettings.delete(ticker);
         newSettings.delete(ticker + FUT_SIGN);
 
         updateSelectedTickers(newSelectedTickers);
@@ -102,8 +101,8 @@ const SettingsModal = ({onClose}) => {
         let newSettingsMap = new Map(settingsMap);
 
         if (props.hasSpot) {
-            newSettingsMap.set(ticker + SPOT_SIGN, DEFAULT_SETTINGS);
-            newMarketTickers = [ticker + SPOT_SIGN, ...newMarketTickers];    
+            newSettingsMap.set(ticker, DEFAULT_SETTINGS);
+            newMarketTickers = [ticker, ...newMarketTickers];    
         } 
 
         if (props.hasFut) {
@@ -159,8 +158,8 @@ const SettingsModal = ({onClose}) => {
                             >
                                 <div id="searchItems" className="search-items-container">
                                     <hr></hr>
-                                    {suggestions.map((value, index) => (
-                                        <div key={index} className="search-item" onClick={() => {handleNewTicker(value)}}>
+                                    {suggestions.map((value) => (
+                                        <div key={value} className="search-item" onClick={(e) => {e.stopPropagation(); handleNewTicker(value);}}>
                                             <span className="material-symbols-outlined"> add </span>
                                             <p> {value} </p>
                                         </div>

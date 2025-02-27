@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { getShortFormNumber, roundNumber, getDate, SPOT_SIGN, FUT_SIGN } from '../../utils/Utils';
+import { getShortFormNumber, roundNumber, getDate, FUT_SIGN } from '../../utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import useCacheContext from '../context/Context';
@@ -20,7 +20,7 @@ const NotificationsMenu = () => {
     }, [notifications]);
 
     const formatSymbol = (ticker) => {
-        return (ticker.replace(SPOT_SIGN, "").replace(FUT_SIGN, "").replace("usdt", "") + "/usdt").toUpperCase();
+        return (ticker.replace(FUT_SIGN, "").replace("usdt", "") + "/usdt").toUpperCase();
     }
 
     const getQty = (data) => {
@@ -38,10 +38,10 @@ const NotificationsMenu = () => {
 
     const getSymbolStyle = (data) => {
         let ticker = data[0];
-        if (ticker.endsWith(SPOT_SIGN)) {
-            return 'spot-notification';
-        } else {
+        if (ticker.endsWith(FUT_SIGN)) {
             return 'perp-notification';
+        } else {
+            return 'spot-notification';
         }
     }
 
@@ -59,7 +59,7 @@ const NotificationsMenu = () => {
                                     <p> {formatSymbol(data[0])} </p>
                                     <p> {getQty(data)} </p>
                                     <p> {data[1] ? 'long' : 'short'} </p>
-                                    <p> {data[0].endsWith(SPOT_SIGN) ? 'spot' : 'perp'} </p>
+                                    <p> {data[0].endsWith(FUT_SIGN) ? 'perp' : 'spot'} </p>
                                 </div>
                                 <div>
                                     <div className='notification-fact notification-line'>

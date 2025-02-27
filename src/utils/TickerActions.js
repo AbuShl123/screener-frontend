@@ -1,5 +1,4 @@
-import { SPOT_SIGN, FUT_SIGN } from "./Utils";
-
+import { FUT_SIGN } from "./Utils";
 
 const getMarketStyle = (ticker, tickerProperties, marketTickers, isSpot=true) => {
     let props = tickerProperties.get(ticker);
@@ -7,7 +6,7 @@ const getMarketStyle = (ticker, tickerProperties, marketTickers, isSpot=true) =>
     let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
     if (!marketExists) return 'disabled';
 
-    let marketSymbol = ticker + (isSpot ? SPOT_SIGN : FUT_SIGN);
+    let marketSymbol = ticker + (isSpot ? '' : FUT_SIGN);
     if (marketTickers.includes(marketSymbol)) {
         let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
         return classValue;

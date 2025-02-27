@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 import { getMarketStyle } from "../../utils/TickerActions";
-import { DEFAULT_SETTINGS, FUT_SIGN, SPOT_SIGN } from "../../utils/Utils";
+import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import useCacheContext from "../context/Context";
 
 const TickerSettings = ({
@@ -42,7 +42,7 @@ const TickerSettings = ({
     useEffect(() => {
         console.log('ticker settings useEffect called');
         
-        const spotSettings = settingsMap.get(ticker + SPOT_SIGN);
+        const spotSettings = settingsMap.get(ticker);
         const futSettings = settingsMap.get(ticker + FUT_SIGN);
 
         setSettingsSpot(spotSettings);

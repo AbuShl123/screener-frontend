@@ -2,7 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import './Menu.css'
 import useCacheContext from '../context/Context.js';
-import { SPOT_SIGN, FUT_SIGN } from '../../utils/Utils.js';
+import { FUT_SIGN } from '../../utils/Utils.js';
 
 const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
     const {allTickers, tickerProps} = useCacheContext();
@@ -45,7 +45,7 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
     }
 
     const handleMarketSelection = (symbol, isSpot) => {
-        let ticker = isSpot ? `${symbol}${SPOT_SIGN}` : `${symbol}${FUT_SIGN}`;
+        let ticker = isSpot ? symbol : symbol + FUT_SIGN;
         let el = document.querySelector(`div[id='${ticker}']`);
         if (!el || el.classList.contains('disabled')) {
             return;
@@ -64,11 +64,10 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
 
     const handleClose = (symbol) => {
         let tickerf = symbol + FUT_SIGN;
-        let tickerp = symbol + SPOT_SIGN;
         activateMarket(tickerf, false, true);
-        activateMarket(tickerp, false, true);
+        activateMarket(symbol, false, true);
         let newSelectedTickers = selectedTickers.filter((t) => t !== symbol);
-        let newMarketTickers = marketTickers.filter((t) => t !== tickerp && t !== tickerf);
+        let newMarketTickers = marketTickers.filter((t) => t !== symbol && t !== tickerf);
         updateSelectedTickers(newSelectedTickers);
         updateMarketTickers(newMarketTickers);
     }
@@ -96,7 +95,7 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
             if (!marketExists) return 'disabled';
         }
 
-        let marketSymbol = ticker + (isSpot ? SPOT_SIGN : FUT_SIGN);
+        let marketSymbol = ticker + (isSpot ? '' : FUT_SIGN);
         if (marketTickers.includes(marketSymbol)) {
             let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
             return classValue;
@@ -118,7 +117,7 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
                             <div className='ticker-action-buttons'>
                                 <div
                                     className={'market-checkbox spot-checkbox ' + getMarketStyle(ticker)}
-                                    id={`${ticker}${SPOT_SIGN}`}
+                                    id={ticker}
                                     onClick={() => handleMarketSelection(ticker, true)}
                                 >
                                     <p>spot</p>

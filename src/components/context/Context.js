@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS, DEFAULT_SETTINGS_MAP, SPOT_SIGN, FUT_SIGN } from "../../utils/Utils";
+import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import api from '../../api/AxiosConfig'
 
 const TOKEN_CACHE_ID = 'screener-auth-token';
@@ -154,8 +154,8 @@ export const CacheProvider = ({ children }) => {
         if (selectedTickers === undefined) return map;
 
         for (const ticker of selectedTickers) {
-            if (!map.has(ticker + SPOT_SIGN)) {
-                map.set(ticker + SPOT_SIGN, DEFAULT_SETTINGS);
+            if (!map.has(ticker)) {
+                map.set(ticker, DEFAULT_SETTINGS);
             }
             if (!map.has(ticker + FUT_SIGN)) {
                 map.set(ticker + FUT_SIGN, DEFAULT_SETTINGS);

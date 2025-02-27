@@ -1,4 +1,3 @@
-const SPOT_SIGN = '.p';
 const FUT_SIGN = '.f';
 
 const DEFAULT_SETTINGS = {
@@ -11,10 +10,10 @@ const DEFAULT_SETTINGS = {
     audio: true
 }
 const DEFAULT_TICKERS = ['btcusdt', 'bnbusdt', 'ethusdt', 'dogeusdt', 'xrpusdt', 'bnxusdt', 'avaxusdt'];
-const DEFAULT_MARKET_TICKERS = DEFAULT_TICKERS.map(t => t + SPOT_SIGN);
+const DEFAULT_MARKET_TICKERS = DEFAULT_TICKERS;
 const DEFAULT_SETTINGS_MAP = new Map(
     DEFAULT_TICKERS.flatMap(t => [
-        [t + SPOT_SIGN, DEFAULT_SETTINGS],
+        [t, DEFAULT_SETTINGS],
         [t + FUT_SIGN, DEFAULT_SETTINGS]
     ])
 );
@@ -56,7 +55,7 @@ const getMarketStyle = (ticker, tickerProperties, marketTickers, isSpot=true) =>
         if (!marketExists) return 'disabled';
     }
 
-    let marketSymbol = ticker + (isSpot ? SPOT_SIGN : FUT_SIGN);
+    let marketSymbol = ticker + (isSpot ? '' : FUT_SIGN);
     if (marketTickers.includes(marketSymbol)) {
         let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
         return classValue;
@@ -85,9 +84,9 @@ const speak = (data, isDollar) => {
     // indexes:                              0       1      2     3      4        5      6
     // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
     let symbol = data[0];
-    let symbolName = symbol.replace(SPOT_SIGN, "").replace(FUT_SIGN, "").replace('usdt', '');
+    let symbolName = symbol.replace(FUT_SIGN, "").replace('usdt', '');
     let coin = convertSymbolToRussian(symbolName);
-    let spotFut = symbol.endsWith(SPOT_SIGN) ? 'спот' : 'фьючерс';
+    let spotFut = symbol.endsWith(FUT_SIGN) ? 'фьючерс' :  'спот';
     let longShort = data[1] ? 'шорт' : 'лонг';
 
     let qty = data[3];
@@ -178,4 +177,4 @@ const isReadbable = (symbolName) => {
     return true;
 }
 
-export { SPOT_SIGN, FUT_SIGN, DEFAULT_SETTINGS, DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, setSpeech, roundNumber, getShortFormNumber, getDate, getMarketStyle, speak }
+export { FUT_SIGN, DEFAULT_SETTINGS, DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, setSpeech, roundNumber, getShortFormNumber, getDate, getMarketStyle, speak }
