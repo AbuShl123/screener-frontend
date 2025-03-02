@@ -3,12 +3,13 @@ import { useState, useEffect } from 'react'
 import './Menu.css'
 import useCacheContext from '../context/Context.js';
 import { FUT_SIGN } from '../../utils/Utils.js';
+import { getMarketStyle } from '../../utils/TickerActions.js';
 
 const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
-    const {allTickers, tickerProps} = useCacheContext();
-    const [suggestions, setSuggestions] = useState(allTickers);
-    const {selectedTickers, setSelectedTickers} = useCacheContext();
-    const {marketTickers, setMarketTickers} = useCacheContext();
+    const {tickers} = useCacheContext();
+    const [suggestions, setSuggestions] = useState(Array.from(tickers.keys()));
+    const [selectedTickers, setSelectedTickers] = useState([]);
+    const {marketTickers, setMarketTickers, getSettings, setSettings} = useCacheContext();
 
     useEffect(() => {
         if (deleteTicker) {
@@ -18,6 +19,12 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
             deleteionCompleted();
         }
     }, [deleteTicker]);
+
+    useEffect(() => {
+        let tickers = marketTickers.map(t => t.replace(FUT_SIGN, ''));
+        let set = new Set([...tickers]);
+        setSelectedTickers([...set]);
+    }, [marketTickers]);
 
     function updateSelectedTickers(value) {
         setSelectedTickers(value);
@@ -74,11 +81,12 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
 
     const handleInputChange = (event) => {
         const query = event.target.value;
-        const filteredSuggestions = allTickers.filter(ticker =>
+        let ticker = tickers.keys();
+        const filteredSuggestions = ticker.filter(ticker =>
             ticker.toLowerCase().includes(query.toLowerCase()) 
             && !selectedTickers.includes(ticker)
         );
-        setSuggestions(filteredSuggestions);
+        setSuggestions(Array.from(filteredSuggestions));
     }
 
     const handleNewSymbol = (symbol) => {
@@ -88,20 +96,17 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
         }
     }
 
-    const getMarketStyle = (ticker, isSpot=true) => {
-        let props = tickerProps.get(ticker);
-        if (props) {
-            let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
-            if (!marketExists) return 'disabled';
-        }
+    const toggleAudio = (symbol) => {
+        const settings = getSettings(symbol);
+        const settingsFut = getSettings(symbol + FUT_SIGN);
 
-        let marketSymbol = ticker + (isSpot ? '' : FUT_SIGN);
-        if (marketTickers.includes(marketSymbol)) {
-            let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
-            return classValue;
-        }
+        let newAudio = !settings.audio;
 
-        return '';
+        const newSettings = { ...settings, audio: newAudio }; 
+        const newSettingsFut = { ...settingsFut, audio: newAudio };
+
+        setSettings(symbol, newSettings);
+        setSettings(symbol + FUT_SIGN, newSettingsFut);
     }
  
     return (
@@ -111,27 +116,25 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
                     Выбранные тикеры 
                 </div>
                 <div className='connected-tickers-list menu-scroller'>
-                    {selectedTickers.length > 0 && selectedTickers.map((ticker) => (       
+                    {selectedTickers.map((ticker) => (       
                         <div key={ticker} className='connected-ticker-container'>
-                            <p> {ticker.toUpperCase()} </p>
+
+                            <div className='ticker-action-buttons ticker-name-audio' onClick={() => toggleAudio(ticker)}>
+                                {getAudioIcon(getSettings(ticker))}
+                                <p className='ticker-name'> {ticker.toUpperCase().replace("USDT", "") + "/USDT"} </p>
+                            </div>
+
                             <div className='ticker-action-buttons'>
-                                <div
-                                    className={'market-checkbox spot-checkbox ' + getMarketStyle(ticker)}
-                                    id={ticker}
-                                    onClick={() => handleMarketSelection(ticker, true)}
-                                >
-                                    <p>spot</p>
-                                </div>
 
-                                <div
-                                    className={'market-checkbox futures-checkbox ' + getMarketStyle(ticker, false)}
-                                    id={`${ticker}${FUT_SIGN}`}
-                                    onClick={() => handleMarketSelection(ticker, false)}
-                                >
-                                    <p>futures</p>
-                                </div>
+                                <div className={'market-checkbox ' + getMarketStyle(ticker, marketTickers)}> </div> 
 
-                                <span className="material-symbols-outlined close-icon" onClick={() => handleClose(ticker)}>close</span>
+                                <div className={'market-checkbox ' + getMarketStyle(ticker, marketTickers, false)}> </div>
+
+                                <span className="material-symbols-outlined ticker-settings settings-icon">
+                                    Settings
+                                </span>
+
+                                {/* <span className="material-symbols-outlined close-icon" onClick={() => handleClose(ticker)}>close</span> */}
                             </div>
                         </div>
                     ))}
@@ -157,3 +160,19 @@ const TickersMenu = ({deleteTicker, deleteionCompleted}) => {
 }
 
 export default TickersMenu;
+
+function getAudioIcon(settings) {
+    return (
+        <>
+            {settings.audio ? (
+                <span className="material-symbols-outlined volume audio-on">
+                    volume_up
+                </span>
+            ) : (
+                <span className="material-symbols-outlined volume audio-off">
+                    volume_off
+                </span>
+            )}
+        </>
+    )
+}

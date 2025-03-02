@@ -7,6 +7,7 @@ const SELECTED_TICKERS_CACHE_ID = 'screener-selectedTickers';
 const MARKET_TICKERS_CACHE_ID = 'screener-marketTickers';
 const SETTINGS_CACHE_ID = 'screener-settings';
 const IS_DOLLAR_CACHE_ID = 'screener-is-dollar';
+const IS_VOICE_ON_CACHE_ID = 'screener-isVoiceOn';
 
 export const ScreenerContext = createContext(undefined);
 
@@ -16,8 +17,8 @@ export const CacheProvider = ({ children }) => {
     const [marketTickers, updateMarketTickers] = useState([]);
     const [settingsMap, updateSettingsMap] = useState(null);
     const [isDollar, updateIsDollar] = useState(true);
-    const [allTickers, updateAllTickers] = useState([]);
-    const [tickerProps, updateTickerProps] = useState(new Map());
+    const [isVoiceOn, updateIsVoiceOn] = useState(true);
+    const [tickers, updateTickers] = useState(new Map());
     const [notifications, setNotifications] = useState([]);
     const [processedNotifications, setProcessedNotifications] = useState([]);
 
@@ -35,21 +36,27 @@ export const CacheProvider = ({ children }) => {
         updateToken(initialToken);
 
         let isDollar = getIsDollar();
-        const initialIsDollar = isDollar === undefined ? true : isDollar;
-        updateIsDollar(initialIsDollar);
+        updateIsDollar(isDollar === undefined ? true : isDollar);
 
-        const setAllTickersAndProps = async () => {
-            const { fetchedTickers, fetchedProps } = await getAllTickersAndProps();
-            updateAllTickers(fetchedTickers);
-            updateTickerProps(fetchedProps);
+        let isVoiceOn = getIsVoiceOn();
+        updateIsVoiceOn(isVoiceOn === undefined ? true : isVoiceOn);
+
+        const setTickers = async () => {
+            const fetchedTickers = await getTickers();
+            updateTickers(fetchedTickers);
         }
 
-        setAllTickersAndProps();
+        setTickers();
     }, []);
 
     function setIsDollar(value) {
         updateIsDollar(value);
         localStorage.setItem(IS_DOLLAR_CACHE_ID, value);
+    }
+
+    function setIsVoiceOn(value) {
+        updateIsVoiceOn(value);
+        localStorage.setItem(IS_VOICE_ON_CACHE_ID, value);
     }
 
     function setToken(value) {
@@ -73,9 +80,14 @@ export const CacheProvider = ({ children }) => {
     }
 
     function setSettings(ticker, newSetting) {
-        let newSettingsMap = new Map(settingsMap);
-        newSettingsMap.set(ticker, newSetting);
-        setSettingsMap(newSettingsMap);
+        updateSettingsMap(prevMap => {
+            const newSettingsMap = new Map(prevMap); 
+            newSettingsMap.set(ticker, newSetting); 
+    
+            localStorage.setItem(SETTINGS_CACHE_ID, JSON.stringify(Array.from(newSettingsMap)));
+    
+            return newSettingsMap;
+        });
     }
 
     function getSettings(ticker) {
@@ -84,44 +96,44 @@ export const CacheProvider = ({ children }) => {
         return setting;
     }
 
-    async function getAllTickersAndProps() {
+    async function getTickers() {
         const token = getToken();
-        let fetchedTickers = [];
-        let fetchedProps = new Map();
+        let fetchedTickers = new Map();
 
         await api.get('/tickers', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         })
-            .then(response => {
-                fetchedTickers = response.data.map(t => t.symbol);
-                response.data.forEach(item => {
-                    let symbol = item.symbol;
-                    let hasSpot = item.hasSpot;
-                    let hasFut = item.hasFut;
-                    let price = item.price;
-                    fetchedProps.set(symbol, { hasSpot, hasFut, price });
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching tickers:', error);
+        .then(response => {
+            response.data.forEach(item => {
+                fetchedTickers.set(item.symbol, parseFloat(item.price));
             });
+        })
+        .catch(error => {
+            console.error('Error fetching tickers:', error);
+        });
 
-        return {fetchedTickers, fetchedProps}
+        return fetchedTickers;
     }
 
     // following getters retrieve values from a localstorage, but if they are not present, then they return undefined
 
     function getToken() {
         let token = localStorage.getItem(TOKEN_CACHE_ID);
-        if (token === 'undefined') return undefined;
+        if (!token || token === 'undefined') return undefined;
         return token;
     }
 
     function getIsDollar() {
         let rawValue = localStorage.getItem(IS_DOLLAR_CACHE_ID);
-        if (rawValue === 'undefined') return undefined;
+        if (!rawValue || rawValue === 'undefined') return undefined;
+        return rawValue === 'true';
+    }
+
+    function getIsVoiceOn() {
+        let rawValue = localStorage.getItem(IS_VOICE_ON_CACHE_ID);
+        if (!rawValue || rawValue === 'undefined') return undefined;
         return rawValue === 'true';
     }
 
@@ -136,7 +148,7 @@ export const CacheProvider = ({ children }) => {
     
     function getMarketTickers() {
         let rawValue = localStorage.getItem(MARKET_TICKERS_CACHE_ID);
-        if (rawValue !== "undefined") {
+        if (rawValue && rawValue !== "undefined") {
             return JSON.parse(rawValue);
         } else {
             return undefined;
@@ -164,15 +176,28 @@ export const CacheProvider = ({ children }) => {
         return map;
     }
 
+    function addNotification(message) {
+        setNotifications((prev) => {
+            let notifs = [message, ...prev];
+    
+            if (notifs.length > 15) {
+                notifs = notifs.slice(0, 15);
+            }
+    
+            return notifs;
+        });
+    };
+
     return (
         <ScreenerContext.Provider value={{ 
             token, setToken,
-            allTickers, tickerProps,
+            tickers,
             selectedTickers, setSelectedTickers, 
             marketTickers, setMarketTickers, 
             settingsMap, setSettingsMap, getSettings, setSettings,
             isDollar, setIsDollar,
-            notifications, setNotifications,
+            isVoiceOn, setIsVoiceOn,
+            notifications, addNotification,
             processedNotifications, setProcessedNotifications
         }}>
             {children}
@@ -187,29 +212,6 @@ export default function useCacheContext() {
         throw new Error("useCacheContext must be used within a CacheProvider.");
     }
 
-    const { 
-        token, setToken,
-        allTickers, tickerProps,
-        selectedTickers, setSelectedTickers, 
-        marketTickers, setMarketTickers,
-        settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar,
-        notifications, setNotifications,
-        processedNotifications, setProcessedNotifications
-    } = context;
 
-    if (selectedTickers === undefined || marketTickers === undefined || settingsMap === undefined) {
-        throw new Error("context variables have not beed initialized yet.");
-    }
-
-    return {
-        token, setToken,
-        allTickers, tickerProps,
-        selectedTickers, setSelectedTickers, 
-        marketTickers, setMarketTickers, 
-        settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar,
-        notifications, setNotifications,
-        processedNotifications, setProcessedNotifications
-    };
+    return context;
 }

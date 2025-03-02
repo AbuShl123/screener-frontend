@@ -1,49 +1,35 @@
 import React, { useEffect } from 'react'
-import { getShortFormNumber, roundNumber, getDate, FUT_SIGN } from '../../utils/Utils';
+import { roundNumber, getDate, FUT_SIGN, setSpeech, speak } from '../../utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import useCacheContext from '../context/Context';
 
 const NotificationsMenu = () => {
 
-    // indexes:                              0       1      2     3      4        5      6
-    // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
-    const {notifications, setNotifications} = useCacheContext();
-    const {isDollar} = useCacheContext();
+    // notification content is following: [ticker, price, qty, distance, level, isAsk, life]
+    const {notifications, isDollar, isVoiceOn, getSettings} = useCacheContext();
 
     useEffect(() => {
-        console.log("new notifications: ", notifications);
-        if (notifications.length > 15) {
-            const pastNotifications = notifications.slice(0, 15);
-            setNotifications(pastNotifications)
+        const waitForVoicesToLoad = async () => await setSpeech();
+        waitForVoicesToLoad();
+    }, []);
+
+    useEffect(() => {
+        if (!isVoiceOn) {
+            window.speechSynthesis.cancel();
+        }
+    }, [isVoiceOn]);
+
+    useEffect(() => {
+        for (const notif of notifications) {
+            if (notif.announced) continue;
+            notif.announced = true;
+            const ticker = notif.ticker;
+            const settings = getSettings(ticker);
+            if (!settings.audio || !isVoiceOn) continue;
+            speak(notif, isDollar);
         }
     }, [notifications]);
-
-    const formatSymbol = (ticker) => {
-        return (ticker.replace(FUT_SIGN, "").replace("usdt", "") + "/usdt").toUpperCase();
-    }
-
-    const getQty = (data) => {
-        let value = getShortFormNumber(data[3]);
-        if (isDollar) {
-            value = '$' + getShortFormNumber(data[3] * data[2]);
-        }
-        return (
-            <>
-                {value + ' '}
-                {!isDollar && <FontAwesomeIcon icon={faCoins} style={{ color: "rgb(255 255 255 / 80%)", fontSize: '12px'}} />}
-            </>
-        );
-    }
-
-    const getSymbolStyle = (data) => {
-        let ticker = data[0];
-        if (ticker.endsWith(FUT_SIGN)) {
-            return 'perp-notification';
-        } else {
-            return 'spot-notification';
-        }
-    }
 
     return (
         <>
@@ -56,23 +42,23 @@ const NotificationsMenu = () => {
                         <div key={index}>
                             <div className='notification-container'>
                                 <div className={'notification-1 notification-line ' + getSymbolStyle(data)}>
-                                    <p> {formatSymbol(data[0])} </p>
-                                    <p> {getQty(data)} </p>
-                                    <p> {data[1] ? 'long' : 'short'} </p>
-                                    <p> {data[0].endsWith(FUT_SIGN) ? 'perp' : 'spot'} </p>
+                                    <p> {formatSymbol(data)} </p>
+                                    <p> {getQty(data, isDollar)} </p>
+                                    <p> {data.isAsk ? 'long' : 'short'} </p>
+                                    <p> {data.ticker.endsWith(FUT_SIGN) ? 'perp' : 'spot'} </p>
                                 </div>
                                 <div>
                                     <div className='notification-fact notification-line'>
                                         <p> цена: </p>
-                                        <p> {roundNumber(data[2])} </p>
+                                        <p> {roundNumber(data.price)} </p>
                                     </div>
                                     <div className='notification-fact notification-line'>
                                         <p> уклон: </p>
-                                        <p> {Math.abs(data[4])}% </p>
+                                        <p> {Math.abs(data.distance)}% </p>
                                     </div>
                                 </div>
                                 <div className='notification-time'>
-                                    <p> {getDate(data[6])} </p>
+                                    <p> {getDate(data.life)} </p>
                                 </div>
                             </div>
                             {index != notifications.length - 1 ? <hr style={{ margin: '0' }}></hr> : <></>}
@@ -85,3 +71,29 @@ const NotificationsMenu = () => {
 }
 
 export default NotificationsMenu;
+
+
+
+function formatSymbol (data) {
+    return (data.ticker.replace(FUT_SIGN, "").replace("usdt", "") + "/usdt").toUpperCase();
+}
+
+function getQty(data, isDollar) {
+    let qty = isDollar ? '$' + data.qty : data.qty;
+
+    return (
+        <>
+            {qty + ' '}
+            {!isDollar && <FontAwesomeIcon icon={faCoins} style={{ color: "rgb(255 255 255 / 80%)", fontSize: '12px'}} />}
+        </>
+    );
+}
+
+function getSymbolStyle(data) {
+    let ticker = data.ticker;
+    if (ticker.endsWith(FUT_SIGN)) {
+        return 'perp-notification';
+    } else {
+        return 'spot-notification';
+    }
+}

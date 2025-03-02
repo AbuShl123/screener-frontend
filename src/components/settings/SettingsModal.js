@@ -8,7 +8,7 @@ import useCacheContext from "../context/Context";
 import TickerSettings from "./TickerSettings";
 
 const SettingsModal = ({onClose}) => {
-    const {allTickers, tickerProps} = useCacheContext();
+    const {tickers} = useCacheContext();
     const {selectedTickers, setSelectedTickers} = useCacheContext();
     const {marketTickers, setMarketTickers} = useCacheContext();
     const {settingsMap, setSettingsMap} = useCacheContext();
@@ -54,11 +54,12 @@ const SettingsModal = ({onClose}) => {
 
     const handleSearchSuggesstions = (event) => {
         let query = event.target.value;
+        let allTickers = Array.from(tickers.keys());
         const filteredSuggestions = allTickers.filter(ticker =>
             ticker.includes(query.toLowerCase())
             && !selectedTickers.includes(ticker)
         ).slice(0, 5);
-        setSuggestions(filteredSuggestions);
+        setSuggestions(Array.from(filteredSuggestions));
     }
 
     const handleNewSetting = (newSetting, ticker, isSpot) => {
@@ -92,23 +93,17 @@ const SettingsModal = ({onClose}) => {
     }
 
     const handleNewTicker = (ticker) => {
-        let props = tickerProps.get(ticker);
-        if (!props || !allTickers.includes(ticker)) return;
+        if (!tickers.keys().includes(ticker)) return;
         let newSelectedTickers = [ticker, ...selectedTickers];
         updateSelectedTickers(newSelectedTickers);
 
         let newMarketTickers = [...marketTickers];
         let newSettingsMap = new Map(settingsMap);
 
-        if (props.hasSpot) {
-            newSettingsMap.set(ticker, DEFAULT_SETTINGS);
-            newMarketTickers = [ticker, ...newMarketTickers];    
-        } 
-
-        if (props.hasFut) {
-            newSettingsMap.set(ticker + FUT_SIGN, DEFAULT_SETTINGS);
-            newMarketTickers = [ticker + FUT_SIGN, ...newMarketTickers];
-        }
+        newSettingsMap.set(ticker, DEFAULT_SETTINGS);
+        newMarketTickers = [ticker, ...newMarketTickers];
+        newSettingsMap.set(ticker + FUT_SIGN, DEFAULT_SETTINGS);
+        newMarketTickers = [ticker + FUT_SIGN, ...newMarketTickers];
 
         updateMarketTickers(newMarketTickers);
         updateSettings(newSettingsMap);
@@ -220,7 +215,7 @@ const SettingsModal = ({onClose}) => {
                                         <div
                                             className={
                                                 'market-checkbox spot-checkbox ' +
-                                                getMarketStyle(ticker, tickerProps, marketTickers, true)
+                                                getMarketStyle(ticker, marketTickers, true)
                                             }
                                             onClick={(e) => {
                                                 handleMarketSelection(ticker, e.currentTarget, true)
@@ -233,7 +228,7 @@ const SettingsModal = ({onClose}) => {
                                         <div
                                             className={
                                                 'market-checkbox futures-checkbox ' +
-                                                getMarketStyle(ticker, tickerProps, marketTickers, false)
+                                                getMarketStyle(ticker, marketTickers, false)
                                             }
                                             onClick={(e) => {
                                                 handleMarketSelection(ticker, e.currentTarget, false)

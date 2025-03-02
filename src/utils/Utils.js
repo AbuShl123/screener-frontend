@@ -48,22 +48,6 @@ const getDate = (timestamp) => {
     return militaryTime;
 }
 
-const getMarketStyle = (ticker, tickerProperties, marketTickers, isSpot=true) => {
-    let props = tickerProperties.get(ticker);
-    if (props) {
-        let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
-        if (!marketExists) return 'disabled';
-    }
-
-    let marketSymbol = ticker + (isSpot ? '' : FUT_SIGN);
-    if (marketTickers.includes(marketSymbol)) {
-        let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
-        return classValue;
-    }
-
-    return '';
-}
-
 function setSpeech() {
     return new Promise(
         function (resolve, reject) {
@@ -81,18 +65,15 @@ function setSpeech() {
 }
 
 const speak = (data, isDollar) => {
-    // indexes:                              0       1      2     3      4        5      6
-    // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
-    let symbol = data[0];
+    // notification content is following: [ticker, price, qty, distance, level, isAsk, life]
+    let symbol = data.ticker;
     let symbolName = symbol.replace(FUT_SIGN, "").replace('usdt', '');
     let coin = convertSymbolToRussian(symbolName);
     let spotFut = symbol.endsWith(FUT_SIGN) ? 'фьючерс' :  'спот';
-    let longShort = data[1] ? 'шорт' : 'лонг';
+    let longShort = data.isAsk ? 'лонг' : 'шорт';
 
-    let qty = data[3];
-    let price = data[2];
-    let value = isDollar ? getShortFormNumber(qty * price) : getShortFormNumber(qty);
-    let number = convertNumberToRussian(value);
+    let qty = data.qty;
+    let number = convertNumberToRussian(qty);
     let dollars = isDollar ? ' долларов' : '';
 
     // пример: моента биткоин спот - в лонг обнаружено 2тыс (долларов)
@@ -177,4 +158,9 @@ const isReadbable = (symbolName) => {
     return true;
 }
 
-export { FUT_SIGN, DEFAULT_SETTINGS, DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, setSpeech, roundNumber, getShortFormNumber, getDate, getMarketStyle, speak }
+export { 
+    FUT_SIGN, DEFAULT_SETTINGS, 
+    DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, 
+    setSpeech, roundNumber, getShortFormNumber, 
+    getDate, speak 
+}

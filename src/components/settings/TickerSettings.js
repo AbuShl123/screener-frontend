@@ -17,7 +17,7 @@ const TickerSettings = ({
     const LOW_RANGE_LIMIT = -30;
     const HIGH_RANGE_LIMIT = 30;
 
-    const {tickerProps} = useCacheContext();
+    const {tickers} = useCacheContext();
     const {marketTickers} = useCacheContext();
     const {settingsMap} = useCacheContext();
 
@@ -91,12 +91,10 @@ const TickerSettings = ({
         let newFutSettings = {...settingsFut};
 
         const setSpot = () => {
-            if (!tickerProps.get(currentTicker).hasSpot) return;
             setSettingsSpot(newSpotSettings);
             onNewSettings(newSpotSettings, currentTicker, true);
         }
         const setFut = () => {
-            if (!tickerProps.get(currentTicker).hasFut) return;
             setSettingsFut(newFutSettings);
             onNewSettings(newFutSettings, currentTicker, false);
         }
@@ -332,12 +330,12 @@ const TickerSettings = ({
                                     )}
                                 </div>
 
-                                <div className={'market-checkbox spot-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, true)}
+                                <div className={'market-checkbox spot-checkbox ' + getMarketStyle(currentTicker, marketTickers, true)}
                                     onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, true)}
                                 >
                                     <p>spot</p>
                                 </div>
-                                <div className={'market-checkbox futures-checkbox ' + getMarketStyle(currentTicker, tickerProps, marketTickers, false)}
+                                <div className={'market-checkbox futures-checkbox ' + getMarketStyle(currentTicker, marketTickers, false)}
                                     onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, false)}
                                 >
                                     <p>futures</p>
@@ -442,7 +440,6 @@ const TickerSettings = ({
                             {getCoinOrDollar()}
                         </div>
                     </div>
-                    {!tickerProps.get(currentTicker)?.hasSpot && <div className="disable-cover" />}
                 </div>
 
                 <div className="vertical-line" />
@@ -532,7 +529,6 @@ const TickerSettings = ({
                             {getCoinOrDollar()}
                         </div>
                     </div>
-                    {!tickerProps.get(currentTicker)?.hasFut && <div className="disable-cover" />}
                 </div>
             </div>
         </>

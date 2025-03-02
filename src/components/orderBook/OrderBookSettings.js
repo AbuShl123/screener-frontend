@@ -2,7 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import useCacheContext from '../context/Context.js';
 
-const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
+const OrderBookSettings = ({ ticker, onSubmit }) => {
     const RANGE_PLACEHOLDER = "%";
     const LOW_BOUND_DEFAULT = -15;
     const HIGH_BOUND_DEFAULT = 15;
@@ -10,11 +10,11 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
     const LEVEL_DEFAULT = "";
 
     const {settingsMap, getSettings, setSettings} = useCacheContext();
-    const [lowBound, setLowBound] = useState();
-    const [highBound, setHighBound] = useState();
-    const [level1, setLevel1] = useState();
-    const [level2, setLevel2] = useState();
-    const [level3, setLevel3] = useState();
+    const [lowBound, setLowBound] = useState(LOW_BOUND_DEFAULT);
+    const [highBound, setHighBound] = useState(HIGH_BOUND_DEFAULT);
+    const [level1, setLevel1] = useState('');
+    const [level2, setLevel2] = useState('');
+    const [level3, setLevel3] = useState('');
 
     useEffect(() => {
         const settings = getSettings(ticker);
@@ -139,100 +139,98 @@ const OrderBookSettings = ({ ticker, isSettings, onSubmit }) => {
 
     return (
         <>
-            {isSettings && (
-                <div className='settings-popup'>
-                    <form className='settings-form'
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            submitSettings();
-                        }}
-                    >
+            <div className='settings-popup'>
+                <form className='settings-form'
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        submitSettings();
+                    }}
+                >
 
-                        <div className='form-container'>
-                            <div className='form-title'>
-                                Диапазон
-                                <span className='range-constraints'>
-                                    (мин: –30
-                                </span>
-                                <span className='range-constraints'>
-                                    макс: 30)
-                                </span>
-                            </div>
-
-                            <div className='range-inputs'>
-                                <input className='settings-input'
-                                    type="text"
-                                    value={lowBound}
-                                    placeholder={RANGE_PLACEHOLDER}
-                                    onFocus={() => setLowBound('')}
-                                    onChange={(e) => handleRangeChange(e, true)}
-                                    onBlur={(e) => handleRangeBlur(true)}
-                                />
-
-                                <hr className='settings-line' />
-
-                                <input className='settings-input'
-                                    type="text"
-                                    value={highBound}
-                                    placeholder={RANGE_PLACEHOLDER}
-                                    onFocus={() => setHighBound('')}
-                                    onChange={(e) => handleRangeChange(e, false)}
-                                    onBlur={(e) => handleRangeBlur(false)}
-                                />
-                            </div>
+                    <div className='form-container'>
+                        <div className='form-title'>
+                            Диапазон
+                            <span className='range-constraints'>
+                                (мин: –30
+                            </span>
+                            <span className='range-constraints'>
+                                макс: 30)
+                            </span>
                         </div>
-                        
-                        <div className='form-container'>
-                            <div className='level-entry'>
-                                <span className="form-title">Ур. 1</span>
 
-                                <hr className='settings-line' />
+                        <div className='range-inputs'>
+                            <input className='settings-input'
+                                type="text"
+                                value={lowBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={() => setLowBound('')}
+                                onChange={(e) => handleRangeChange(e, true)}
+                                onBlur={(e) => handleRangeBlur(true)}
+                            />
 
-                                <input className='settings-input level-input'
-                                    type="text"
-                                    value={level1}
-                                    placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => handleLevelChange(e, 1)}
-                                    onBlur={(e) => handleLevelBlur(e, 1)}
-                                />
-                            </div>
-                            <div className='level-entry'>
-                                <span className="form-title">Ур. 2</span>
+                            <hr className='settings-line' />
 
-                                <hr className='settings-line' />
-                                
-                                <input className='settings-input level-input'
-                                    type="text"
-                                    value={level2}
-                                    placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => handleLevelChange(e, 2)}
-                                    onBlur={(e) => handleLevelBlur(e, 2)}
-                                />
-                            </div>
-                            <div className='level-entry'>
-                                <span className="form-title">Ур. 3</span>
-
-                                <hr className='settings-line' />
-                                
-                                <input className='settings-input level-input'
-                                    type="text"
-                                    value={level3}
-                                    placeholder={LEVEL_PLACEHOLDER}
-                                    onChange={e => handleLevelChange(e, 3)}
-                                    onBlur={(e) => handleLevelBlur(e, 3)}
-                                />
-                            </div>
+                            <input className='settings-input'
+                                type="text"
+                                value={highBound}
+                                placeholder={RANGE_PLACEHOLDER}
+                                onFocus={() => setHighBound('')}
+                                onChange={(e) => handleRangeChange(e, false)}
+                                onBlur={(e) => handleRangeBlur(false)}
+                            />
                         </div>
-                        
-                        <div className='form-container'> 
-                            <div className='submit-buttons'>
-                                <button type="submit" className='settings-submit-input'>Submit</button>
-                                <button className='settings-submit-input' onClick={handleReset}>Reset</button>
-                            </div>
+                    </div>
+
+                    <div className='form-container'>
+                        <div className='level-entry'>
+                            <span className="form-title">Ур. 1</span>
+
+                            <hr className='settings-line' />
+
+                            <input className='settings-input level-input'
+                                type="text"
+                                value={level1}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={e => handleLevelChange(e, 1)}
+                                onBlur={(e) => handleLevelBlur(e, 1)}
+                            />
                         </div>
-                    </form>
-                </div>
-            )}
+                        <div className='level-entry'>
+                            <span className="form-title">Ур. 2</span>
+
+                            <hr className='settings-line' />
+
+                            <input className='settings-input level-input'
+                                type="text"
+                                value={level2}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={e => handleLevelChange(e, 2)}
+                                onBlur={(e) => handleLevelBlur(e, 2)}
+                            />
+                        </div>
+                        <div className='level-entry'>
+                            <span className="form-title">Ур. 3</span>
+
+                            <hr className='settings-line' />
+
+                            <input className='settings-input level-input'
+                                type="text"
+                                value={level3}
+                                placeholder={LEVEL_PLACEHOLDER}
+                                onChange={e => handleLevelChange(e, 3)}
+                                onBlur={(e) => handleLevelBlur(e, 3)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className='form-container'>
+                        <div className='submit-buttons'>
+                            <button type="submit" className='settings-submit-input'>Submit</button>
+                            <button className='settings-submit-input' onClick={handleReset}>Reset</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </>
     )
 }

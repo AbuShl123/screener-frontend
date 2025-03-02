@@ -7,31 +7,23 @@ import { useNavigate } from 'react-router-dom';
 import './Header.css'
 import useCacheContext from '../context/Context';
 
-const Header = ({ onNewDollar, onVoiceToggle, onMenuSelection, onSettings }) => {
+const Header = ({ onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
-    const {isDollar, setIsDollar} = useCacheContext();
-    const [isVoiceOn, setIsVoiceOn] = useState(localStorage.getItem('screener-isVoiceOn') === 'true');
+    const {isDollar, setIsDollar, isVoiceOn, setIsVoiceOn} = useCacheContext();
     const [activeMenu, setActiveMenu] = useState(localStorage.getItem('screener-active-menu') || Menu.tickers);
 
     const handleDollarToggle = () => {
-        let newIsDollar = !isDollar;
-        setIsDollar(newIsDollar);
+        setIsDollar(!isDollar);
     }
 
     const handleVoiceToggle = () => {
-        setIsVoiceOn(prev => !prev);
-        onVoiceToggle(!isVoiceOn);
-        localStorage.setItem('screener-isVoiceOn', !isVoiceOn);
+        setIsVoiceOn(!isVoiceOn);
     }
 
     const handleSignOut = () => {
         localStorage.removeItem('token');
         navigate('/login');
     }
-
-    useEffect(() => {
-        onVoiceToggle(isVoiceOn);
-    }, []);
 
     useEffect(() => {
         const elements = document.querySelectorAll('button[id*="MenuSelection"]');

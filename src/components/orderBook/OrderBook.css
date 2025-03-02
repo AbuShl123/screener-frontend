@@ -102,6 +102,10 @@
     position: relative;
 }
 
+.coin-symbol {
+    color: rgba(255, 255, 255, 0.555);
+}
+
 .quantity-level-0 {
     background-color: inherit;
 }
@@ -124,6 +128,14 @@
     gap: 10px;
 }
 
+.ask-color {
+    color: rgba(200, 70, 70);
+}
+
+.bid-color {
+    color: rgba(60, 145, 60);
+}
+
 .ob__percentage-data {
     display: flex;
     justify-content: flex-end;
@@ -135,10 +147,6 @@
     text-wrap: nowrap;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.676); 
-}
-
-.ob__footer__line {
-    margin: 10px 0 0 0;
 }
 
 /* settings form */

@@ -1,7 +1,6 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './Main.css'
-import useCacheContext from '../context/Context';
 import Header from '../header/Header'
 import Menu from '../menu/Menu'
 import TickersMenu from '../menu/TickersMenu'
@@ -9,33 +8,10 @@ import NotificationsMenu from '../menu/NotificationsMenu'
 import OIMenu from '../menu/OIMenu'
 import OrderBook from '../orderBook/OrderBook'
 import SettingsModal from '../settings/SettingsModal'
-import { setSpeech, speak } from '../../utils/Utils'
 
 const Main = () => {
     const [activeMenu, setActiveMenu] = useState(Menu.tickers);
-    const [isVoiceOn, setIsVoiceOn] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const {isDollar} = useCacheContext();
-    const {notifications, processedNotifications, setProcessedNotifications} = useCacheContext();
-
-    useEffect(() => {
-        const waitForVoicesToLoad = async () => await setSpeech();
-        waitForVoicesToLoad();
-    }, []);
-
-    useEffect(() => {
-        if (!isVoiceOn) {
-            window.speechSynthesis.cancel();
-        }
-    }, [isVoiceOn]);
-
-    useEffect(() => {
-        for (const notification of notifications) {
-            if (processedNotifications.includes(notification[6])) continue;
-            if (isVoiceOn) speak(notification, isDollar);
-            setProcessedNotifications(prev => [notification[6], ...prev]);
-        }
-    }, [notifications]);
 
     const switchSettingsModal = () => {
         setIsModalOpen(prev => !prev);
@@ -47,7 +23,7 @@ const Main = () => {
 
             <div className='main' style={{ filter: isModalOpen ? 'blur(.8px)' : 'none' }}>
                 <div className='content-left'>
-                    <Header onVoiceToggle={setIsVoiceOn} onMenuSelection={setActiveMenu} onSettings={switchSettingsModal} />
+                    <Header onMenuSelection={setActiveMenu} onSettings={switchSettingsModal} />
                     <OrderBook />
                 </div>
                 <div className='content-right'>

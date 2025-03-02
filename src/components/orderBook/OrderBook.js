@@ -5,6 +5,62 @@ import useCacheContext from '../context/Context'
 import useApiContext from '../context/ApiContext'
 import { FUT_SIGN } from '../../utils/Utils'
 
+const OrderBook = () => {
+
+    // set market tickers and settings 
+    const {marketTickers, setMarketTickers, getSettings} = useCacheContext();
+
+    // update event to set max tickers
+    const {maxOrdersUpdate} = useApiContext();
+
+    // holds ticker->severity values. Determines the cup order 
+    const [severityMap, setSeverityMap] = useState(new Map());
+
+    useEffect(() => {
+        if (marketTickers.length === 0) return;
+        let newSeverityMap = new Map();
+        marketTickers.forEach(ticker => newSeverityMap.set(ticker, severityMap.get(ticker) || 0));
+        setSeverityMap(newSeverityMap);
+    }, [marketTickers]);
+
+    useEffect(() => {
+        if (!maxOrdersUpdate) return;
+
+        try {
+            const maxSymbols = maxOrdersUpdate.filter(item => checkDensity(item, getSettings(item.symbol)))
+                .map(item => item.symbol.endsWith(FUT_SIGN) ? item.symbol : item.symbol);
+    
+            if (!areArraysEqual(marketTickers, maxSymbols)) setMarketTickers(maxSymbols);
+
+        } catch (error) {
+            console.error(`couldn't process ${maxOrdersUpdate} becase `, error);
+        }
+        
+    }, [maxOrdersUpdate]);
+
+    const handleNewSeverity = (ticker, severity) => {
+        setSeverityMap(prev => {
+            const newMap = new Map(prev);
+            newMap.set(ticker, severity);
+            return newMap;
+        })
+    }
+
+    return (
+        <div className='order-book-container menu-invisible-scroller'>
+            <div className='order-book'>
+                {getPrioritizedTickers(severityMap).map((symbol) => (
+                    <div className='order-book-cup' key={symbol}>
+                        <OrderBookBox ticker={symbol} onSeverityChange={handleNewSeverity} />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+export default OrderBook
+
 function areArraysEqual(arr1, arr2) {
     if (arr1.length !== arr2.length) return false;
     const sortedArr1 = arr1.slice().sort();
@@ -32,50 +88,3 @@ function checkDensity(trade, settings) {
 function getPrioritizedTickers(severityMap) {
     return [...severityMap].sort((a, b) => b[1] - a[1]).map(e => e[0]);
 }
-
-const OrderBook = () => {
-    const {getSettings} = useCacheContext();
-    const {maxOrdersUpdate} = useApiContext();
-    const [maxTickers, setMaxTickers] = useState([]);
-    const [severityMap, setSeverityMap] = useState(new Map());
-
-    useEffect(() => {
-        if (maxTickers.length === 0) return;
-        let newSeverityMap = new Map();
-        maxTickers.forEach(ticker => newSeverityMap.set(ticker, severityMap.get(ticker) || 0));
-        setSeverityMap(newSeverityMap);
-    }, [maxTickers]);
-
-    useEffect(() => {
-        if (!maxOrdersUpdate) return;
-        
-        const maxSymbols = maxOrdersUpdate
-            .filter(item => checkDensity(item, getSettings(item.symbol)))
-            .map(item => item.symbol.endsWith(FUT_SIGN) ? item.symbol : item.symbol);
-
-        if (!areArraysEqual(maxTickers, maxSymbols)) setMaxTickers(maxSymbols);
-        
-    }, [maxOrdersUpdate]);
-
-    const handleNewSeverity = (ticker, severity) => {
-        setSeverityMap(prev => {
-            const newMap = new Map(prev);
-            newMap.set(ticker, severity);
-            return newMap;
-        })
-    }
-
-    return (
-        <div className='order-book-container menu-scroller'>
-            <div className='order-book'>
-                {getPrioritizedTickers(severityMap).map((symbol) => (
-                    <div className='order-book-cup' key={symbol}>
-                        <OrderBookBox ticker={symbol} onSeverityChange={handleNewSeverity} />
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
-}
-
-export default OrderBook

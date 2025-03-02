@@ -77,7 +77,16 @@ class ApiService {
             const response = await api.get(`${baseUrl}/klines?symbol=${symbol.toUpperCase()}&interval=5m&limit=1`)
             return response.data;
         } catch (error) {
-            console.log("Error whilte fetching klines data: ", error);
+            console.error("Error whilte fetching klines data: ", error);
+        }
+    }
+
+    async fetchOpenInterest(token) {
+        try {
+            const response = await api.get('/openInterest', { headers: { Authorization: `Bearer ${token}` }, });
+            return response.data;
+        } catch (error) {
+            console.error("Erro while fetching open interest data: ", error);
         }
     }
 };

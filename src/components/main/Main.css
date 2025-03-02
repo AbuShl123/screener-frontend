@@ -1,7 +1,7 @@
 
 .main {
     display: grid;
-    grid-template-columns: 1fr 292px;
+    grid-template-columns: 1fr 20%;
 }
 
 .content-left {

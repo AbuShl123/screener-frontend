@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { getShortFormNumber, getDate } from '../../utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
+import apiService from '../../api/ApiService';
 import useCacheContext from '../context/Context';
 import useApiContext from '../context/ApiContext';
 import Menu from './Menu';
+import cache from '../../utils/CacheUtils';
 
 const OIMenu = ({activeMenu}) => {
     const [notifications, setNotifications] = useState([])
@@ -13,6 +15,29 @@ const OIMenu = ({activeMenu}) => {
     const level1 = 100_000;
     const level2 = 250_000;
     const level3 = 1_000_000;
+
+    useEffect(() => {
+        const fetchOpenInterest = async () => {
+            const data = await apiService.fetchOpenInterest(cache.getToken());
+            let notifications = [];
+            try {
+                for (const event of data) {
+                    const newNotification = {
+                        symbol: event.symbol,
+                        percentage: event.deltaPercentage,
+                        coins: event.deltaCoins,
+                        dollars: event.deltaDollars,
+                        timestamp: event.timestamp
+                    };
+                    notifications = [newNotification, ...notifications];
+                }
+                setNotifications(notifications);
+            } catch (error) {
+                console.error(`Error while reading open interest: ${data}`, error);
+            }
+        }
+        fetchOpenInterest();
+    }, [])
 
     useEffect(() => {
         if (!openInterestEvent || !openInterestEvent.symbol) {
