@@ -180,8 +180,8 @@ export const CacheProvider = ({ children }) => {
         setNotifications((prev) => {
             let notifs = [message, ...prev];
     
-            if (notifs.length > 15) {
-                notifs = notifs.slice(0, 15);
+            if (notifs.length > 40) {
+                notifs = notifs.slice(0, 40);
             }
     
             return notifs;

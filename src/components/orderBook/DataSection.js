@@ -45,7 +45,7 @@ const DataSection = ({densities}) => {
                     data.isAsk && displayData(data, index, isDollar)
                 ))}
             </div>
-            <div className='ob__separator'><p></p></div>
+            <div className='ob__separator'></div>
             <div className='data-section'>
                 {densities.map((data, index) => (
                     !data.isAsk && displayData(data, index, isDollar)

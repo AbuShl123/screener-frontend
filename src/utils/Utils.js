@@ -1,8 +1,6 @@
 const FUT_SIGN = '.f';
 
 const DEFAULT_SETTINGS = {
-    lowBound: -15,
-    highBound: 15,
     level1: -1,
     level2: -1,
     level3: -1,
@@ -30,7 +28,10 @@ const roundNumber = (num, dec = 5) => {
 const getShortFormNumber = (number, dec = 1) => {
     let shortNumber = '';
     let value = Math.abs(number);
-    if (value >= 1_000_000) {
+    if (value >= 1_000_000_000) {
+        shortNumber = roundNumber((value / 1_000_000_000), dec) + 'B';
+    }
+    else if (value >= 1_000_000) {
         shortNumber = roundNumber((value / 1_000_000), dec) + 'M';
     } else if (value >= 1_000) {
         shortNumber = roundNumber((value / 1_000).toFixed(1), dec) + 'K';
@@ -110,8 +111,9 @@ const convertSymbolToRussian = (symbolName) => {
     switch(symbolName) {
         case 'btc': return 'биткоин';
         case 'eth': return 'эфир';
-        case 'bnb': return 'байнанс коин';
+        case 'bnb': return 'бинанс коин';
         case 'ltc': return 'лайткоин';
+        case '1000sats': return '1000 сатс'
     }
 
     // if symbol is easily readable, then just return it (ex: 'avax' -> 'авакс')

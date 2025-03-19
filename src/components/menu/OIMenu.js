@@ -12,9 +12,9 @@ const OIMenu = ({activeMenu}) => {
     const [notifications, setNotifications] = useState([])
     const {isDollar} = useCacheContext();
     const {openInterestEvent} = useApiContext();
-    const level1 = 100_000;
-    const level2 = 250_000;
-    const level3 = 1_000_000;
+    const level0 = 100_000;
+    const level1 = 250_000;
+    const level2 = 1_000_000;
 
     useEffect(() => {
         const fetchOpenInterest = async () => {
@@ -75,10 +75,10 @@ const OIMenu = ({activeMenu}) => {
 
     const getOILevelClass = (data) => {
         let dollars = Math.abs(parseFloat(data.dollars));
-        return dollars < level1 ? 'oi-level-1' :
-               dollars < level2 ? 'oi-level-2' :
-               dollars < level3 ? 'oi-level-3' :
-               'oi-level-4';
+        return dollars < level0 ? 'notif-level-0' :
+               dollars < level1 ? 'notif-level-1' :
+               dollars < level2 ? 'notif-level-2' :
+               'notif-level-3';
     }
 
     const getPercentage = (data) => {
@@ -92,10 +92,10 @@ const OIMenu = ({activeMenu}) => {
                 <div className='menu-title'>
                     Открытый Интерес - BitGet
                 </div>
-                <div className='menu-notification-container menu-invisible-scroller'>
+                <div className='menu-notification-container menu-scroller'>
                     {notifications.map((data, index) => (
                         <div key={index} className={'notification-container ' + getOILevelClass(data)}>
-                            <div className='notification-1'>
+                            <div className='notification-1 notification-line'>
                                 <div> {data.symbol?.replace("USDT", "") + "/USDT"} </div>
                                 <div> {getDate(data.timestamp)} </div>
                             </div>

@@ -1,352 +1,186 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 import { getMarketStyle } from "../../utils/TickerActions";
 import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import useCacheContext from "../context/Context";
 
+const LEVEL_PLACEHOLDER = 'auto';
+
+// params: 
+// ticker, String - symbol name, without fut sign
+// onClose, func - action to do when settings closed
+// onDelete, func - action to do when settings deleted
 const TickerSettings = ({
-    ticker, 
-    onNewSettings,
-    onMarketSelection,
+    ticker,
     onClose,
     onDelete
 }) => {
-    const LEVEL_PLACEHOLDER = 'auto';
-    const RANGE_PLACEHOLDER = "%";
-    const LOW_RANGE_LIMIT = -30;
-    const HIGH_RANGE_LIMIT = 30;
 
-    const {tickers} = useCacheContext();
-    const {marketTickers} = useCacheContext();
-    const {settingsMap} = useCacheContext();
-
-    const [settingsSpot, setSettingsSpot] = useState({});
-    const [settingsFut, setSettingsFut] = useState({});
-    const [currentTicker, setCurrentTicker] = useState('');
-    const [isDollar, setIsDollar] = useState(false);
-
-    const [spotLowBound, setSpotLowBound] = useState('');
-    const [spotHighBound, setSpotHighBound] = useState('');
-    const [futLowBound, setFutLowBound] = useState('');
-    const [futHighBound, setFutHighBound] = useState('');
-
-    const [spotLevel1, setSpotLevel1] = useState('');
-    const [spotLevel2, setSpotLevel2] = useState('');
-    const [spotLevel3, setSpotLevel3] = useState('');
-
-    const [futLevel1, setFutLevel1] = useState('');
-    const [futLevel2, setFutLevel2] = useState('');
-    const [futLevel3, setFutLevel3] = useState('');
+    const {settingsMap, getSettings, setSettings} = useCacheContext();
+    const [spotForm, setSpotForm] = useState(DEFAULT_SETTINGS);
+    const [futForm, setFutForm] = useState(DEFAULT_SETTINGS);
+    const [submitted, setSubmitted] = useState({});
     
     useEffect(() => {
-        console.log('ticker settings useEffect called');
+        let settings = getSettings(ticker);
+        setSpotForm(settings)
+        settings = getSettings(ticker + FUT_SIGN);
+        setFutForm(settings)
+    }, [settingsMap, ticker]);
+
+    const submitSettings = (isSpot) => {
+        const form = isSpot ? spotForm : futForm;
+
+        const lev1 = form.level1 === '' ? -1 : form.level1;
+        const lev2 = form.level2 === '' ? -1 : form.level2;
+        const lev3 = form.level3 === '' ? -1 : form.level3;
+
+        const isAscending = form.level3 > form.level2 && form.level2 > form.level1;
+        const isAllNegatice = lev1 < 0 && lev2 < 0 && lev3 < 0;
         
-        const spotSettings = settingsMap.get(ticker);
-        const futSettings = settingsMap.get(ticker + FUT_SIGN);
-
-        setSettingsSpot(spotSettings);
-        setSettingsFut(futSettings);
-        setCurrentTicker(ticker);
-
-        setSpotLowBound(spotSettings?.lowBound !== undefined ? spotSettings.lowBound + '%' : '');
-        setSpotHighBound(spotSettings?.highBound !== undefined ? spotSettings.highBound + '%' : '');
-        
-        setFutLowBound(futSettings?.lowBound !== undefined ? futSettings.lowBound + '%' : '');
-        setFutHighBound(futSettings?.highBound !== undefined ? futSettings.highBound + '%' : '');
-
-        const getLevel = (settings, level) => {
-            if (!settings) return '';
-
-            let val = -1;
-
-            if (level === 1) {
-                val = settings.level1;
-            } else if (level === 2) {
-                val = settings.level2;
-            } else if (level === 3) {
-                val = settings.level3;
+        if (!isAscending && !isAllNegatice) {
+            if (isSpot) {
+                setSubmitted({spotWarning: true});
+                setTimeout(() => setSubmitted({spotWarning: false}), 2_000);
+            } else {
+                setSubmitted({futWarning: true});
+                setTimeout(() => setSubmitted({futWarning: false}), 2_000);
             }
-
-            if (val < 0) {
-                return '';
-            }
-
-            return val;
+            return;
         }
 
-        setSpotLevel1(getLevel(spotSettings, 1));
-        setSpotLevel2(getLevel(spotSettings, 2));
-        setSpotLevel3(getLevel(spotSettings, 3));
+        const marketTicker = ticker + (!isSpot ? FUT_SIGN : '');
+        const settings = getSettings(marketTicker);
 
-        setFutLevel1(getLevel(futSettings, 1));
-        setFutLevel2(getLevel(futSettings, 2));
-        setFutLevel3(getLevel(futSettings, 3));
-        
-        setIsDollar(spotSettings.isDollar || true);
+        if (JSON.stringify(form) === JSON.stringify(settings)) {
+            return;
+        }
+
+        let newSettings = {
+            ...settings,
+            level1: lev1,
+            level2: lev2,
+            level3: lev3,
+            isDollar: form.isDollar,
+            audio: form.audio,
+        };
+        setSettings(marketTicker, newSettings);
+
+        if (isSpot) {
+            setSubmitted({spot: true});
+            setTimeout(() => setSubmitted({spot: false}), 5_000);
+        } else {
+            setSubmitted({fut: true});
+            setTimeout(() => setSubmitted({fut: false}), 5_000);
+        }
+    }
+
+    const handleReset = useCallback((isSpot) => {
+        if (isSpot) {
+            setSpotForm(DEFAULT_SETTINGS);
+            setSettings(ticker, DEFAULT_SETTINGS);
+            setSubmitted({spotReset: true});
+            setTimeout(() => setSubmitted({spotReset: false}), 2_000);
+        } else {
+            setFutForm(DEFAULT_SETTINGS);
+            setSettings(ticker + FUT_SIGN, DEFAULT_SETTINGS);
+            setSubmitted({futReset: true});
+            setTimeout(() => setSubmitted({futReset: false}), 2_000);
+        }
     }, [ticker]);
 
-    const setSettingsProperty = (property, value, isSpot) => {
-        let newSpotSettings = {...settingsSpot};
-        let newFutSettings = {...settingsFut};
+    const handleSpotChange = useCallback((field, value) => {
+        setSpotForm((prevForm) => ({
+            ...prevForm,
+            [field]: value,
+        }));
+    }, []);
 
-        const setSpot = () => {
-            setSettingsSpot(newSpotSettings);
-            onNewSettings(newSpotSettings, currentTicker, true);
+    const handleFutChange = useCallback((field, value) => {
+        setFutForm((prevForm) => ({
+            ...prevForm,
+            [field]: value,
+        }));
+    }, []);
+
+    const handleChange = useCallback((field, value, isSpot) => {
+        if (isSpot) {
+            handleSpotChange(field, value);
+        } else {
+            handleFutChange(field, value);
         }
-        const setFut = () => {
-            setSettingsFut(newFutSettings);
-            onNewSettings(newFutSettings, currentTicker, false);
+    }, []);
+
+    const switchDollar = useCallback((newValue) => {
+        handleChange('isDollar', newValue, true);
+        handleChange('isDollar', newValue, false);
+    }, []);
+
+    const switchAudio = useCallback((newValue) => {
+        handleChange('audio', newValue, true);
+        handleChange('audio', newValue, false);
+    }, []);
+
+    const setLevel = useCallback((level, value, isSpot) => {
+        switch (level) {
+            case 1: handleChange('level1', value, isSpot); break;
+            case 2: handleChange('level2', value, isSpot); break;
+            case 3: handleChange('level3', value, isSpot); break;
         }
+    }, []);
 
-        switch( property ) {
-            case 'audio': {
-                newSpotSettings.audio = value;
-                newFutSettings.audio = value;
-                setSpot();
-                setFut();
-                break;
-            }
-
-            case 'isDollar': {
-                newSpotSettings.isDollar = value;
-                newFutSettings.isDollar = value;
-                setSpot();
-                setFut();
-                break;
-            }
-
-            case 'level1': {
-                if (isSpot) {
-                    newSpotSettings.level1 = value < 0 ? -1 : value;
-                    setSpot();
-                } else {
-                    newFutSettings.level1 = value < 0 ? -1 : value;
-                    setFut();
-                }
-                break;
-            }
-
-            case 'level2': {
-                if (isSpot) {
-                    newSpotSettings.level2 = value < 0 ? -1 : value;
-                    setSpot();
-                } else {
-                    newFutSettings.level2 = value < 0 ? -1 : value;
-                    setFut();
-                }
-                break;
-            }
-
-            case 'level3': {
-                if (isSpot) {
-                    newSpotSettings.level3 = value;
-                    setSpot();
-                } else {
-                    newFutSettings.level3 = value;
-                    setFut();
-                }
-                break;
-            }
-
-            case 'lowBound': {
-                if (isSpot) {
-                    newSpotSettings.lowBound = value;
-                    setSpot();
-                } else {
-                    newFutSettings.lowBound = value;
-                    setFut();
-                }
-                break;
-            }
-
-            case 'highBound': {
-                if (isSpot) {
-                    newSpotSettings.highBound = value;
-                    setSpot();
-                } else {
-                    newFutSettings.highBound = value;
-                    setFut();
-                }
-                break;
-            }
-
-            default: console.warn('invalid property value passed: ', property);
-        }
-    }
-
-    const handleVoiceToggle = () => {
-        setSettingsProperty('audio', !settingsSpot.audio, true);
-    }
-
-    const switchDollar = () => {
-        let newValue = !isDollar;
-        setIsDollar(newValue);
-        setSettingsProperty('isDollar', newValue, true);
-    }
-
-    const getCoinOrDollar = () => {
-        return isDollar ? (
-            <div onClick={() => switchDollar()} className="modal-dollar-coin-icon">
+    const getCoinOrDollar = useCallback((form) => {
+        return form.isDollar ? (
+            <div onClick={() => switchDollar(false)} className="dollar-coin-icon">
                 <FontAwesomeIcon icon={faDollarSign}/>
             </div>
         ) : (
-            <div onClick={() => switchDollar()} className="modal-dollar-coin-icon">
+            <div onClick={() => switchDollar(true)} className="dollar-coin-icon">
                 <FontAwesomeIcon icon={faCoins}/>
             </div>
         )
-    }
+    }, []);
 
-    const resetRangeValue = (isSpot, isLowBound) => {
-        let settings = isSpot ? settingsSpot : settingsFut;
-        if (!settings) return '';
+    const getAudio = useCallback((form) => {
+        return form.audio ? (
+            <span className="material-symbols-outlined medium-icon" onClick={() => switchAudio(false)}>
+                volume_up
+            </span>
+        ) : (
+            <span className="material-symbols-outlined medium-icon" onClick={() => switchAudio(true)}>
+                volume_off
+            </span>
+        )
+    }, []);
 
-        let bound = isLowBound ? settings?.lowBound : settings?.highBound;
-        if (bound === undefined) return '';
+    const handleLevelChange = useCallback((event, level, isSpot) => {
+        let value = event.target.value.replace(/[^0-9 ]/g, '');
+        setLevel(level, value, isSpot);
+    }, []);
 
-        updateRangeStates(bound + '%', isSpot, isLowBound);
-    }
-
-    const handleRangeFocus = (event) => {
-        event.target.value = event.target.value.replace('%', '');
-    }
-
-    const handleRangeBlur = (event, isSpot, isLowBound) => {
-        let val = Number(event.target.value);
-
-        if (isNaN(val)) {
-            resetRangeValue(isSpot, isLowBound);
-            return;
+    const handleLevelBlur = useCallback((event, level, isSpot) => {
+        let inputValue = event.target.value.replace(/[^0-9]/g, '');
+        let value = Number(inputValue);
+        if (isNaN(value) || inputValue === '') {
+            value = -1;
         }
-        
-        if (val < LOW_RANGE_LIMIT || val > HIGH_RANGE_LIMIT) {
-            resetRangeValue(isSpot, isLowBound);
-            return;
-        }
-
-        let settings = isSpot ? settingsSpot : settingsFut;
-        let anotherBound = isLowBound ? settings.highBound : settings.lowBound;
-        if ((isLowBound && val > anotherBound) || (!isLowBound && val < anotherBound)) {
-            resetRangeValue(isSpot, isLowBound);
-            return;
-        }
-
-        updateRangeStates(val + '%', isSpot, isLowBound);
-
-        if (isLowBound) {
-            setSettingsProperty('lowBound', val, isSpot);
-        } else {
-            setSettingsProperty('highBound', val, isSpot);
-        }
-    }
-
-    const handleRangeChange = (event, isSpot, isLowBound) => {
-        let inputValue = event.target.value;
-        inputValue = inputValue.replace(/[^0-9-]/g, '');
-        updateRangeStates(inputValue, isSpot, isLowBound);
-    }
-
-    const updateRangeStates = (value, isSpot, isLowBound) => {
-        if (isSpot) {
-            if (isLowBound) setSpotLowBound(value);
-            else setSpotHighBound(value);
-        } else {
-            if (isLowBound) setFutLowBound(value);
-            else setFutHighBound(value);
-        }
-    }
-
-    const handleLevelChange = (event, isSpot, level) => {
-        let inputValue = event.target.value;
-        inputValue = inputValue.replace(/[^0-9 ]/g, '');
-        switch(level) {
-            case 1: isSpot ? setSpotLevel1(inputValue) : setFutLevel1(inputValue); break;
-            case 2: isSpot ? setSpotLevel2(inputValue) : setFutLevel2(inputValue); break;
-            case 3: isSpot ? setSpotLevel3(inputValue) : setFutLevel3(inputValue); break;
-        }
-    }
-
-    const handleLevelBlur = (e, isSpot, level) => {
-        let rawValue = e.target.value.replace(/[^0-9]/g, '');
-        const value = Number(rawValue === '' ? -1 : rawValue);
-        switch (level) {
-            case 1:
-                setSettingsProperty('level1', value, isSpot);
-                isSpot ? setSpotLevel1(rawValue) : setFutLevel1(rawValue);
-                break;
-            case 2:
-                setSettingsProperty('level2', value, isSpot);
-                isSpot ? setSpotLevel2(rawValue) : setFutLevel2(rawValue);
-                break;
-            case 3: 
-                setSettingsProperty('level3', value, isSpot); 
-                isSpot ? setSpotLevel3(rawValue) : setFutLevel3(rawValue);
-                break;
-        }
-    }
-
-    const handleReset = (isSpot) => {
-        if (isSpot) {
-            setSettingsSpot(DEFAULT_SETTINGS);
-            setSpotHighBound(DEFAULT_SETTINGS.highBound + '%');
-            setSpotLowBound(DEFAULT_SETTINGS.lowBound + '%');
-            setSpotLevel1('');
-            setSpotLevel2('');
-            setSpotLevel3('');
-            onNewSettings(DEFAULT_SETTINGS, currentTicker, true)
-        } else {
-            setSettingsFut(DEFAULT_SETTINGS);
-            setFutHighBound(DEFAULT_SETTINGS.highBound + '%');
-            setFutLowBound(DEFAULT_SETTINGS.lowBound + '%');
-            setFutLevel1('');
-            setFutLevel2('');
-            setFutLevel3('');
-            onNewSettings(DEFAULT_SETTINGS, currentTicker, false)
-        }
-    }
+        setLevel(level, value, isSpot);
+    }, []);
 
     return (
         <>
             <div className="settings-header">
                 <div className="selected-ticker">
                     <div className="pill-container">
-                        <span className="selected-ticker-name">
-                            {currentTicker.toUpperCase().replace("USDT", '') + " / USDT"}
-                        </span>
-
+                        <div className="delete-icon" onClick={() => onDelete(ticker)}>
+                            <FontAwesomeIcon icon={faTrashCan} />
+                        </div>
                         <div className="small-vertical-separator" />
 
-                        <div className="selected-ticker-right-elements">
-                            <div className="swtich-elements">
-                                <div className='audio-toggle' onClick={handleVoiceToggle}>
-                                    {settingsSpot?.audio ? (
-                                        <span className="material-symbols-outlined volume-icon audio-setting">
-                                            volume_up
-                                        </span>
-                                    ) : (
-                                        <span className="material-symbols-outlined volume-icon audio-setting">
-                                            volume_off
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className={'market-checkbox spot-checkbox ' + getMarketStyle(currentTicker, marketTickers, true)}
-                                    onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, true)}
-                                >
-                                    <p>spot</p>
-                                </div>
-                                <div className={'market-checkbox futures-checkbox ' + getMarketStyle(currentTicker, marketTickers, false)}
-                                    onClick={(e) => onMarketSelection(currentTicker, e.currentTarget, false)}
-                                >
-                                    <p>futures</p>
-                                </div>
-                            </div>
-
-                            <div className="small-vertical-separator" />
-                            <div className="delete-icon" onClick={() => onDelete(currentTicker)}>
-                                <FontAwesomeIcon icon={faTrashCan} />
-                            </div>
-                        </div>
+                        <span className="selected-ticker-name">
+                            {ticker.toUpperCase().replace("USDT", '') + " / USDT"}
+                        </span>
                     </div>
                     <div className="close-ticker-settings">
                         <span className="material-symbols-outlined close-icon close-selected-ticker" onClick={onClose}>close</span>
@@ -355,11 +189,16 @@ const TickerSettings = ({
             </div>
 
             <div className="settings-body">
-                <div className="settings-container">
+                <form className="settings-container" id={ticker + 'ModalSpotSettings'}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        submitSettings(true);
+                    }}
+                >
                     <div className="settings-market-type">
                         spot
                         <div className="reset-icon-layer">
-                            <div className="reset-icon-container tooltip-container" onClick={() => handleReset(true)}>
+                            <div className="settings-icon-container tooltip-container" onClick={() => handleReset(true)}>
                                 <span className="material-symbols-outlined">
                                     undo
                                 </span>
@@ -368,87 +207,129 @@ const TickerSettings = ({
                                 </span>
                             </div>
                         </div>
+                        <div className="audio-icon-layer">
+                            <div className="settings-icon-container tooltip-container">
+                                {getAudio(spotForm)}
+                                <span className="tooltip reset-settings-tooltip">
+                                    озвучка и уведомления монеты: вкл/выкл
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="settings-section form-container-2">
-                        <div className="setting-mini-title">
-                            Диапазон
-                            <span className="range-constraints">
-                                (мин: {LOW_RANGE_LIMIT}%
+
+                    <div className="form-container-parent">
+
+                        <div className="settings-section form-container">
+                            <div className='level-entry'>
+                                <div className='small-circle-container'>
+                                    <div className="small-circle green-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={spotForm.level1 < 0 ? '' : spotForm.level1}
+                                    placeholder={'Ур.1 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 1, true)}
+                                    onBlur={(e) => handleLevelBlur(e, 1, true)}
+                                />
+                                {spotForm.level1 !== '' && spotForm.level1 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleSpotChange('level1', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                            <div className='level-entry'>
+                            <div className='small-circle-container'>
+                                    <div className="small-circle yellow-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={spotForm.level2 < 0 ? '' : spotForm.level2}
+                                    placeholder={'Ур.2 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 2, true)}
+                                    onBlur={(e) => handleLevelBlur(e, 2, true)}
+                                />
+                                {spotForm.level2 !== '' && spotForm.level2 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleSpotChange('level2', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                            <div className='level-entry'>
+                            <div className='small-circle-container'>
+                                    <div className="small-circle red-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={spotForm.level3 < 0 ? '' : spotForm.level3}
+                                    placeholder={'Ур.3 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 3, true)}
+                                    onBlur={(e) => handleLevelBlur(e, 3, true)}
+                                />
+                                {spotForm.level3 !== '' && spotForm.level3 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleSpotChange('level3', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                        </div>
+
+                        <div className={'hint-container' + (submitted.spotWarning ? ' warning' : '')}>
+                            <span className="material-symbols-outlined small-icon">
+                                error
                             </span>
-                            <span className="range-constraints">
-                                макс: {HIGH_RANGE_LIMIT}%)
+                            <span>
+                                Убедитесь, что значения идут в порядке возрастания.
+                                Если оставить хоть одно поле пустым, то цвета
+                                будут определяться автоматически.
                             </span>
                         </div>
 
-                        <div className='modal-range-inputs settings-element'>
-                            <input className='modal-input range-input'
-                                type="text"
-                                value={spotLowBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={handleRangeFocus}
-                                onChange={(e) => handleRangeChange(e, true, true)}
-                                onBlur={(e) => handleRangeBlur(e, true, true)}
-                            />
-
-                            <hr className='settings-line' />
-
-                            <input className='modal-input range-input'
-                                type="text"
-                                value={spotHighBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={handleRangeFocus}
-                                onChange={(e) => handleRangeChange(e, true, false)}
-                                onBlur={(e) => handleRangeBlur(e, true, false)}
-                            />
+                        <div className='settings-section form-container'>
+                            <div className='submit-buttons'>
+                                <button 
+                                    type="submit" 
+                                    className={'settings-submit-button' + (submitted.spot ? ' submitted-successfully' : '')}
+                                    disabled={submitted.spot}
+                                >
+                                    Готово
+                                    {submitted.spot && 
+                                        <span className="material-symbols-outlined small-icon success-icon">
+                                            check_circle
+                                        </span>
+                                    }
+                                </button>
+                                <button 
+                                    className={'settings-submit-button' + (submitted.spotReset ? ' submitted-successfully' : '')}
+                                    disabled={submitted.spotReset}
+                                    onClick={() => handleReset(true)}
+                                >
+                                    Сбросить
+                                    {submitted.spotReset && 
+                                        <span className="material-symbols-outlined small-icon success-icon">
+                                            check_circle
+                                        </span>
+                                    }
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div className="settings-section section-after form-container-2">
-                        <div className="setting-mini-title">
-                            Отоброжение плотностей
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: 'green' }} />
-                            <span className="form-title">Ур. 1</span>
-                            <input className="modal-input level-input"
-                                value={spotLevel1}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, true, 1)}
-                                onBlur={(e) => handleLevelBlur(e, true, 1)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: '#bdbd07' }} />
-                            <span className="form-title">Ур. 2</span>
-                            <input className="modal-input level-input"
-                                value={spotLevel2}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, true, 2)}
-                                onBlur={(e) => handleLevelBlur(e, true, 2)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: '#df3838' }} />
-                            <span className="form-title">Ур. 3</span>
-                            <input className="modal-input level-input"
-                                value={spotLevel3}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, true, 3)}
-                                onBlur={(e) => handleLevelBlur(e, true, 3)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                    </div>
-                </div>
+                </form>
 
                 <div className="vertical-line" />
 
-                <div className="settings-container">
+                <form className="settings-container" id={ticker + 'ModalFutSettings'}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        submitSettings(false);
+                    }}
+                >
                     <div className="settings-market-type">
                         futures
                         <div className="reset-icon-layer">
-                            <div className="reset-icon-container tooltip-container" onClick={() => handleReset(false)}>
+                            <div className="settings-icon-container tooltip-container" onClick={() => handleReset(false)}>
                                 <span className="material-symbols-outlined">
                                     undo
                                 </span>
@@ -457,79 +338,115 @@ const TickerSettings = ({
                                 </span>
                             </div>
                         </div>
+                        <div className="audio-icon-layer">
+                            <div className="settings-icon-container tooltip-container">
+                                {getAudio(spotForm)}
+                                <span className="tooltip reset-settings-tooltip">
+                                    озвучка и уведомления монеты: вкл/выкл
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="settings-section form-container-2">
-                        <div className="setting-mini-title">
-                            Диапазон
-                            <span className="range-constraints">
-                                (мин: {LOW_RANGE_LIMIT}%
+
+                    <div className="form-container-parent">
+                        <div className="settings-section form-container">
+                            <div className='level-entry'>
+                                <div className='small-circle-container'>
+                                    <div className="small-circle green-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={futForm.level1 < 0 ? '' : futForm.level1}
+                                    placeholder={'Ур.1 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 1, false)}
+                                    onBlur={(e) => handleLevelBlur(e, 1, false)}
+                                />
+                                {futForm.level1 !== '' && futForm.level1 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleFutChange('level1', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                            <div className='level-entry'>
+                            <div className='small-circle-container'>
+                                    <div className="small-circle yellow-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={futForm.level2 < 0 ? '' : futForm.level2}
+                                    placeholder={'Ур.2 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 2, false)}
+                                    onBlur={(e) => handleLevelBlur(e, 2, false)}
+                                />
+                                {futForm.level2 !== '' && futForm.level2 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleFutChange('level2', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                            <div className='level-entry'>
+                            <div className='small-circle-container'>
+                                    <div className="small-circle red-circle"/>
+                                </div>
+                                <input className='settings-input'
+                                    type="text"
+                                    value={futForm.level3 < 0 ? '' : futForm.level3}
+                                    placeholder={'Ур.3 - автоматически'}
+                                    onChange={e => handleLevelChange(e, 3, false)}
+                                    onBlur={(e) => handleLevelBlur(e, 3, false)}
+                                />
+                                {futForm.level3 !== '' && futForm.level3 >= 0 &&
+                                    <span className="material-symbols-outlined clear-input" onClick={() => handleFutChange('level3', '')}>
+                                        close
+                                    </span>
+                                }
+                                {getCoinOrDollar(spotForm)}
+                            </div>
+                        </div>
+
+                        <div className={'hint-container' + (submitted.futWarning ? ' warning' : '')}>
+                            <span className="material-symbols-outlined small-icon">
+                                error
                             </span>
-                            <span className="range-constraints">
-                                макс: {HIGH_RANGE_LIMIT}%)
+                            <span>
+                                Убедитесь, что значения идут в порядке возрастания.
+                                Если оставить хоть одно поле пустым, то цвета
+                                будут определяться автоматически.
                             </span>
                         </div>
 
-                        <div className='modal-range-inputs settings-element'>
-                            <input className='modal-input range-input'
-                                type="text"
-                                value={futLowBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={handleRangeFocus}
-                                onChange={(e) => handleRangeChange(e, false, true)}
-                                onBlur={(e) => handleRangeBlur(e, false, true)}
-                            />
-
-                            <hr className='settings-line' />
-
-                            <input className='modal-input range-input'
-                                type="text"
-                                value={futHighBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={handleRangeFocus}
-                                onChange={(e) => handleRangeChange(e, false, false)}
-                                onBlur={(e) => handleRangeBlur(e, false, false)}
-                            />
+                        <div className='settings-section form-container'>
+                            <div className='submit-buttons'>
+                                <button
+                                    type="submit"
+                                    className={'settings-submit-button' + (submitted.fut ? ' submitted-successfully' : '')}
+                                    disabled={submitted.fut}
+                                >
+                                    Готово
+                                    {submitted.fut &&
+                                        <span className="material-symbols-outlined small-icon success-icon">
+                                            check_circle
+                                        </span>
+                                    }
+                                </button>
+                                <button
+                                    className={'settings-submit-button' + (submitted.futReset ? ' submitted-successfully' : '')}
+                                    disabled={submitted.futReset}
+                                    onClick={() => handleReset(false)}
+                                >
+                                    Сбросить
+                                    {submitted.futReset &&
+                                        <span className="material-symbols-outlined small-icon success-icon">
+                                            check_circle
+                                        </span>
+                                    }
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div className="settings-section section-after form-container-2">
-                        <div className="setting-mini-title">
-                            Отоброжение плотностей
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: 'green' }} />
-                            <span className="form-title">Ур. 1</span>
-                            <input className="modal-input level-input"
-                                value={futLevel1}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, false, 1)}
-                                onBlur={(e) => handleLevelBlur(e, false, 1)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: '#bdbd07' }} />
-                            <span className="form-title">Ур. 2</span>
-                            <input className="modal-input level-input"
-                                value={futLevel2}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, false, 2)}
-                                onBlur={(e) => handleLevelBlur(e, false, 2)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                        <div className="level-entry">
-                            <div className="small-circle" style={{ backgroundColor: '#df3838' }} />
-                            <span className="form-title">Ур. 3</span>
-                            <input className="modal-input level-input"
-                                value={futLevel3}
-                                placeholder={LEVEL_PLACEHOLDER}
-                                onChange={(e) => handleLevelChange(e, false, 3)}
-                                onBlur={(e) => handleLevelBlur(e, false, 3)}
-                            />
-                            {getCoinOrDollar()}
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
         </>
     )

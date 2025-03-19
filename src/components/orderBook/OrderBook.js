@@ -17,7 +17,6 @@ const OrderBook = () => {
     const [severityMap, setSeverityMap] = useState(new Map());
 
     useEffect(() => {
-        if (marketTickers.length === 0) return;
         let newSeverityMap = new Map();
         marketTickers.forEach(ticker => newSeverityMap.set(ticker, severityMap.get(ticker) || 0));
         setSeverityMap(newSeverityMap);
@@ -70,7 +69,7 @@ function areArraysEqual(arr1, arr2) {
 
 function checkDensity(trade, settings) {
     let level3 = settings.level3;
-    if (level3 === -1) return trade.density === 3;
+    if (level3 === -1) return trade.density >= 3;
 
     let isDollar = settings.isDollar;
     let maxBidQty = trade.maxBidQty;

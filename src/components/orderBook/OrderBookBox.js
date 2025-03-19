@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FUT_SIGN } from '../../utils/Utils.js'
-import { processDensities, getVolume } from './OBUtils.js'
+import { processDensities, balanceFigures, getVolume } from './OBUtils.js'
 import apiService from '../../api/ApiService.js'
 import OrderBookSettings from './OrderBookSettings.js'
 import useCacheContext from '../context/Context.js'
@@ -27,7 +27,7 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
     const [severity, setSeverity] = useState(0);
 
     // stores the price->level pairs
-    const [levelsMap, setLevelsMap] = useState(new Map());
+    const [pastDensities, setPastDensities] = useState(new Set());
 
     // function to get settings for a ticker and isDollar
     const {getSettings, isDollar} = useCacheContext();
@@ -63,12 +63,15 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
             if (!orderBookEvent) return;
             const { symbol, bidsData, asksData } = orderBookEvent;
             if (symbol !== ticker) return;
+            if (symbol === '1000satsusdt.f') {
+                console.log('here');
+            }
 
             const settings = getSettings(ticker);
             densities = processDensities(asksData, bidsData, settings, isDollar);
             checkNotifications(densities);
             iterateLevels(densities);
-            setDensities(densities);
+            setDensities(balanceFigures(densities));
         } catch (error) {
             console.error(`couldn't process orderbook event ${densities}`, error);
         }
@@ -77,70 +80,68 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
     // checks whether there are any notifications
     const checkNotifications = (trades) => {
         if (!readyToNotify) return;
-        if (levelsMap.size === 0) return;
+        if (pastDensities.size === 0) return;
         const settings = getSettings(ticker);
         for (const trade of trades) {
-            let level = trade.level;
-            let oldLevel = levelsMap.get(trade.price);
-
-            if (oldLevel !== level && level === 3 && settings.audio) {
-                addNotification({
-                    ticker,
-                    ...trade,
-                });
+            let isRecent = Date.now() - trade.life <= 30_000;
+            let hashcode = trade.price + ' ' + trade.distance;
+            if (isRecent && !pastDensities.has(hashcode) && trade.level >= 1 && settings.audio) {
+                addNotification({ticker, ...trade});
             }
         }
     }
 
-    // sets the levelsMap and determines the severity
+    // sets the levelsSet and determines the severity
     const iterateLevels = (trades) => {
         let sev = 0;
-        const levelsMap = new Map();
+        let newDensities = new Set();
         for (const trade of trades) {
-            let price = trade.price;
-            let level = trade.level
-            if (level === 3) sev++;
-            levelsMap.set(price, level);
+            if (trade.level === 3) sev++;
+            if (trade.level === 4) sev += 10;
+            let hashcode = trade.price + ' ' + trade.distance;
+            newDensities.add(hashcode);
         }
-
-        setLevelsMap(levelsMap);
+        setPastDensities(newDensities);
         if (severity === sev) return;
         onSeverityChange(ticker, sev);
         setSeverity(sev);
     }
 
+    const handleSettingsToggle = () => {
+        setIsSettings(prev => !prev);
+    };
+
     return (
         <>
-            <div className='ob__container' id={`obContainer_${ticker}`}>
+            <div className='ob__header'>
+                <div> {isSpot ? "spot" : "perp"} </div>
+                <span className={'ob__symbol-name ' + (isSpot ? 'ob__spot-symbol' : 'ob__perp-symbol')}>
+                    <div>{ticker.replace(FUT_SIGN, "").toUpperCase()}</div>
+                </span>
 
-                <div className='ob__header'>
-                    <div> {isSpot ? "spot" : "perp"} </div>
-                    <span className={'ob__symbol-name ' + (isSpot ? 'ob__spot-symbol' : 'ob__perp-symbol')}>
-                        <div>{ticker.replace(FUT_SIGN, "").toUpperCase()}</div>
+                <div className='ob__icons' onClick={() => handleSettingsToggle()}>
+                    <span className="material-symbols-outlined settings-icon">
+                        Settings
                     </span>
-
-                    <div className='ob__icons'>
-                        <span className="material-symbols-outlined settings-icon" onClick={() => setIsSettings(prev => !prev)}>
-                            Settings
-                        </span>
-                    </div>
                 </div>
+            </div>
 
-                <div className='ob__body'>
+            <div className='ob__content'>
+                {isSettings && <OrderBookSettings ticker={ticker} onSubmit={() => setIsSettings(false)}/>}
+                <div>
                     <hr className='ob__line'></hr>
                     <div className='ob__data-container'>
-                        <DataSection densities={densities}/>
+                        <DataSection densities={densities} />
                     </div>
                 </div>
 
-                <hr style={{margin: '0'}}></hr>
+                <hr className='ob__line_footer'></hr>
                 <div className='ob__footer'>
-                    Объем за 5 мин: 
-                    <div style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    Объем за 5 мин:
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <b>{getVolume(isDollar, volumeData)}</b>
                     </div>
                 </div>
-
             </div>
         </>
     )

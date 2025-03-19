@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import './SettingsModal.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWrench, faStar, faSearch } from '@fortawesome/free-solid-svg-icons';
-import { FUT_SIGN, DEFAULT_SETTINGS } from "../../utils/Utils";
-import { getMarketStyle, switchMarketStatus } from "../../utils/TickerActions";
+import { faWrench, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import useCacheContext from "../context/Context";
 import TickerSettings from "./TickerSettings";
 
-const SettingsModal = ({onClose}) => {
+const SettingsModal = ({onClose, desiredTicker=''}) => {
     const {tickers} = useCacheContext();
-    const {selectedTickers, setSelectedTickers} = useCacheContext();
-    const {marketTickers, setMarketTickers} = useCacheContext();
     const {settingsMap, setSettingsMap} = useCacheContext();
     const [isOpen, setIsOpen] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-    const [currentTicker, setCurrentTicker] = useState('');
+    const [currentTicker, setCurrentTicker] = useState(desiredTicker);
+    const [modifiedTickers, setModifiedTickers] = useState([]);
     
     useEffect(() => {
         setIsOpen(true);
@@ -24,91 +22,58 @@ const SettingsModal = ({onClose}) => {
         child.style.marginTop = marginVal+"px";
     }, []);
 
-    function updateSelectedTickers(value) {
-        setSelectedTickers(value);
-    }
-    
-    function updateMarketTickers(value) {
-        setMarketTickers(value);
-    }
-    
-    function updateSettings(value) {
-        setSettingsMap(value);
-    }
-
-    const handleMarketSelection = (ticker, element, isSpot) => {
-        if (!element || element.classList.contains('disabled')) {
-            return;
+    useEffect(() => {
+        if (desiredTicker !== '') {
+            let newSettingsMap = new Map(settingsMap);
+            if (!newSettingsMap.has(desiredTicker)) {
+                newSettingsMap.set(desiredTicker, DEFAULT_SETTINGS);
+            } 
+            if (!newSettingsMap.has(desiredTicker + FUT_SIGN)) {
+                newSettingsMap.set(desiredTicker + FUT_SIGN, DEFAULT_SETTINGS);
+            }
+            setSettingsMap(newSettingsMap)
         }
+    }, [desiredTicker]);
 
-        let hasActivated = switchMarketStatus(element, isSpot);
-        let marketSymbol = ticker + ( isSpot ? '' : FUT_SIGN);
-        if (hasActivated) {
-            let newValue = [...marketTickers, marketSymbol];
-            updateMarketTickers(newValue);
-        } else {
-            let newValue = marketTickers.filter((t) => t !== marketSymbol);
-            updateMarketTickers(newValue);
-        }
-    }
+    useEffect(() => {
+        let tickers = [...settingsMap.keys()];
+        let uniqueTickers = tickers.map(t => t.replace(FUT_SIGN, ""));
+        let setOfTickers = new Set(uniqueTickers);
+        setModifiedTickers(Array.from(setOfTickers));
+    }, [settingsMap]);
 
-    const handleSearchSuggesstions = (event) => {
+    const handleSearchSuggesstions = useCallback((event) => {
         let query = event.target.value;
         let allTickers = Array.from(tickers.keys());
-        const filteredSuggestions = allTickers.filter(ticker =>
-            ticker.includes(query.toLowerCase())
-            && !selectedTickers.includes(ticker)
-        ).slice(0, 5);
+        const filteredSuggestions = allTickers
+            .filter(ticker => ticker.includes(query.toLowerCase()))
+            .slice(0, 5);
         setSuggestions(Array.from(filteredSuggestions));
-    }
+    }, []);
 
-    const handleNewSetting = (newSetting, ticker, isSpot) => {
-        let marketTicker = ticker + (isSpot ? '' : FUT_SIGN);
-        console.log(`${marketTicker} - new settings here: `, newSetting);
-
-        let newSettingsMap = new Map(settingsMap);
-        newSettingsMap.set(marketTicker, newSetting);
-        updateSettings(newSettingsMap);
-    }
-
-    const handleCloseSelectedTicker = () => {
+    const handleCloseSelectedTicker = useCallback(() => {
         let element = document.getElementById(`favorite-${currentTicker}`);
         if (element?.classList.contains('selected')) {
             element.classList.remove('selected');
         }
         setCurrentTicker('');
-    }
+    }, []);
 
     const handleDelete = (ticker) => {
-        let newSelectedTickers = selectedTickers.filter(t => t !== ticker);
-        let newMarketTickers = marketTickers.filter(t => !t.includes(ticker));
-        let newSettings = new Map(settingsMap);
-        newSettings.delete(ticker);
-        newSettings.delete(ticker + FUT_SIGN);
-
-        updateSelectedTickers(newSelectedTickers);
-        updateMarketTickers(newMarketTickers);
+        let newSettingsMap = new Map(settingsMap);
+        newSettingsMap.delete(ticker);
+        newSettingsMap.delete(ticker + FUT_SIGN);
+        setSettingsMap(newSettingsMap);
         if (currentTicker === ticker) handleCloseSelectedTicker();
-        updateSettings(newSettings);
     }
 
     const handleNewTicker = (ticker) => {
-        if (!tickers.keys().includes(ticker)) return;
-        let newSelectedTickers = [ticker, ...selectedTickers];
-        updateSelectedTickers(newSelectedTickers);
-
-        let newMarketTickers = [...marketTickers];
-        let newSettingsMap = new Map(settingsMap);
-
-        newSettingsMap.set(ticker, DEFAULT_SETTINGS);
-        newMarketTickers = [ticker, ...newMarketTickers];
-        newSettingsMap.set(ticker + FUT_SIGN, DEFAULT_SETTINGS);
-        newMarketTickers = [ticker + FUT_SIGN, ...newMarketTickers];
-
-        updateMarketTickers(newMarketTickers);
-        updateSettings(newSettingsMap);
+        if (![...tickers.keys()].includes(ticker)) return;
+        if (!modifiedTickers.includes(ticker)) {
+            setModifiedTickers(prev => [ticker, ...prev]);
+        };
         setCurrentTicker(ticker);
-    }
+    };
 
     return (
         <>
@@ -130,7 +95,7 @@ const SettingsModal = ({onClose}) => {
                                     placeholder='добавить тикер'
                                     onClick={handleSearchSuggesstions}
                                     onChange={handleSearchSuggesstions}
-                                    onBlur={() => setTimeout(() => setSuggestions([]), 100)}
+                                    onBlur={() => setTimeout(() => setSuggestions([]), 200)}
                                     autoComplete="off"
                                     id='settingsSearchInput'
                                 />
@@ -154,7 +119,12 @@ const SettingsModal = ({onClose}) => {
                                 <div id="searchItems" className="search-items-container">
                                     <hr></hr>
                                     {suggestions.map((value) => (
-                                        <div key={value} className="search-item" onClick={(e) => {e.stopPropagation(); handleNewTicker(value);}}>
+                                        <div key={value} className="search-item" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleNewTicker(value)
+                                            }}
+                                        >
                                             <span className="material-symbols-outlined"> add </span>
                                             <p> {value} </p>
                                         </div>
@@ -166,8 +136,6 @@ const SettingsModal = ({onClose}) => {
                             {currentTicker !== undefined && currentTicker !== '' ? (
                                     <TickerSettings
                                         ticker={currentTicker}
-                                        onNewSettings={handleNewSetting}
-                                        onMarketSelection={handleMarketSelection}
                                         onClose={handleCloseSelectedTicker}
                                         onDelete={handleDelete}
                                     />
@@ -196,48 +164,22 @@ const SettingsModal = ({onClose}) => {
                     </div>
                     <div className="modal-right-content">
                         <div className="modal-content-title">
-                            <span style={{ padding: '0 5px 0 0' }}> Избранные Тикеры </span>
-                            <FontAwesomeIcon icon={faStar} style={{ color: "yellow" }}/>
+                            <span style={{ padding: '0 5px 0 0' }}> Настроенные Тикеры </span>
+                            <FontAwesomeIcon icon={faWrench} />
                         </div>
                         <div className="modal-content-body menu-scroller">
-                            {selectedTickers?.length > 0 && selectedTickers.map((ticker, index) => (
+                            {modifiedTickers.map((ticker, index) => (
                                 <div 
                                     key={ticker} 
-                                    className={'connected-ticker-container chosen-one ' + (currentTicker === ticker ? 'selected' : '')} 
+                                    className={'modified-ticker-container' + (currentTicker === ticker ? ' selected' : '')} 
                                     id={`favorite-${ticker}`} 
                                     onClick={() => {
                                         if (currentTicker === '' || currentTicker !== ticker) setCurrentTicker(ticker);
                                         else setCurrentTicker('');
                                     }}
                                 >
-                                    <p> {ticker.toUpperCase()} </p>
+                                    <p className="modified-ticker-name"> {ticker.toUpperCase().replace("USDT", '') + " / USDT"} </p>
                                     <div className='ticker-action-buttons'>
-                                        <div
-                                            className={
-                                                'market-checkbox spot-checkbox ' +
-                                                getMarketStyle(ticker, marketTickers, true)
-                                            }
-                                            onClick={(e) => {
-                                                handleMarketSelection(ticker, e.currentTarget, true)
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <p>spot</p>
-                                        </div>
-
-                                        <div
-                                            className={
-                                                'market-checkbox futures-checkbox ' +
-                                                getMarketStyle(ticker, marketTickers, false)
-                                            }
-                                            onClick={(e) => {
-                                                handleMarketSelection(ticker, e.currentTarget, false)
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <p>futures</p>
-                                        </div>
-
                                         <span className="material-symbols-outlined close-icon" 
                                             onClick={(e) => {
                                                 handleDelete(ticker)

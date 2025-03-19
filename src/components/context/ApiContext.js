@@ -19,7 +19,7 @@ export const ApiProvider = ({children}) => {
         const handleMaxOrdersUpdates = (event) => setMaxOrdersUpdate(event);
         const fetchMaxOrders = async () => apiService.fetchMaxOrders(handleMaxOrdersUpdates, token);
         fetchMaxOrders();
-        const interval = setInterval(fetchMaxOrders, 30_000);
+        const interval = setInterval(fetchMaxOrders, 10_000);
 
         return () => {
             apiService.closeOBConnection();

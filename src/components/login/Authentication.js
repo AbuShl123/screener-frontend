@@ -3,21 +3,13 @@ import { jwtDecode } from 'jwt-decode';
 import cache from '../../utils/CacheUtils.js'
 
 const signUpUser = async (firstname, lastname, email, password) => {
-    try {
-        const response = await axios.post('/auth/register', {
-            firstname,
-            lastname,
-            email,
-            password,
-        });
-
-        let token = response.data.token;
-        cache.setToken(token);
-        window.location.href = '/main';
-
-    } catch (error) {
-        console.log('Sign-up failed: ', error);
-    }
+    const response = await axios.post('/auth/register', {
+        firstname,
+        lastname,
+        email,
+        password,
+    });
+    return response;
 }
 
 const logInUser = async (email, password) => {
@@ -25,9 +17,7 @@ const logInUser = async (email, password) => {
         email,
         password,
     });
-
-    let token = response.data.token;
-    cache.setToken(token);
+    return response;
 };
 
 const checkTokenExpiration = () => {

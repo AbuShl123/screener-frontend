@@ -3,29 +3,22 @@
 
 .order-book-container {
     flex: 1 1 auto;
-    padding: 40px 0 50px 40px;
+    padding: 20px 0 20px 5px;
     overflow-y: auto;
 }
 
 .order-book {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 13px;
 }
 
 /* order book box */
 
-.ob__container {
-    display: inline-block;
-    min-width: 300px;
-    min-height: 360px;
-
-    border: 1px solid rgb(99, 99, 95);
+.order-book-cup {
     border-radius: 5px;
-}
-
-.ob__body {
-    position: relative;
+    background-color: rgba(104, 98, 120, 0.1);
+    font-size: 14px;
 }
 
 .ob__header {
@@ -33,6 +26,10 @@
     justify-content: space-between;
     padding: 5px 15px 0 15px;
     align-items: center;
+}
+
+.ob__content {
+    position: relative;
 }
 
 .ob__icons {
@@ -57,8 +54,7 @@
 }
 
 .settings-icon:hover {
-    transform: rotate(45deg) scale(1.1);
-    font-weight: 600;
+    transform: rotate(45deg);
 }
 
 .delete-cup-icon {
@@ -80,17 +76,20 @@
 }
 
 .ob__line {
-    margin: 0 5px 20px 5px;
+    margin: 0 5px 10px 5px;
     color: white;
 }
 
 .ob__data-container {
-    padding: 0 10px;
-    min-height: 280px;
+    padding: 3px 10px;
 }
 
 .data-section {
-    min-height: 130px;
+    min-height: 115px;
+}
+
+.ob__separator {
+    height: 5px;
 }
 
 .ob__each-data {
@@ -122,6 +121,10 @@
     background-color: rgb(252, 83, 83, 0.3);
 }
 
+.quantity-level-4 {
+    background-color: rgba(149, 0, 255, 0.648);
+}
+
 .ob__price-data-box {
     display: flex;
     justify-content: end;
@@ -141,11 +144,16 @@
     justify-content: flex-end;
 }
 
+.ob__line_footer {
+    margin: 10px 5px 0 5px;
+    color: white;
+}
+
 .ob__footer {
     display: flex;
     padding: 10px 0 10px 10px;
     text-wrap: nowrap;
-    font-size: 14px;
+    font-size: 13px;
     color: rgba(255, 255, 255, 0.676); 
 }
 
@@ -156,134 +164,174 @@
     top: 0;
     left: 0;
     z-index: 10;
-
-    background: rgba(24, 26, 32, 0.7);
-
-    border-top: 1px solid rgb(99, 99, 95);
+    background-color: #212129;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     width: 100%;
     height: 100%;
-    /* animation: expandSquare .2s ease forwards; */
-}
-
-.settings-collapsed {
-    animation: collapseSquare .2s ease forwards;
-}
-
-@keyframes expandSquare {
-    0% {
-        height: 0;
-    }
-    100% {
-        height: 100%;
-    }
-}
-
-@keyframes collapseSquare {
-    0% {
-        width: 100px;
-        height: 100px;
-    }
-    100% {
-        width: 0;
-        height: 0;
-    }
-}
-
-.settings-header-title {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0 10px 0;
 }
 
 .settings-form {
     width: 100%;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 5px 0 15px 0;
 }
 
-.form-container {
-    padding: 20px 20px 0 20px;
+.settings-container-popup {
+    padding: 0 15px;
+}
+
+.form-container-parent {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    gap: 15px;
-}
-
-.form-title {
-    white-space: nowrap;
-}
-
-.settings-input {
-    background-color: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 5px;
-    width: 100%;
-    min-height: 27px;
-    text-align: center;
-    color: rgb(255, 255, 255);
-    font-size: 15px;
-}
-
-.settings-input:hover {
-    border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.settings-input:focus {
-    border: .1px solid rgba(255, 255, 255, 0.8);
-}
-
-.range-inputs {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     gap: 20px;
-    height: 25px;
 }
 
-.range-constraints {
-    margin-left: 15px;
-    color: rgb(117, 117, 117);
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.level-input {
-    height: 20px;
+.hint-container {
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.307);
+    border: 1px solid  rgba(0, 0, 0, 0.307);
+    padding: 10px;
+    margin: 0 15px;
+    font-size: 12px;
+    color: grey;
+}
+
+.hint-container:not(.warning) {
+    transition: 1s linear;
+}
+
+.hint-container.warning {
+    border: 1px solid rgb(202, 97, 97);
+    color: rgb(202, 97, 97);
+}
+
+.small-icon {
+    font-size: 15px;
+    vertical-align: middle;
+    margin-right: 3px;
+    font-variation-settings: 
+      'FILL' 1,
+      'wght' 1000,
+      'GRAD' 0,
+      'opsz' 74
 }
 
 .level-entry {
+    --level-entry-color: #38383F;
+    --level-entry-hover-color: #4b4b55;
+
+    background-color: var(--level-entry-color);
+    color: white;
     display: flex;
     align-items: center;
-    gap: 15px;
+    border-radius: 5px;
 }
 
-.settings-line {
-    min-width: 7px;
-    min-height: 2px;
-    background-color: white;
+.level-entry:hover {
+    background-color: var(--level-entry-hover-color);
+}
+
+.settings-input {
+    background-color: var(--level-entry-color);
+    border: none;
+    color: white;
+    width: 100%;
+    font-size: 13px;
+    padding: 5px 0;
+}
+
+.settings-input:hover {
+    background-color: var(--level-entry-hover-color);
+}
+
+.level-entry:hover .settings-input {
+    background-color: var(--level-entry-hover-color) !important;
+}
+
+.settings-input:focus {
+    border: none;
+}
+
+.clear-input {
+    font-size: 18px;
+    cursor: pointer;
 }
 
 .submit-buttons {
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
 
-.settings-submit-input {
+.settings-submit-button {
     margin: 0;
-    border-radius: 5px;
-    padding: 10px;
-    border: 1px solid rgb(255, 204, 0);
-    background-color: inherit;
-    min-width: 100px;
-    min-height: 30px;
     padding: 0;
+    border-radius: 5px;
+    border: 1px solid #38383F;
+    background-color: #38383F;
     color: white;
+    min-width: 120px;
+    height: 35px;
+    font-size: 12px;
+    position: relative;
 }
 
-.settings-submit-input:hover {
-    background-color: rgb(255, 204, 0);
-    color: rgb(0, 0, 0);
+.settings-submit-button:hover {
+    background-color: #4F4F54;  
     transition: .2s;
-    transform: .1s;
 }
 
+.screener-submit-button {
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    border: 1px solid white;
+    background-color: white;
+    color: black;
+    font-size: .9rem;
+    min-width: 120px;
+    height: 35px;
+    position: relative;
+}
+
+.screener-submit-button:hover {
+    background-color: inherit;
+    color: white;
+    /* transition: .2s; */
+}
+
+.submitted-successfully {
+    --success-color: rgb(140, 235, 140);
+    border: 1px solid var(--success-color);
+    color: var(--success-color)
+}
+
+.submitted-successfully:hover {
+    --success-color: rgb(140, 235, 140);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+    background-color: #38383F;
+}
+
+.success-icon {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    height: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    margin: 0;
+}

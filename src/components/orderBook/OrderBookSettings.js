@@ -1,232 +1,175 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import useCacheContext from '../context/Context.js';
+import { DEFAULT_SETTINGS } from '../../utils/Utils.js';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
 
 const OrderBookSettings = ({ ticker, onSubmit }) => {
-    const RANGE_PLACEHOLDER = "%";
-    const LOW_BOUND_DEFAULT = -15;
-    const HIGH_BOUND_DEFAULT = 15;
-    const LEVEL_PLACEHOLDER = "auto";
-    const LEVEL_DEFAULT = "";
-
     const {settingsMap, getSettings, setSettings} = useCacheContext();
-    const [lowBound, setLowBound] = useState(LOW_BOUND_DEFAULT);
-    const [highBound, setHighBound] = useState(HIGH_BOUND_DEFAULT);
-    const [level1, setLevel1] = useState('');
-    const [level2, setLevel2] = useState('');
-    const [level3, setLevel3] = useState('');
+    const [form, setForm] = useState(DEFAULT_SETTINGS);
 
     useEffect(() => {
         const settings = getSettings(ticker);
-        setLowBound(settings.lowBound);
-        setHighBound(settings.highBound)
-        setLevel1(settings.level1 < 0 ? '' : settings.level1);
-        setLevel2(settings.level2 < 0 ? '' : settings.level2);
-        setLevel3(settings.level3 < 0 ? '' : settings.level3);
+        setForm(settings)
     }, [settingsMap]);
 
-    const handleReset = () => {
-        setLowBound(LOW_BOUND_DEFAULT);
-        setHighBound(HIGH_BOUND_DEFAULT);
-        setLevel1(LEVEL_DEFAULT);
-        setLevel2(LEVEL_DEFAULT);
-        setLevel3(LEVEL_DEFAULT);
-        let newSettings = {
-            lowBound: LOW_BOUND_DEFAULT,
-            highBound: HIGH_BOUND_DEFAULT,
-            level1: -1,
-            level2: -1,
-            level3: -1,
-            audio: false,
-            isDollar: false
-        };
-        setSettings(ticker, newSettings);
+    const handleChange = useCallback((field, value) => {
+        setForm((prevForm) => ({
+            ...prevForm,
+            [field]: value,
+        }));
+    }, []);
+
+    const handleReset = useCallback(() => {
+        setForm(DEFAULT_SETTINGS);
+        setSettings(ticker, DEFAULT_SETTINGS);
         onSubmit();
-    }
+    }, []);
 
     const submitSettings = () => {
-        let low = Number(lowBound);
-        let high = Number(highBound);
+        const lev1 = form.level1 === '' ? -1 : form.level1;
+        const lev2 = form.level2 === '' ? -1 : form.level2;
+        const lev3 = form.level3 === '' ? -1 : form.level3;
 
-        if (isNaN(lowBound) || isNaN(highBound) || lowBound > highBound) {
-            setLowBound(LOW_BOUND_DEFAULT);
-            setHighBound(HIGH_BOUND_DEFAULT);
-            low = LOW_BOUND_DEFAULT;
-            high = HIGH_BOUND_DEFAULT;
+        const isAscending = form.level3 > form.level2 && form.level2 > form.level1;
+        const isAllNegatice = lev1 < 0 && lev2 < 0 && lev3 < 0;
+        if (!isAscending && !isAllNegatice) {
+            let locator = "form[id='settingsPopupForm-" + ticker + "'] .hint-container";
+            let warning = document.querySelector(locator);
+            warning.classList.add('warning');
+            return;
         }
 
-        const lev1 = level1 === '' ? -1 : level1;
-        const lev2 = level2 === '' ? -1 : level2;
-        const lev3 = level3 === '' ? -1 : level3;
-
+        const settings = getSettings(ticker);
         let newSettings = {
-            lowBound: low,
-            highBound: high,
+            ...settings,
             level1: lev1,
             level2: lev2,
             level3: lev3,
-            audio: false,
-            isDollar: true
+            isDollar: form.isDollar
         };
-
         setSettings(ticker, newSettings);
         onSubmit();
     }
 
-    const handleRangeChange = (event, isLowBound) => {
-        let value = event.target.value.replace(/[^0-9-]/g, '');
-        if (isLowBound) {
-            setLowBound(value);
-        } else {
-            setHighBound(value);
-        }
-    }
+    const getCoinOrDollar = useCallback(() => {
+        return form.isDollar ? (
+            <div onClick={() => handleChange('isDollar', false)} className="dollar-coin-icon">
+                <FontAwesomeIcon icon={faDollarSign} />
+            </div>
+        ) : (
+            <div onClick={() => handleChange('isDollar', true)} className="dollar-coin-icon">
+                <FontAwesomeIcon icon={faCoins} />
+            </div>
+        )
+    }, [form.isDollar]);
 
-    const handleRangeBlur = (isLowBound) => {
-        let value = Number(isLowBound ? lowBound : highBound);
-        if (isNaN(value)) {
-            if (isLowBound) {
-                setLowBound(LOW_BOUND_DEFAULT);
-            } else {
-                setHighBound(HIGH_BOUND_DEFAULT);
-            }
-            return;
-        }
-
-        let anotherValue = isLowBound ? highBound : lowBound;
-        if (isLowBound && value > anotherValue) {
-            setLowBound(LOW_BOUND_DEFAULT);
-            return;
-        } 
-
-        if (!isLowBound && value < anotherValue) {
-            setHighBound(HIGH_BOUND_DEFAULT);
-            return;
-        }
-
-        if (isLowBound) {
-            setLowBound(value);
-        } else {
-            setHighBound(value);
-        }
-    };
-
-    const handleLevelChange = (event, level) => {
+    const handleLevelChange = useCallback((event, level) => {
         let value = event.target.value;
         value = value.replace(/[^0-9 ]/g, '');
         switch (level) {
-            case 1: setLevel1(value); break;
-            case 2: setLevel2(value); break;
-            case 3: setLevel3(value); break;
+            case 1: handleChange('level1', value); break;
+            case 2: handleChange('level2', value); break;
+            case 3: handleChange('level3', value); break;
         }
-    }
+    }, []);
 
-    // this function doesn't allow users to enter letters
-    const handleLevelBlur = (event, level) => {
+    const handleLevelBlur = useCallback((event, level) => {
         let inputValue = event.target.value.replace(/[^0-9]/g, '');
         let value = Number(inputValue);
-
         if (isNaN(value) || inputValue === '') {
-            value = LEVEL_DEFAULT;
+            value = -1;
         }
-
         switch (level) {
-            case 1: setLevel1(value); break;
-            case 2: setLevel2(value); break;
-            case 3: setLevel3(value); break;
+            case 1: handleChange('level1', value); break;
+            case 2: handleChange('level2', value); break;
+            case 3: handleChange('level3', value); break;
         }
-    }
+    }, []);
 
     return (
         <>
             <div className='settings-popup'>
-                <form className='settings-form'
+                <form className='settings-form' id={'settingsPopupForm-' + ticker}
                     onSubmit={(e) => {
                         e.preventDefault();
                         submitSettings();
                     }}
                 >
-
-                    <div className='form-container'>
-                        <div className='form-title'>
-                            Диапазон
-                            <span className='range-constraints'>
-                                (мин: –30
-                            </span>
-                            <span className='range-constraints'>
-                                макс: 30)
-                            </span>
-                        </div>
-
-                        <div className='range-inputs'>
-                            <input className='settings-input'
-                                type="text"
-                                value={lowBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={() => setLowBound('')}
-                                onChange={(e) => handleRangeChange(e, true)}
-                                onBlur={(e) => handleRangeBlur(true)}
-                            />
-
-                            <hr className='settings-line' />
-
-                            <input className='settings-input'
-                                type="text"
-                                value={highBound}
-                                placeholder={RANGE_PLACEHOLDER}
-                                onFocus={() => setHighBound('')}
-                                onChange={(e) => handleRangeChange(e, false)}
-                                onBlur={(e) => handleRangeBlur(false)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className='form-container'>
+                    <div className='form-container settings-container-popup'>
                         <div className='level-entry'>
-                            <span className="form-title">Ур. 1</span>
-
-                            <hr className='settings-line' />
-
-                            <input className='settings-input level-input'
+                            <div className='small-circle-container'>
+                                <div className="small-circle green-circle" />
+                            </div>
+                            <input className='settings-input'
                                 type="text"
-                                value={level1}
-                                placeholder={LEVEL_PLACEHOLDER}
+                                value={form.level1 < 0 ? '' : form.level1}
+                                placeholder={'Ур.1 - автоматически'}
                                 onChange={e => handleLevelChange(e, 1)}
                                 onBlur={(e) => handleLevelBlur(e, 1)}
                             />
+                            {form.level1 !== '' && form.level1 >= 0 &&
+                                <span className="material-symbols-outlined clear-input" onClick={() => handleChange('level1', '')}>
+                                    close
+                                </span>
+                            }
+                            {getCoinOrDollar()}
                         </div>
+
                         <div className='level-entry'>
-                            <span className="form-title">Ур. 2</span>
-
-                            <hr className='settings-line' />
-
-                            <input className='settings-input level-input'
+                            <div className='small-circle-container'>
+                                <div className="small-circle yellow-circle" />
+                            </div>
+                            <input className='settings-input'
                                 type="text"
-                                value={level2}
-                                placeholder={LEVEL_PLACEHOLDER}
+                                value={form.level2 < 0 ? '' : form.level2}
+                                placeholder={'Ур.2 - автоматически'}
                                 onChange={e => handleLevelChange(e, 2)}
                                 onBlur={(e) => handleLevelBlur(e, 2)}
                             />
+                            {form.level2 !== '' && form.level2 >= 0 &&
+                                <span className="material-symbols-outlined clear-input" onClick={() => handleChange('level2', '')}>
+                                    close
+                                </span>
+                            }
+                            {getCoinOrDollar()}
                         </div>
+
                         <div className='level-entry'>
-                            <span className="form-title">Ур. 3</span>
-
-                            <hr className='settings-line' />
-
-                            <input className='settings-input level-input'
+                            <div className='small-circle-container'>
+                                <div className="small-circle red-circle" />
+                            </div>
+                            <input className='settings-input'
                                 type="text"
-                                value={level3}
-                                placeholder={LEVEL_PLACEHOLDER}
+                                value={form.level3 < 0 ? '' : form.level3}
+                                placeholder={'Ур.3 - автоматически'}
                                 onChange={e => handleLevelChange(e, 3)}
                                 onBlur={(e) => handleLevelBlur(e, 3)}
                             />
+                            {form.level3 !== '' && form.level3 >= 0 &&
+                                <span className="material-symbols-outlined clear-input" onClick={() => handleChange('level3', '')}>
+                                    close
+                                </span>
+                            }
+                            {getCoinOrDollar()}
                         </div>
                     </div>
 
-                    <div className='form-container'>
+                    <div className='hint-container'>
+                        <span className="material-symbols-outlined small-icon">
+                            error
+                        </span>
+                        <span>
+                            Убедитесь, что значения идут в порядке возрастания.
+                            Если оставить хоть одно поле пустым, то цвета
+                            будут определяться автоматически.
+                        </span>
+                    </div>
+
+                    <div className='form-container settings-container-popup'>
                         <div className='submit-buttons'>
-                            <button type="submit" className='settings-submit-input'>Submit</button>
-                            <button className='settings-submit-input' onClick={handleReset}>Reset</button>
+                            <button type="submit" className='settings-submit-button'>Готово</button>
+                            <button className='settings-submit-button' onClick={handleReset}>Сбросить</button>
                         </div>
                     </div>
                 </form>

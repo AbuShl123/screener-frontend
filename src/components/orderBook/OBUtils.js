@@ -1,7 +1,7 @@
 import { roundNumber, getShortFormNumber } from '../../utils/Utils'
 
 export {
-    processDensities, getVolume, getLevelStyle, getTickerLife
+    processDensities, balanceFigures, getVolume, getLevelStyle, getTickerLife
 }
 
 function processDensities(asks, bids, settings, isDollar) {
@@ -11,12 +11,10 @@ function processDensities(asks, bids, settings, isDollar) {
 }
 
 // indexes:             0      1       2        3      4
-// bid/ask data ===== [price, qty,2 distance, level, life]
+// bid/ask data ===== [price, qty, distance, level, life]
 function processTrades(data, settings, isAsk, isDollar) {
     let densities = [];
-    const low = settings.lowBound;
-    const high = settings.highBound;
-    let dataArray = sortTrades(filterTrades(data, low, high));
+    let dataArray = sortTrades(data);
 
     for (const data of dataArray) {
         let p = parseFloat(data[0]);
@@ -38,6 +36,10 @@ function processTrades(data, settings, isAsk, isDollar) {
         densities = [density, ...densities];
     }
 
+    return densities;
+}
+
+function balanceFigures(densities) {
     let prices = getBalancedPrices(densities);
     let distances = getBalancedDistances(densities);
 
@@ -49,15 +51,10 @@ function processTrades(data, settings, isAsk, isDollar) {
     return densities;
 }
 
-function filterTrades(trades, low, high) {
-    if (trades.length == 0) return [];
-    return trades.filter(trade => trade[2] >= low && trade[2] <= high);
-}
-
 function sortTrades(trades) {
     if (!trades || !Array.isArray([...trades]) || trades.length <= 0) return [];
     return trades.sort((a, b) => b[1] - a[1]).slice(0, 5)
-        .sort((a, b) => parseFloat(a[2]) - parseFloat(b[2]));
+                 .sort((a, b) => parseFloat(a[2]) - parseFloat(b[2]));
 }
 
 function getVolume(isDollar, volumeData) {
@@ -139,23 +136,27 @@ function getLevel(price, qty, level, settings) {
 function getLevelStyle(data) {
     const styleLevel = 'quantity-level-';
     const level = data.level;
-    switch (level) {
-        case 1: return styleLevel + 1;
-        case 2: return styleLevel + 2;
-        case 3: return styleLevel + 3;
-        default: return styleLevel + 0;
-    }
+    return styleLevel + level;
 }
 
 function getTickerLife(data) {
     let life = data.life;
     let currentTime = Date.now();
     let duration = (currentTime - life) / 1000;
-    if (duration > 3600) {
-        return roundNumber((duration / 3600), 0) + 'ч';
+    if (duration >= 3600 * 24 * 30) {
+        return roundNumber(duration / (3600 * 24 * 30), 0) + 'мес'
     }
-    else if (duration > 60) {
-        return roundNumber((duration / 60), 0) + 'мин';
+    else if (duration >= 3600 * 24 * 7) {
+        return roundNumber(duration / (3600 * 24 * 7), 0) + 'нед'
+    }
+    else if (duration >= 3600 * 24) {
+        return roundNumber(duration / (3600 * 24), 0) + 'д'
+    }
+    else if (duration >= 3600) {
+        return roundNumber(duration / 3600, 0) + 'ч';
+    }
+    else if (duration >= 60) {
+        return roundNumber(duration / 60, 0) + 'мин';
     }
     else {
         return roundNumber(duration, 0) + 'сек';

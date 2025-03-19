@@ -87,7 +87,7 @@ input:focus {
 }
 
 .tooltip-container:hover .tooltip {
-    animation: opacity-change .1s linear 2s forwards;
+    animation: opacity-change .1s linear 1s forwards;
     visibility: visible;
 }
 
