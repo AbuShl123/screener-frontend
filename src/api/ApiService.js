@@ -38,7 +38,6 @@ class ApiService {
         obUrl += marketTickers.join("/");
 
         this.obSocket = new WebSocket(obUrl);
-
         this.obSocket.onmessage = (event) => this.handleMessage(event, callback);
         this.obSocket.onopen = () => console.log(`Connected to order book: ${obUrl}`);
         this.obSocket.onclose = (event) => console.log('Disconnected from order book', event.code, event.reason);
@@ -57,6 +56,30 @@ class ApiService {
             this.obSocket.close(1000, reason);
             this.obSocket = undefined;
         }
+    }
+
+    async fetchUserInfo(token) {
+        try {
+            const response = await api.get('/user', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response;
+        } catch (error) {
+            console.error('Error while fetching user info: ', error);
+        }
+    }
+
+    async fetchSubscriptionPlans() {
+        try {
+            const response = await api.get('/subscribe/plans');
+            return response;
+        } catch (error) {
+            console.error('Error while fetching subscription plans: ', error);
+        }
+    }
+
+    async subscribe(email, planId) {
+        return await api.post(`subscribe/${planId}/${email}`);
     }
 
     async fetchMaxOrders(callback, token) {
@@ -87,6 +110,16 @@ class ApiService {
             return response.data;
         } catch (error) {
             console.error("Erro while fetching open interest data: ", error);
+        }
+    }
+
+    async fetchSubscriptionPlans() {
+        try {
+            const response = await api.get('/subscribe/plans');
+            return response;
+        } catch (error) {
+            console.error("Erro while fetching subscribe plans data: ", error);
+            return undefined;
         }
     }
 };

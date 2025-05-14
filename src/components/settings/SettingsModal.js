@@ -77,120 +77,122 @@ const SettingsModal = ({onClose, desiredTicker=''}) => {
 
     return (
         <>
-            <div className={`modal-overlay ${isOpen ? 'open' : ''}`}>
-                <div className="modal-header">
-                    <div className="modal-title">
-                        Настроить Тикеры
-                    </div>
-                    <button onClick={onClose} className="close-modal"> 
-                        <span className="material-symbols-outlined">close</span>  
-                    </button>
-                </div>
-                <div className="modal-content">
-                    <div className="modal-left-content">
-                        <div className="modal-search-container">
-                            <div className="search-input-container">
-                                <input
-                                    className='ticker-search-input'
-                                    placeholder='добавить тикер'
-                                    onClick={handleSearchSuggesstions}
-                                    onChange={handleSearchSuggesstions}
-                                    onBlur={() => setTimeout(() => setSuggestions([]), 200)}
-                                    autoComplete="off"
-                                    id='settingsSearchInput'
-                                />
-                                <div className='clear-search-container'>
-                                    <span
-                                        className="material-symbols-outlined close-icon clear-search"
-                                        onClick={(e) => { document.getElementById('settingsSearchInput').value = '' }}
-                                    >
-                                        close
-                                    </span>
-                                </div>
-                                <div className="search-icon-container">
-                                    <FontAwesomeIcon icon={faSearch} />
-                                </div>
-                            </div>
-                            <div 
-                                style={{ display: suggestions?.length > 0 ? 'block' : 'none' }} 
-                                className="search-suggesstions-container"
-                                id="searchSuggesstionsContainer"
-                            >
-                                <div id="searchItems" className="search-items-container">
-                                    <hr></hr>
-                                    {suggestions.map((value) => (
-                                        <div key={value} className="search-item" 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleNewTicker(value)
-                                            }}
-                                        >
-                                            <span className="material-symbols-outlined"> add </span>
-                                            <p> {value} </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+            <div className="modal-container">
+                <div className={`modal-overlay ${isOpen ? 'open' : ''}`}>
+                    <div className="modal-header">
+                        <div className="modal-title">
+                            Настроить Тикеры
                         </div>
-                        <div className="ticker-settings-container">
-                            {currentTicker !== undefined && currentTicker !== '' ? (
-                                    <TickerSettings
-                                        ticker={currentTicker}
-                                        onClose={handleCloseSelectedTicker}
-                                        onDelete={handleDelete}
+                        <button onClick={onClose} className="close-modal"> 
+                            <span className="material-symbols-outlined">close</span>  
+                        </button>
+                    </div>
+                    <div className="modal-content">
+                        <div className="modal-left-content">
+                            <div className="modal-search-container">
+                                <div className="search-input-container">
+                                    <input
+                                        className='ticker-search-input'
+                                        placeholder='добавить тикер'
+                                        onClick={handleSearchSuggesstions}
+                                        onChange={handleSearchSuggesstions}
+                                        onBlur={() => setTimeout(() => setSuggestions([]), 200)}
+                                        autoComplete="off"
+                                        id='settingsSearchInput'
                                     />
-                                ) : (
-                                    <div className="noTickerSelected-background">
-                                        <div className="noTickerSelected-container">
-                                            <div className="noTickerSelected-icons">
-                                                <span className="material-symbols-outlined settings-background">
-                                                    settings
-                                                </span>
-                                                <FontAwesomeIcon icon={faWrench} className="wrench-icon" />
-                                            </div>
-                                            <div>
-                                                <p className="noTickerSelected-text">
-                                                    Здесь можно настроить тикеры
-                                                </p>
-                                                <p className="noTickerSelected-text">
-                                                    Нажмите на нужный символ
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            }
-                        </div>
-                    </div>
-                    <div className="modal-right-content">
-                        <div className="modal-content-title">
-                            <span style={{ padding: '0 5px 0 0' }}> Настроенные Тикеры </span>
-                            <FontAwesomeIcon icon={faWrench} />
-                        </div>
-                        <div className="modal-content-body menu-scroller">
-                            {modifiedTickers.map((ticker, index) => (
-                                <div 
-                                    key={ticker} 
-                                    className={'modified-ticker-container' + (currentTicker === ticker ? ' selected' : '')} 
-                                    id={`favorite-${ticker}`} 
-                                    onClick={() => {
-                                        if (currentTicker === '' || currentTicker !== ticker) setCurrentTicker(ticker);
-                                        else setCurrentTicker('');
-                                    }}
-                                >
-                                    <p className="modified-ticker-name"> {ticker.toUpperCase().replace("USDT", '') + " / USDT"} </p>
-                                    <div className='ticker-action-buttons'>
-                                        <span className="material-symbols-outlined close-icon" 
-                                            onClick={(e) => {
-                                                handleDelete(ticker)
-                                                e.stopPropagation();
-                                            }
-                                        }>
+                                    <div className='clear-search-container'>
+                                        <span
+                                            className="material-symbols-outlined close-icon clear-search"
+                                            onClick={(e) => { document.getElementById('settingsSearchInput').value = '' }}
+                                        >
                                             close
                                         </span>
                                     </div>
+                                    <div className="search-icon-container">
+                                        <FontAwesomeIcon icon={faSearch} />
+                                    </div>
                                 </div>
-                            ))}
+                                <div 
+                                    style={{ display: suggestions?.length > 0 ? 'block' : 'none' }} 
+                                    className="search-suggesstions-container"
+                                    id="searchSuggesstionsContainer"
+                                >
+                                    <div id="searchItems" className="search-items-container">
+                                        <hr></hr>
+                                        {suggestions.map((value) => (
+                                            <div key={value} className="search-item" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleNewTicker(value)
+                                                }}
+                                            >
+                                                <span className="material-symbols-outlined"> add </span>
+                                                <p> {value} </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="ticker-settings-container">
+                                {currentTicker !== undefined && currentTicker !== '' ? (
+                                        <TickerSettings
+                                            ticker={currentTicker}
+                                            onClose={handleCloseSelectedTicker}
+                                            onDelete={handleDelete}
+                                        />
+                                    ) : (
+                                        <div className="noTickerSelected-background">
+                                            <div className="noTickerSelected-container">
+                                                <div className="noTickerSelected-icons">
+                                                    <span className="material-symbols-outlined settings-background">
+                                                        settings
+                                                    </span>
+                                                    <FontAwesomeIcon icon={faWrench} className="wrench-icon" />
+                                                </div>
+                                                <div>
+                                                    <p className="noTickerSelected-text">
+                                                        Здесь можно настроить тикеры
+                                                    </p>
+                                                    <p className="noTickerSelected-text">
+                                                        Нажмите на нужный символ
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+                        <div className="modal-right-content">
+                            <div className="modal-content-title">
+                                <span style={{ padding: '0 5px 0 0' }}> Настроенные Тикеры </span>
+                                <FontAwesomeIcon icon={faWrench} />
+                            </div>
+                            <div className="modal-content-body menu-scroller">
+                                {modifiedTickers.map((ticker, index) => (
+                                    <div 
+                                        key={ticker} 
+                                        className={'modified-ticker-container' + (currentTicker === ticker ? ' selected' : '')} 
+                                        id={`favorite-${ticker}`} 
+                                        onClick={() => {
+                                            if (currentTicker === '' || currentTicker !== ticker) setCurrentTicker(ticker);
+                                            else setCurrentTicker('');
+                                        }}
+                                    >
+                                        <p className="modified-ticker-name"> {ticker.toUpperCase().replace("USDT", '') + " / USDT"} </p>
+                                        <div className='ticker-action-buttons'>
+                                            <span className="material-symbols-outlined close-icon" 
+                                                onClick={(e) => {
+                                                    handleDelete(ticker)
+                                                    e.stopPropagation();
+                                                }
+                                            }>
+                                                close
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

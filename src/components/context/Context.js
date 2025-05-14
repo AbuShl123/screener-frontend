@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import api from '../../api/AxiosConfig'
+import cache from "../../utils/CacheUtils";
 
 const TOKEN_CACHE_ID = 'screener-auth-token';
 const SELECTED_TICKERS_CACHE_ID = 'screener-selectedTickers';
@@ -12,7 +13,7 @@ const IS_VOICE_ON_CACHE_ID = 'screener-isVoiceOn';
 export const ScreenerContext = createContext(undefined);
 
 export const CacheProvider = ({ children }) => {
-    const [token, updateToken] = useState('');
+    const [token, updateToken] = useState(cache.getToken() || '');
     const [selectedTickers, updateSelectedTickers] = useState([]);
     const [marketTickers, updateMarketTickers] = useState([]);
     const [settingsMap, updateSettingsMap] = useState(null);
@@ -211,7 +212,6 @@ export default function useCacheContext() {
     if (!context) {
         throw new Error("useCacheContext must be used within a CacheProvider.");
     }
-
 
     return context;
 }

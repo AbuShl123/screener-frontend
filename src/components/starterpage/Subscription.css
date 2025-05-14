@@ -1,0 +1,126 @@
+
+.plans-container {
+    margin-top: 4%;
+}
+
+.plans-upper-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;   
+    align-items: center;
+    gap: 1vw;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-in-out forwards;
+}
+
+.plans-middle-container {
+    width: 65%;
+    margin: 0 auto;
+    margin-top: 1%;
+}
+
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.subscription-plan {
+    padding: 20px;
+    border-radius: 10px;
+    background: linear-gradient(#232331f2, #2f2f37ca);
+    min-width: 30%;
+    max-width: 32%;
+    min-height: 45vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3), -10px -10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.subscription-plan p {
+    margin: 0;
+}
+
+.plan-name {
+    display: inline-block;
+    padding: 10px;
+    border: .1px solid white;
+    border-radius: 5px;
+    font-size: 15px;
+}
+
+.plan-price {
+    margin: 7% 0;
+}
+
+.plan-price-container {
+    border-bottom: 1px solid black;
+}
+
+.plan-price-big {
+    padding: 10px 0;
+    border-radius: 5px;
+    font-size: 20px;
+}
+
+.plan-duration {
+    font-size: 14px;
+}
+
+.plan-state-container {
+    margin: 0;
+    margin-top: 15px;
+    line-height: 26px;
+}
+
+.plan-state {   
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+}
+
+.plan-description {
+    font-size: 13px;
+}
+
+.plan-description-2 {
+    margin: 0;
+    font-weight: 400;
+}
+
+.plan-buttons {
+    margin-top: 10%;
+}
+
+.transparent-submit-button {
+    background-color: #4e4e608c;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    color: inherit;
+    padding: 5% 12%;
+    font-size: 13px;
+}
+
+.transparent-submit-button:hover {
+    background-color: #66667b8c;
+    border: 1px solid transparent;  
+}
+
+.button-icon {
+    margin: 0;
+    margin-left: 3px;
+}
+
+.dotted-list {
+    padding: 0;
+    padding-left: 5px;
+    margin: 0;
+}
+
+.dotted-list > li{
+    margin: 7px;
+    padding: 0;
+}

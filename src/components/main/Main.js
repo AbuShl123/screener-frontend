@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { setSpeech, speak } from '../../utils/Utils'
 import './Main.css'
 import Header from '../header/Header'
 import Menu from '../menu/Menu'
@@ -13,29 +12,13 @@ import useCacheContext from '../context/Context'
 const Main = () => {
     const [activeMenu, setActiveMenu] = useState(Menu.tickers);
     const [settingsModal, setSettingsModal] = useState({isOpen: false, desiredTicker: ''});
-    const {notifications, isVoiceOn, getSettings, isDollar} = useCacheContext();
-
-    useEffect(() => {
-        const waitForVoicesToLoad = async () => await setSpeech();
-        waitForVoicesToLoad();
-    }, []);
+    const {isVoiceOn} = useCacheContext();
 
     useEffect(() => {
         if (!isVoiceOn) {
             window.speechSynthesis.cancel();
         }
     }, [isVoiceOn]);
-
-    useEffect(() => {
-        for (const notif of notifications) {
-            if (notif.announced) continue;
-            notif.announced = true;
-            const ticker = notif.ticker;
-            const settings = getSettings(ticker);
-            if (!settings.audio || !isVoiceOn) continue;
-            speak(notif, isDollar);
-        }
-    }, [notifications]);
 
     const openSettingsModal = useCallback(() => {
         setSettingsModal({isOpen: true, desiredTicker: ''});
@@ -53,8 +36,8 @@ const Main = () => {
         <>
             {settingsModal.isOpen && <SettingsModal onClose={closeSettingsModal} desiredTicker={settingsModal.desiredTicker} />}
 
-            <div className='main' style={{ filter: settingsModal.isOpen ? 'blur(.8px)' : 'none' }}>
-                <div className='content-left'>
+            <div className='main'>
+                <div className='content-left menu-invisible-scroller'>
                     <Header onMenuSelection={setActiveMenu} onSettings={openSettingsModal} />
                     <OrderBook />
                 </div>

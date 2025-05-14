@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import apiService from "../../api/ApiService.js";
 import useCacheContext from './Context.js'
-import cache from "../../utils/CacheUtils.js";
 
 export const APIContext = createContext(undefined);
 
@@ -12,14 +11,13 @@ export const ApiProvider = ({children}) => {
     const {token, marketTickers} = useCacheContext();
     
     useEffect(() => {
-        const token = cache.getToken();
         const handleOpenInterestUpdates = (event) => setOpenInterestEvent(event);
         apiService.createOIConnection(handleOpenInterestUpdates, token);
 
         const handleMaxOrdersUpdates = (event) => setMaxOrdersUpdate(event);
         const fetchMaxOrders = async () => apiService.fetchMaxOrders(handleMaxOrdersUpdates, token);
         fetchMaxOrders();
-        const interval = setInterval(fetchMaxOrders, 10_000);
+        const interval = setInterval(fetchMaxOrders, 1000);
 
         return () => {
             apiService.closeOBConnection();
@@ -34,8 +32,8 @@ export const ApiProvider = ({children}) => {
         if (marketTickers.length === 0) return;
     
         const handleOrderBookUpdates = (event) => {
-            const { symbol, b: bidsData, a: asksData } = event;
-            setOrderBookEvent({symbol, bidsData, asksData});
+            const { s: symbol, p: price, b: bidsData, a: asksData } = event;
+            setOrderBookEvent({symbol, price, bidsData, asksData});
         };
         apiService.createOBConnection(marketTickers, handleOrderBookUpdates, token);
     }, [marketTickers]);

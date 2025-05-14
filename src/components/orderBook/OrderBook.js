@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import './OrderBook.css'
 import OrderBookBox from './OrderBookBox'
 import useCacheContext from '../context/Context'
 import useApiContext from '../context/ApiContext'
-import { FUT_SIGN } from '../../utils/Utils'
 
 const OrderBook = () => {
 
@@ -16,6 +15,14 @@ const OrderBook = () => {
     // holds ticker->severity values. Determines the cup order 
     const [severityMap, setSeverityMap] = useState(new Map());
 
+    // status to check whether order book is ready to send notifications 
+    const [readyToNotify, setReadyToNotify] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setReadyToNotify(true), 10_000);
+        return () => {clearTimeout(timer)};
+    }, []);
+
     useEffect(() => {
         let newSeverityMap = new Map();
         marketTickers.forEach(ticker => newSeverityMap.set(ticker, severityMap.get(ticker) || 0));
@@ -27,7 +34,7 @@ const OrderBook = () => {
 
         try {
             const maxSymbols = maxOrdersUpdate.filter(item => checkDensity(item, getSettings(item.symbol)))
-                .map(item => item.symbol.endsWith(FUT_SIGN) ? item.symbol : item.symbol);
+                .map(item => item.symbol);
     
             if (!areArraysEqual(marketTickers, maxSymbols)) setMarketTickers(maxSymbols);
 
@@ -46,11 +53,11 @@ const OrderBook = () => {
     }
 
     return (
-        <div className='order-book-container menu-invisible-scroller'>
+        <div className='order-book-container'>
             <div className='order-book'>
                 {getPrioritizedTickers(severityMap).map((symbol) => (
                     <div className='order-book-cup' key={symbol}>
-                        <OrderBookBox ticker={symbol} onSeverityChange={handleNewSeverity} />
+                        <OrderBookBox ticker={symbol} onSeverityChange={handleNewSeverity} readyToNotify={readyToNotify} />
                     </div>
                 ))}
             </div>
@@ -68,8 +75,8 @@ function areArraysEqual(arr1, arr2) {
 }
 
 function checkDensity(trade, settings) {
-    let level3 = settings.level3;
-    if (level3 === -1) return trade.density >= 3;
+    let level1 = settings.level1;
+    if (level1 === -1) return trade.density >= 1;
 
     let isDollar = settings.isDollar;
     let maxBidQty = trade.maxBidQty;
@@ -81,7 +88,7 @@ function checkDensity(trade, settings) {
         maxAskQty = maxAskQty * price;
     }
 
-    return maxBidQty > level3 || maxAskQty > level3;
+    return maxBidQty > level1 || maxAskQty > level1;
 }
 
 function getPrioritizedTickers(severityMap) {

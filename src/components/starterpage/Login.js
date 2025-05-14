@@ -33,7 +33,7 @@ const Login = () => {
             let message = error.response?.data?.message || "Произошла ошибка.";
 
             if (message === 'User is disabled') {
-                setError('Пользователь не активирован. Вам отправили письмо на почту, пожалуйста следуйте инструкциям там чтобы активировать аккаунт.');
+                setError('Аккаунт неактивирован. Вам отправили письмо на почту, пожалуйста, следуйте инструкциям там, чтобы активировать аккаунт.');
             } else {
                 setError('Не удалось войти в аккаунт. Нерпавильный имейл или пароль.');
             }
@@ -85,49 +85,51 @@ const Login = () => {
 
     return (
         <>
-            <div className="login-layout" style={{ alignItems: 'center', filter: isEmailSent ? 'blur(3px)' : 'blur(0)'}}>
-                <form className='login-container' onSubmit={handleSubmit}>
-                    <h3 className='login-title'> Войти в аккаунт</h3>
-                    {error && <p className='login-error-message'> {error} </p>}
+            <div className="login-layout" style={{filter: isEmailSent ? 'blur(3px)' : 'blur(0)'}}>
+                <div className='content-container animated-box-fadeInDown'>
+                    <form className='left-content-container' onSubmit={handleSubmit}>
+                        <h4 className='login-title'> Войти в аккаунт</h4>
+                        {error && <p className='login-error-message'> {error} </p>}
 
-                    <div className='login-input-elements'>
-                        <div className='form-input' id='emailInput'>
-                            <input className='login-input' type='text' required
-                                onChange={e => {
-                                    setUsername(e.target.value)
-                                    handleInputChange(e, 'emailInput')
-                                }}
-                                onFocus={() => handleInputFocus('emailInput')}
-                                onBlur={(e) => handleInputBlur(e, 'emailInput')}
-                            />
-                            <span className='form-placeholder'> Email </span>
-                            <span className="material-symbols-outlined form-icon"> mail </span>
+                        <div className='login-input-elements'>
+                            <div className='form-input' id='emailInput'>
+                                <input className='login-input' type='text' required
+                                    onChange={e => {
+                                        setUsername(e.target.value)
+                                        handleInputChange(e, 'emailInput')
+                                    }}
+                                    onFocus={() => handleInputFocus('emailInput')}
+                                    onBlur={(e) => handleInputBlur(e, 'emailInput')}
+                                />
+                                <span className='form-placeholder'> Email </span>
+                                <span className="material-symbols-outlined form-icon"> mail </span>
+                            </div>
+                            <div className='form-input' id='passwordInput'>
+                                <input className='login-input' type='password' required
+                                    onChange={e => {
+                                        setPassword(e.target.value)
+                                        handleInputChange(e, 'passwordInput')
+                                    }}
+                                    onFocus={() => handleInputFocus('passwordInput')}
+                                    onBlur={(e) => handleInputBlur(e, 'passwordInput')}
+                                />
+                                <span className='form-placeholder'> Пароль </span>
+                                <span className="material-symbols-outlined form-icon"> lock </span>
+                            </div>
                         </div>
-                        <div className='form-input' id='passwordInput'>
-                            <input className='login-input' type='password' required
-                                onChange={e => {
-                                    setPassword(e.target.value)
-                                    handleInputChange(e, 'passwordInput')
-                                }}
-                                onFocus={() => handleInputFocus('passwordInput')}
-                                onBlur={(e) => handleInputBlur(e, 'passwordInput')}
-                            />
-                            <span className='form-placeholder'> Пароль </span>
-                            <span className="material-symbols-outlined form-icon"> lock </span>
-                        </div>
-                    </div>
 
-                    <button className='form-button submit-button' type='submit' disabled={isEmailSent}>
-                        {loading ? 'Вход...' : 'Войти'}
-                    </button>
-
-                    <div className='secondary-button-container'>
-                        <span style={{ color: 'grey' }}> Еще не зарегистрированы? </span>
-                        <button className='form-button secondary-button' type="button" onClick={handleSignUp} disabled={isEmailSent}> 
-                            Зарегистрироваться 
+                        <button className='form-button submit-button' type='submit' disabled={isEmailSent}>
+                            {loading ? 'Вход...' : 'Войти'}
                         </button>
-                    </div>
-                </form>
+
+                        <div className='secondary-button-container'>
+                            <span style={{ color: 'grey' }}> Еще не зарегистрированы? </span>
+                            <button className='form-button secondary-button' type="button" onClick={handleSignUp} disabled={isEmailSent}> 
+                                Зарегистрироваться 
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
             {isEmailSent ? (
                 <div className={'modal-overlay small-modal' + (isEmailSent ? ' open' : '')}>

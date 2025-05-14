@@ -17,7 +17,8 @@ const DEFAULT_SETTINGS_MAP = new Map(
 );
 
 const vowels = 'aeiou';
-window.utterances = [];
+
+const monthsInRussian = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 
 const roundNumber = (num, dec = 5) => {
     let result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
@@ -41,8 +42,26 @@ const getShortFormNumber = (number, dec = 1) => {
     return number < 0 ? "-" + shortNumber : shortNumber;
 }
 
+const getDateTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const month = monthsInRussian[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month} ${day}, ${year} ${hours}:${minutes}`;
+}
+
 const getDate = (timestamp) => {
     let date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const militaryTime = `${hours}:${minutes}`;
+    return militaryTime;
+}
+
+const getCurrentDate = () => {
+    let date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const militaryTime = `${hours}:${minutes}`;
@@ -65,13 +84,13 @@ function setSpeech() {
     )
 }
 
-const speak = (data, isDollar) => {
+const getUtterance = (data, isDollar) => {
     // notification content is following: [ticker, price, qty, distance, level, isAsk, life]
     let symbol = data.ticker;
     let symbolName = symbol.replace(FUT_SIGN, "").replace('usdt', '');
     let coin = convertSymbolToRussian(symbolName);
     let spotFut = symbol.endsWith(FUT_SIGN) ? 'фьючерс' :  'спот';
-    let longShort = data.isAsk ? 'лонг' : 'шорт';
+    let longShort = data.isAsk ? 'шорт' : 'лонг';
 
     let qty = data.qty;
     let number = convertNumberToRussian(qty);
@@ -102,8 +121,46 @@ const speak = (data, isDollar) => {
     utterance.onstart = () => console.log('starting to talk.');
     console.log("Voicing: ", message);
     console.log("Utterance is ", utterance);
-    window.utterances.push(utterance);
-    synth.speak(utterance);
+    return utterance;
+}
+
+const getUtteranceForPriceChange = (data) => {
+    // notification content is following: [s: symbol, d: pricechange in percentages]
+    let symbol = data.s;
+    let symbolName = symbol.replace('usdt', '');
+    let coin = convertSymbolToRussian(symbolName);
+
+    let action = 'выросла';
+    if (data.d < 0) {
+        action = 'упала';
+    }
+
+    let pricechange = Math.round(Math.abs(data.d));
+
+    // пример: цена на биткоин выросла на 3 процента
+    let message = 'цена на ' + coin + ' ' + action + ' на ' + pricechange + ' процентов';
+    
+    // Find the Russian female voice
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    let russianFemaleVoice = voices[0];
+
+    const russianVoices = voices.filter((voice) => voice.lang.startsWith('ru'));
+    const googleVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('google'));
+    const irinaVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('irina'));
+    if (googleVoice) russianFemaleVoice = googleVoice;
+    else if (irinaVoice) russianFemaleVoice = irinaVoice;
+    else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
+    console.log('Russian voices are ', russianVoices);
+
+    // Speak the text
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'ru-RU';
+    utterance.voice = russianFemaleVoice; 
+    utterance.pitch = 1; // Range: 0 to 2
+    utterance.rate = 1; // Range: 0.1 to 10
+    console.log("Voicing: ", message);
+    return utterance;
 }
 
 const convertSymbolToRussian = (symbolName) => {
@@ -164,5 +221,5 @@ export {
     FUT_SIGN, DEFAULT_SETTINGS, 
     DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, 
     setSpeech, roundNumber, getShortFormNumber, 
-    getDate, speak 
+    getDateTime, getDate, getCurrentDate, getUtterance, getUtteranceForPriceChange
 }

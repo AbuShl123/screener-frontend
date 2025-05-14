@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useState, useEffect } from 'react'
 import Menu from '../menu/Menu'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,10 +6,12 @@ import { faCoins, faDollarSign, faFilter } from '@fortawesome/free-solid-svg-ico
 import { useNavigate } from 'react-router-dom';
 import './Header.css'
 import useCacheContext from '../context/Context';
+import useUserContext from '../context/UserContext';
 
 const Header = ({ onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
     const {isDollar, setIsDollar, isVoiceOn, setIsVoiceOn} = useCacheContext();
+    const {user} = useUserContext();
     const [activeMenu, setActiveMenu] = useState(localStorage.getItem('screener-active-menu') || Menu.tickers);
 
     const handleDollarToggle = () => {
@@ -20,10 +22,14 @@ const Header = ({ onMenuSelection, onSettings }) => {
         setIsVoiceOn(!isVoiceOn);
     }
 
-    const handleSignOut = () => {
+    const handleSignOut = useCallback(() => {
         localStorage.removeItem('token');
         navigate('/login');
-    }
+    }, [localStorage]);
+
+    const handleGoToAccount = useCallback(() => {
+        navigate('/account');
+    }, []);
 
     useEffect(() => {
         const elements = document.querySelectorAll('button[id*="MenuSelection"]');
@@ -43,21 +49,57 @@ const Header = ({ onMenuSelection, onSettings }) => {
             <header className='header'>
                 <div className='header-container'>
                     <div className='header-left-elements'>
-                        <button className='menu-button header-item' onClick={handleSignOut}> выйти </button>
-                        <button className='menu-button header-item' onClick={onSettings}> настройки </button>
-                        <div className='toggle-icon header-item' onClick={handleDollarToggle}>
+                        <div className='menu-button multi-el-header-item header-item profile-nav tooltip-container' >
+                            <button className='relative-button' onClick={handleGoToAccount}/>
+                            <span className="material-symbols-outlined header-google-icon-item">
+                                account_circle
+                            </span>
+                            <div> {user.firstname} </div>
+                            <div className='advanced-tooltip profile-overview-container'> 
+                                <div className='profile-header'>
+                                    <div className='profile-image'>
+                                        <span className="material-symbols-outlined large-icon">
+                                            person
+                                        </span>
+                                    </div>
+                                    <div className='profile-quick-info'>
+                                        <p className='account-email'> {user.email} </p>
+                                        <span className='highlighted-text'> обычный пользователь </span>
+                                    </div>
+                                </div>
+                                <div className='profile-nav-action'>
+                                    <button className='profile-window-button multi-el-header-item' onClick={handleGoToAccount}> 
+                                        <span className="material-symbols-outlined header-google-icon-item">
+                                            loyalty
+                                        </span>
+                                        Подписки
+                                    </button>
+                                    <button className='profile-window-button multi-el-header-item' style={{color: '#ff6b6b'}} onClick={handleSignOut}> 
+                                        <span className="material-symbols-outlined header-google-icon-item">
+                                            logout
+                                        </span>
+                                        Выйти
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button className='menu-button multi-el-header-item header-item' onClick={onSettings}> 
+                            <span className="material-symbols-outlined header-google-icon-item">
+                                settings
+                            </span>
+                            <div> Настройки </div>
+                        </button>
+                    </div>
+                    <div className='header-right-elements'>
+                        <div className='toggle-icon header-item tooltip-container' onClick={handleDollarToggle}>
                             {isDollar ? (
                                 <FontAwesomeIcon icon={faDollarSign} style={{ color: "#FFD43B", }} />
                             ) : (
                                 <FontAwesomeIcon icon={faCoins} style={{ color: "#FFD43B", }} />
                             )}
+                            <span className='simple-tooltip'> значения в долларах/монетах </span>
                         </div>
-                        <div className='toggle-icon header-item'>
-                            <FontAwesomeIcon icon={faFilter} style={{ color: "#ffffff", }} />
-                        </div>
-                    </div>
-                    <div className='header-right-elements'>
-                        <div className='toggle-icon header-item' onClick={handleVoiceToggle}>
+                        <div className='toggle-icon header-item tooltip-container' onClick={handleVoiceToggle}>
                             {isVoiceOn ? (
                                 <span className="material-symbols-outlined volume-icon">
                                     volume_up
@@ -67,18 +109,23 @@ const Header = ({ onMenuSelection, onSettings }) => {
                                     volume_off
                                 </span>
                             )}
+                            <span className='simple-tooltip'> озвучка плотностей </span>
                         </div>
-                        <button className='menu-button header-item'
+                        <div className='toggle-icon header-item tooltip-container'>
+                            <FontAwesomeIcon icon={faFilter} style={{ color: "#ffffff", }} />
+                            <span className='simple-tooltip'> фильтрация стаканов </span>
+                        </div>
+                        <button className='menu-button header-item trns-border'
                             onClick={() => setActiveMenu(Menu.notifications)}
                             id={Menu.notifications + 'MenuSelection'}
                         > уведомления </button>
 
-                        <button className='menu-button header-item'
+                        <button className='menu-button header-item trns-border'
                             onClick={() => setActiveMenu(Menu.tickers)}
                             id={Menu.tickers + 'MenuSelection'}
                         > тикеры </button>
 
-                        <button className='menu-button header-item'
+                        <button className='menu-button header-item trns-border'
                             onClick={() => setActiveMenu(Menu.oi)}
                             id={Menu.oi + 'MenuSelection'}
                         > ОИ </button>

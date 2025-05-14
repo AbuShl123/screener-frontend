@@ -1,7 +1,7 @@
 
 .main {
     display: grid;
-    grid-template-columns: 1fr 20%;
+    grid-template-columns: 11fr 19rem;
 }
 
 .content-left {
@@ -9,6 +9,7 @@
     flex-flow: column;
     max-height: 100vh;
     position: relative;
+    overflow-y: auto;
 }
 
 .content-right {
@@ -16,8 +17,6 @@
     top: 0;
     right: 0;
     padding-bottom: 20px;
-
-    background-color: #21222794;
     height: 100vh;
     max-height: 100vh;
 }

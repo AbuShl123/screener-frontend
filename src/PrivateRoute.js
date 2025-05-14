@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { checkTokenExpiration } from './components/login/Authentication'
+import { checkTokenExpiration } from './components/starterpage/Authentication'
 import cache from './utils/CacheUtils';
-import { CacheProvider } from './components/context/Context';
-import { ApiProvider } from './components/context/ApiContext';
+import { UserProvider } from './components/context/UserContext';
+import SubscribedRoute from './SubscribedRoute';
 
 const PrivateRoute = ({ Component }) => {
 	const token = cache.getToken();
@@ -12,12 +12,18 @@ const PrivateRoute = ({ Component }) => {
 		return <Navigate to="/login" replace />
 	}
 
-	return (
-		<CacheProvider>
-			<ApiProvider> 
+	if (Component.displayName?.includes('Account')) {
+		return (
+			<UserProvider>
 				<Component />
-			</ApiProvider>
-		</CacheProvider>
+			</UserProvider>
+		)
+	}
+
+	return (
+		<UserProvider>
+			<SubscribedRoute Component={Component}/>
+		</UserProvider>
 	);
 };
 

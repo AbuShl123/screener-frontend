@@ -1,15 +1,22 @@
 .menu-container {
     display: flex;
     flex-flow: column;
-    height: 100vh;
+    height: 96vh;
+
+    margin: 2vh 1vh 2vh 0px;
+    border-radius: 20px;
+    background-color: rgb(255 255 255 / 5%);
 }
 
 .menu-title {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     font-size: 15px;
-    text-align: center;
-    padding: 20px 0;    
+    height: 50px;  
     color: rgba(255, 255, 255, 0.747);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* connected symbols */
@@ -18,8 +25,7 @@
     flex: 0 1 auto;
     overflow-y: auto;
     min-height: 50%;
-    /* max-height: 50%; */
-
+    margin: 0 5px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -33,11 +39,11 @@
     justify-content: space-between;
     align-items: center;
     padding-right: 10px;
-    background-color: rgba(81, 66, 116, 0.2);
+    background-color: rgb(177 173 249 / 16%);
 }
 
 .connected-ticker-container:hover {
-    background-color: rgba(81, 66, 116, 0.3);
+    background-color: rgba(175, 175, 175, 0.16);
 }
 
 .ticker-name-audio {
@@ -65,7 +71,7 @@
     cursor: default;
     min-width: 12px;
     min-height: 12px;
-    background-color: rgba(78, 78, 78, 0.404);
+    background-color: rgb(185 185 185 / 30%);
     border: none;
 }
 
@@ -117,11 +123,11 @@
 }
 
 .audio-off {
-    color: rgb(101, 101, 101);
+    color: rgb(145 145 145);
 }
 
 .audio-on {
-    color: rgb(255, 255, 172);
+    color: rgb(255, 255, 149);
 }
 
 /* add new ticker */
@@ -182,9 +188,13 @@ input.add-ticker-container:focus {
 .notification-container {
     font-size: 12px;
     padding: 5px 10px 5px 10px;
-    margin: 10px 10px 10px 10px;
+    margin: 0px 10px 10px 10px;
     border-radius: 10px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 55px;
 }
 
 .notification-container p {
@@ -204,23 +214,27 @@ input.add-ticker-container:focus {
 }
 
 .notif-level-0 {
-    background-color: rgba(128, 128, 128, 0.153);
+    background-color: rgb(255 255 255 / 5%);
 }
 
 .notif-level-1 {
-    background-color: rgba(99, 199, 99, 0.3);
+    background-color: rgb(75 143 53 / 50%);
 }
 
 .notif-level-2 {
-    background-color: rgb(95, 84, 30);
+    background-color: rgb(113 96 19);
 }
 
 .notif-level-3 {
-    background-color: rgb(252, 83, 83, 0.3);
+    background-color: rgb(171 57 57 / 70%);
 }
 
 .notif-level-4 {
-    background-color: rgba(215, 83, 252, 0.3);
+    background-color: rgb(125 0 201 / 68%);
+}
+
+.notif-level-pricechange {
+    background-color: rgb(87 89 91 / 55%);
 }
 
 .notification-fact {
@@ -243,4 +257,10 @@ input.add-ticker-container:focus {
 
 .notification-line {
     padding-bottom: 3px;
+}
+
+.icon-text-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

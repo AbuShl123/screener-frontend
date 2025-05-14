@@ -4,21 +4,22 @@ export {
     processDensities, balanceFigures, getVolume, getLevelStyle, getTickerLife
 }
 
-function processDensities(asks, bids, settings, isDollar) {
-    const asksData = processTrades(asks, settings, true, isDollar);
-    const bidsData = processTrades(bids, settings, false, isDollar);
+function processDensities(price, asks, bids, settings, isDollar) {
+    const asksData = processTrades(price, asks, settings, true, isDollar);
+    const bidsData = processTrades(price, bids, settings, false, isDollar);
     return [...asksData, ...bidsData];
 }
 
-// indexes:             0      1       2        3      4
-// bid/ask data ===== [price, qty, distance, level, life]
-function processTrades(data, settings, isAsk, isDollar) {
+// indexes:                       0     1       2       3      4
+// output: bid/ask array ===== [price, qty, distance, level, life]
+function processTrades(price, data, settings, isAsk, isDollar) {
     let densities = [];
-    let dataArray = sortTrades(data);
+    let unsortedDataArray = analyzeDistances(price, data);
+    let dataArray = sortTrades(unsortedDataArray, isAsk);
 
     for (const data of dataArray) {
         let p = parseFloat(data[0]);
-        let d = parseFloat(data[2]);
+        let d = data[2];
         let q = data[1];
         let l = data[3];
 
@@ -51,10 +52,23 @@ function balanceFigures(densities) {
     return densities;
 }
 
-function sortTrades(trades) {
-    if (!trades || !Array.isArray([...trades]) || trades.length <= 0) return [];
-    return trades.sort((a, b) => b[1] - a[1]).slice(0, 5)
-                 .sort((a, b) => parseFloat(a[2]) - parseFloat(b[2]));
+function analyzeDistances(marketPrice, trades) {
+    if (!trades || !Array.isArray(trades) || trades.length <= 0) return [];
+    const market = parseFloat(marketPrice);
+    for (const array of trades) {
+        const price = parseFloat(array[0]);
+        const distance = (Math.abs((price/market - 1) * 100)).toFixed(2);
+        array[2] = distance;
+    }
+    return trades;
+}
+
+function sortTrades(trades, isAsk) {
+    if (isAsk) {
+        return trades.sort((a, b) => a[2] - b[2]);
+    } else {
+        return trades.sort((a, b) => b[2] - a[2]);
+    }
 }
 
 function getVolume(isDollar, volumeData) {

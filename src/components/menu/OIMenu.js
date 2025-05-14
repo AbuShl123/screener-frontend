@@ -10,7 +10,7 @@ import cache from '../../utils/CacheUtils';
 
 const OIMenu = ({activeMenu}) => {
     const [notifications, setNotifications] = useState([])
-    const {isDollar} = useCacheContext();
+    const {isDollar, addNotification} = useCacheContext();
     const {openInterestEvent} = useApiContext();
     const level0 = 100_000;
     const level1 = 250_000;
@@ -40,7 +40,12 @@ const OIMenu = ({activeMenu}) => {
     }, [])
 
     useEffect(() => {
-        if (!openInterestEvent || !openInterestEvent.symbol) {
+        if (!openInterestEvent) {
+            return;
+        }
+
+        if (openInterestEvent.n === 'price') {
+            addNotification(openInterestEvent);
             return;
         }
         

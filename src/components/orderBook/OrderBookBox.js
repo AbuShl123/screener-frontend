@@ -7,7 +7,7 @@ import useCacheContext from '../context/Context.js'
 import useApiContext from '../context/ApiContext.js'
 import DataSection from './DataSection.js'
 
-const OrderBookBox = ({ ticker, onSeverityChange }) => {
+const OrderBookBox = ({ ticker, onSeverityChange, readyToNotify }) => {
 
     const isSpot = !ticker.endsWith(FUT_SIGN);
     
@@ -38,9 +38,6 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
     // listening to orderbook events
     const {orderBookEvent} = useApiContext();
 
-    // status to check whether order book is ready to send notifications 
-    const [readyToNotify, setReadyToNotify] = useState(false);
-
     useEffect(() => {
         const fetchVolumeData = async () => {
             const volumeUpdate = await apiService.fetch5MVolume(ticker.replace(FUT_SIGN, ''))
@@ -51,8 +48,7 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
         }
         fetchVolumeData();
         const interval = setInterval(fetchVolumeData, 300_000);
-        const timer = setTimeout(() => setReadyToNotify(true), 20_000);
-        return () => {clearInterval(interval); clearTimeout(timer)};
+        return () => {clearInterval(interval)};
     }, []);
 
     // indexes:             0      1      2        3      4
@@ -61,14 +57,10 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
         let densities;
         try {
             if (!orderBookEvent) return;
-            const { symbol, bidsData, asksData } = orderBookEvent;
+            const { price, symbol, bidsData, asksData } = orderBookEvent;
             if (symbol !== ticker) return;
-            if (symbol === '1000satsusdt.f') {
-                console.log('here');
-            }
-
             const settings = getSettings(ticker);
-            densities = processDensities(asksData, bidsData, settings, isDollar);
+            densities = processDensities(price, asksData, bidsData, settings, isDollar);
             checkNotifications(densities);
             iterateLevels(densities);
             setDensities(balanceFigures(densities));
@@ -80,7 +72,6 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
     // checks whether there are any notifications
     const checkNotifications = (trades) => {
         if (!readyToNotify) return;
-        if (pastDensities.size === 0) return;
         const settings = getSettings(ticker);
         for (const trade of trades) {
             let isRecent = Date.now() - trade.life <= 30_000;
@@ -135,12 +126,15 @@ const OrderBookBox = ({ ticker, onSeverityChange }) => {
                     </div>
                 </div>
 
-                <hr className='ob__line_footer'></hr>
+                {/* <hr className='ob__line_footer'></hr> */}
                 <div className='ob__footer'>
-                    Объем за 5 мин:
-                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <b>{getVolume(isDollar, volumeData)}</b>
+                    объем за 5м:
+                    <div style={{paddingLeft: '10px'}}>
+                        {getVolume(isDollar, volumeData)}
                     </div>
+                    {/* <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <b>{getVolume(isDollar, volumeData)}</b>
+                    </div> */}
                 </div>
             </div>
         </>

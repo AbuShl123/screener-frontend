@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faDollarSign, faCoins } from '@fortawesome/free-solid-svg-icons';
-import { getMarketStyle } from "../../utils/TickerActions";
 import { DEFAULT_SETTINGS, FUT_SIGN } from "../../utils/Utils";
 import useCacheContext from "../context/Context";
-
-const LEVEL_PLACEHOLDER = 'auto';
 
 // params: 
 // ticker, String - symbol name, without fut sign
@@ -112,9 +109,8 @@ const TickerSettings = ({
         }
     }, []);
 
-    const switchDollar = useCallback((newValue) => {
-        handleChange('isDollar', newValue, true);
-        handleChange('isDollar', newValue, false);
+    const switchDollar = useCallback((newValue, isSpot) => {
+        handleChange('isDollar', newValue, isSpot);
     }, []);
 
     const switchAudio = useCallback((newValue) => {
@@ -130,13 +126,13 @@ const TickerSettings = ({
         }
     }, []);
 
-    const getCoinOrDollar = useCallback((form) => {
+    const getCoinOrDollar = useCallback((form, isSpot) => {
         return form.isDollar ? (
-            <div onClick={() => switchDollar(false)} className="dollar-coin-icon">
+            <div onClick={() => switchDollar(false, isSpot)} className="dollar-coin-icon">
                 <FontAwesomeIcon icon={faDollarSign}/>
             </div>
         ) : (
-            <div onClick={() => switchDollar(true)} className="dollar-coin-icon">
+            <div onClick={() => switchDollar(true, isSpot)} className="dollar-coin-icon">
                 <FontAwesomeIcon icon={faCoins}/>
             </div>
         )
@@ -236,7 +232,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(spotForm, true)}
                             </div>
                             <div className='level-entry'>
                             <div className='small-circle-container'>
@@ -254,7 +250,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(spotForm, true)}
                             </div>
                             <div className='level-entry'>
                             <div className='small-circle-container'>
@@ -272,7 +268,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(spotForm, true)}
                             </div>
                         </div>
 
@@ -366,7 +362,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(futForm, false)}
                             </div>
                             <div className='level-entry'>
                             <div className='small-circle-container'>
@@ -384,7 +380,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(futForm, false)}
                             </div>
                             <div className='level-entry'>
                             <div className='small-circle-container'>
@@ -402,7 +398,7 @@ const TickerSettings = ({
                                         close
                                     </span>
                                 }
-                                {getCoinOrDollar(spotForm)}
+                                {getCoinOrDollar(futForm, false)}
                             </div>
                         </div>
 
