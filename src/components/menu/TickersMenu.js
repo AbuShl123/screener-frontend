@@ -1,19 +1,27 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
 import './Menu.css'
 import useCacheContext from '../context/Context.js';
 import { FUT_SIGN } from '../../utils/Utils.js';
-import { getMarketStyle } from '../../utils/TickerActions.js';
+import useApiContext from '../context/ApiContext.js';
+import { useCallback, useEffect, useState } from 'react';
 
-const TickersMenu = ({onTickerSettings}) => {
-    const [selectedTickers, setSelectedTickers] = useState([]);
-    const {marketTickers, getSettings, setSettings} = useCacheContext();
+const TickersMenu = ({ onTickerSettings }) => {
+    const { getSettings, setSettings } = useCacheContext();
+    const [currentTickers, setCurrentTickers] = useState(new Map());
+    const { orderBookEvent } = useApiContext();
 
     useEffect(() => {
-        let tickers = marketTickers.map(t => t.replace(FUT_SIGN, ''));
-        let set = new Set([...tickers]);
-        setSelectedTickers([...set]);
-    }, [marketTickers]);
+        if (!orderBookEvent) return;
+        setCurrentTickers(prevTickers => {
+            const updated = new Map();
+            for (const event of orderBookEvent) {
+                let symbol = event.s.replace(FUT_SIGN, "");
+                let id = symbol === event.s ? 1 : 2;
+                let val = updated.has(symbol) ? updated.get(symbol) : 0;
+                updated.set(symbol, val + id);
+            }
+            return updated;
+        });
+    }, [orderBookEvent]);
 
     const toggleAudio = (symbol) => {
         const settings = getSettings(symbol);
@@ -21,35 +29,59 @@ const TickersMenu = ({onTickerSettings}) => {
 
         let newAudio = !settings.audio;
 
-        const newSettings = { ...settings, audio: newAudio }; 
+        const newSettings = { ...settings, audio: newAudio };
         const newSettingsFut = { ...settingsFut, audio: newAudio };
 
         setSettings(symbol, newSettings);
         setSettings(symbol + FUT_SIGN, newSettingsFut);
     }
- 
+
+    const getMarketDots = useCallback((number) => {
+        const spotStyle = number === 1 || number === 3 ? 'spot-selected' : '';
+        const futStyle = number === 2 || number === 3 ? 'futures-selected' : '';
+        return (
+            <>
+                <div className={'market-checkbox ' + spotStyle}> </div>
+                <div className={'market-checkbox ' + futStyle}> </div>
+            </>
+        )
+    }, []);
+
+    
+    const getAudioIcon = useCallback((settings) => {
+        return (
+            <>
+                {settings.audio ? (
+                    <span className="material-symbols-outlined volume audio-on">
+                        volume_up
+                    </span>
+                ) : (
+                    <span className="material-symbols-outlined volume audio-off">
+                        volume_off
+                    </span>
+                )}
+            </>
+        )
+    }, []);
+
     return (
         <>
-            <div className='menu-container'> 
+            <div className='menu-container'>
                 <div className='menu-title'>
-                    Нынешние тикеры 
+                    Нынешние тикеры
                 </div>
                 <div className='connected-tickers-list menu-scroller'>
-                    {selectedTickers.map((ticker) => (       
-                        <div key={ticker} className='connected-ticker-container'>
+                    {[...currentTickers].map(([symbol, number]) => (
+                        <div key={symbol} className='connected-ticker-container'>
 
-                            <div className='ticker-action-buttons ticker-name-audio' onClick={() => toggleAudio(ticker)}>
-                                {getAudioIcon(getSettings(ticker))}
-                                <p className='ticker-name'> {ticker.toUpperCase().replace("USDT", "") + "/USDT"} </p>
+                            <div className='ticker-action-buttons ticker-name-audio' onClick={() => toggleAudio(symbol)}>
+                                {getAudioIcon(getSettings(symbol))}
+                                <p className='ticker-name'> {symbol.toUpperCase().replace("USDT", "") + "/USDT"} </p>
                             </div>
 
                             <div className='ticker-action-buttons'>
-
-                                <div className={'market-checkbox ' + getMarketStyle(ticker, marketTickers)}> </div> 
-
-                                <div className={'market-checkbox ' + getMarketStyle(ticker, marketTickers, false)}> </div>
-
-                                <span className="material-symbols-outlined ticker-settings settings-icon" onClick={() => onTickerSettings(ticker)}>
+                                {getMarketDots(number)}
+                                <span className="material-symbols-outlined ticker-settings settings-icon" onClick={() => onTickerSettings(symbol)}>
                                     Settings
                                 </span>
                             </div>
@@ -62,19 +94,3 @@ const TickersMenu = ({onTickerSettings}) => {
 }
 
 export default TickersMenu;
-
-function getAudioIcon(settings) {
-    return (
-        <>
-            {settings.audio ? (
-                <span className="material-symbols-outlined volume audio-on">
-                    volume_up
-                </span>
-            ) : (
-                <span className="material-symbols-outlined volume audio-off">
-                    volume_off
-                </span>
-            )}
-        </>
-    )
-}

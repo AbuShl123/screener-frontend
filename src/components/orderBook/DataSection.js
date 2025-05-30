@@ -1,5 +1,3 @@
-
-import React from "react";
 import { getLevelStyle, getTickerLife } from './OBUtils'
 import useCacheContext from "../context/Context";
 

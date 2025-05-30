@@ -96,6 +96,15 @@ input:focus {
 	visibility: visible;
 }
 
+.tooltip-clickable-container {
+	position: relative;
+}
+
+.tooltip-clickable-container.active .advanced-tooltip {
+	animation: fadeInDown .1s linear .1s forwards;
+	visibility: visible;
+}
+
 .tooltip {
 	visibility: hidden;
 	opacity: 0;
@@ -139,13 +148,12 @@ input:focus {
 
 	position: absolute;
 	top: 100%;
-	left: 10%;
+	left: -50%;
 
 	border-radius: 10px;
 	border: 1.5px solid rgb(51 52 55);
 	background-color: #212227;
 	color: #ffff;
-	text-align: center;
 	font-size: 12px;
 	white-space: nowrap;
 }
@@ -226,4 +234,19 @@ input:focus {
 
 .warning-icon {
 	color: rgb(255 197 0);
+}
+
+/* fonts */
+.roboto-mono-font {
+  font-family: "Roboto Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.montserrat-font {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
 }

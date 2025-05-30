@@ -170,7 +170,8 @@ const convertSymbolToRussian = (symbolName) => {
         case 'eth': return 'эфир';
         case 'bnb': return 'бинанс коин';
         case 'ltc': return 'лайткоин';
-        case '1000sats': return '1000 сатс'
+        case '1000sats': return '1000 сатс';
+        case 'doge': return 'доге';
     }
 
     // if symbol is easily readable, then just return it (ex: 'avax' -> 'авакс')

@@ -40,10 +40,11 @@
     align-items: center;
     padding-right: 10px;
     background-color: rgb(177 173 249 / 16%);
+    transition: background-color 0.2s;
 }
 
 .connected-ticker-container:hover {
-    background-color: rgba(175, 175, 175, 0.16);
+    background-color: rgb(177 173 249 / 24%);
 }
 
 .ticker-name-audio {
@@ -80,12 +81,12 @@
 }
 
 .spot-selected {
-    background-color: #dbb742;
+    background-color: yellow;
     color: black;
 }
 
 .futures-selected {
-    background-color: rgb(164, 205, 136);
+    background-color: rgb(127 255 40);
     color: black;
 }
 

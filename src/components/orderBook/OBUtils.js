@@ -1,25 +1,24 @@
 import { roundNumber, getShortFormNumber } from '../../utils/Utils'
 
 export {
-    processDensities, balanceFigures, getVolume, getLevelStyle, getTickerLife
+    processDensities, balanceFigures, getVolume, getLevelStyle, getTickerLife, getQty
 }
 
-function processDensities(price, asks, bids, settings, isDollar) {
-    const asksData = processTrades(price, asks, settings, true, isDollar);
-    const bidsData = processTrades(price, bids, settings, false, isDollar);
+function processDensities(asks, bids, settings, isDollar) {
+    const asksData = processTrades(asks, settings, true, isDollar);
+    const bidsData = processTrades(bids, settings, false, isDollar);
     return [...asksData, ...bidsData];
 }
 
 // indexes:                       0     1       2       3      4
 // output: bid/ask array ===== [price, qty, distance, level, life]
-function processTrades(price, data, settings, isAsk, isDollar) {
+function processTrades(trades, settings, isAsk, isDollar) {
     let densities = [];
-    let unsortedDataArray = analyzeDistances(price, data);
-    let dataArray = sortTrades(unsortedDataArray, isAsk);
+    let dataArray = sortTrades(trades, isAsk);
 
     for (const data of dataArray) {
         let p = parseFloat(data[0]);
-        let d = data[2];
+        let d = roundNumber(data[2], 2);
         let q = data[1];
         let l = data[3];
 
@@ -50,17 +49,6 @@ function balanceFigures(densities) {
     }
 
     return densities;
-}
-
-function analyzeDistances(marketPrice, trades) {
-    if (!trades || !Array.isArray(trades) || trades.length <= 0) return [];
-    const market = parseFloat(marketPrice);
-    for (const array of trades) {
-        const price = parseFloat(array[0]);
-        const distance = (Math.abs((price/market - 1) * 100)).toFixed(2);
-        array[2] = distance;
-    }
-    return trades;
 }
 
 function sortTrades(trades, isAsk) {

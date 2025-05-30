@@ -3,7 +3,7 @@
 
 .order-book-container {
     flex: 1 1 auto;
-    padding: 0px 10px;
+    padding: 0px 1vh 5vh 2vh;
 }
 
 .order-book {
@@ -131,11 +131,11 @@
 }
 
 .ask-color {
-    color: rgba(200, 70, 70);
+    color: rgb(253 82 82);
 }
 
 .bid-color {
-    color: rgba(60, 145, 60);
+    color: rgb(59 191 59);
 }
 
 .ob__percentage-data {
@@ -200,8 +200,8 @@
 
 .hint-container {
     border-radius: 5px;
-    background-color: rgba(0, 0, 0, 0.307);
-    border: 1px solid  rgba(0, 0, 0, 0.307);
+    background-color: #18181C;
+    border: 1px solid  rgb(0, 0, 0);
     padding: 10px;
     margin: 0 15px;
     font-size: 12px;
@@ -229,10 +229,11 @@
 }
 
 .level-entry {
-    --level-entry-color: #38383F;
-    --level-entry-hover-color: #4b4b55;
+    --level-entry-color: #18181C;
+    --level-entry-hover-color: #121212;
 
     background-color: var(--level-entry-color);
+    border: 1px solid black;
     color: white;
     display: flex;
     align-items: center;

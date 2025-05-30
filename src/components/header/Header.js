@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { useState, useEffect } from 'react'
 import Menu from '../menu/Menu'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import './Header.css'
 import useCacheContext from '../context/Context';
 import useUserContext from '../context/UserContext';
+import SortDropdown from './SortDropdown';
 
 const Header = ({ onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
@@ -49,6 +50,11 @@ const Header = ({ onMenuSelection, onSettings }) => {
             <header className='header'>
                 <div className='header-container'>
                     <div className='header-left-elements'>
+                        <div className="logo-title-container montserrat-font" style={{fontSize: '14px'}}>
+                            <span className="logo-title" style={{padding: '9px'}}>
+                                clerk screener
+                            </span>
+                        </div>
                         <div className='menu-button multi-el-header-item header-item profile-nav tooltip-container' >
                             <button className='relative-button' onClick={handleGoToAccount}/>
                             <span className="material-symbols-outlined header-google-icon-item">
@@ -89,6 +95,7 @@ const Header = ({ onMenuSelection, onSettings }) => {
                             </span>
                             <div> Настройки </div>
                         </button>
+                        <SortDropdown />
                     </div>
                     <div className='header-right-elements'>
                         <div className='toggle-icon header-item tooltip-container' onClick={handleDollarToggle}>
@@ -111,10 +118,7 @@ const Header = ({ onMenuSelection, onSettings }) => {
                             )}
                             <span className='simple-tooltip'> озвучка плотностей </span>
                         </div>
-                        <div className='toggle-icon header-item tooltip-container'>
-                            <FontAwesomeIcon icon={faFilter} style={{ color: "#ffffff", }} />
-                            <span className='simple-tooltip'> фильтрация стаканов </span>
-                        </div>
+
                         <button className='menu-button header-item trns-border'
                             onClick={() => setActiveMenu(Menu.notifications)}
                             id={Menu.notifications + 'MenuSelection'}

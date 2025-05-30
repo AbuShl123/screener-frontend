@@ -1,45 +1,92 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import apiService from "../../api/ApiService.js";
-import useCacheContext from './Context.js'
+import useUserContext from "./UserContext.js";
+import useCacheContext from "./Context.js";
+import SortingRule from "../header/SortingRule.js";
 
 export const APIContext = createContext(undefined);
 
-export const ApiProvider = ({children}) => {
-    const [orderBookEvent, setOrderBookEvent] = useState(null);
+export const ApiProvider = ({ children }) => {
+    const [orderBookEvent, setOrderBookEvent] = useState([]);
     const [openInterestEvent, setOpenInterestEvent] = useState([]);
-    const [maxOrdersUpdate, setMaxOrdersUpdate] = useState(null);
-    const {token, marketTickers} = useCacheContext();
-    
-    useEffect(() => {
-        const handleOpenInterestUpdates = (event) => setOpenInterestEvent(event);
-        apiService.createOIConnection(handleOpenInterestUpdates, token);
+    const { token } = useUserContext();
+    const { sortingRule } = useCacheContext();
 
-        const handleMaxOrdersUpdates = (event) => setMaxOrdersUpdate(event);
-        const fetchMaxOrders = async () => apiService.fetchMaxOrders(handleMaxOrdersUpdates, token);
-        fetchMaxOrders();
-        const interval = setInterval(fetchMaxOrders, 1000);
+    useEffect(() => {
+        apiService.createOBConnection((e) => handleDepthEvents(e, sortingRule), token);
+        apiService.createOIConnection(setOpenInterestEvent, token);
 
         return () => {
             apiService.closeOBConnection();
             apiService.closeOIConnection();
-            clearInterval(interval);
         };
     }, []);
 
     useEffect(() => {
-        apiService.closeOBConnection();
-        if (!marketTickers || !Array.isArray(marketTickers)) return;
-        if (marketTickers.length === 0) return;
-    
-        const handleOrderBookUpdates = (event) => {
-            const { s: symbol, p: price, b: bidsData, a: asksData } = event;
-            setOrderBookEvent({symbol, price, bidsData, asksData});
-        };
-        apiService.createOBConnection(marketTickers, handleOrderBookUpdates, token);
-    }, [marketTickers]);
+        apiService.setOBCallback((e) => handleDepthEvents(e, sortingRule));
+    }, [sortingRule])
+
+    const handleDepthEvents = useCallback((events, sortingRule) => {
+        console.log("sorting rule is ", sortingRule);
+
+        if (sortingRule === SortingRule.alphabet) {
+            events.sort((a, b) => a.s.localeCompare(b.s));
+        }
+
+        else if (sortingRule === SortingRule.levels) {
+            events.sort((a, b) => {
+                return getEventPriority(b) - getEventPriority(a);
+            });
+        }
+
+        else if (sortingRule === SortingRule.futThenSpot) {
+            events.sort((a, b) => {
+                const aHasDot = a.s.includes('.');
+                const bHasDot = b.s.includes('.');
+                if (aHasDot && !bHasDot) return -1;     // If only one has a dot, prioritize the one with the dot
+                if (!aHasDot && bHasDot) return 1;
+                return a.s.localeCompare(b.s);          // If both or neither have a dot, sort lexicographically
+            });
+        }
+
+        else if (sortingRule === SortingRule.spotThenFut) {
+            events.sort((a, b) => {
+                const aHasDot = a.s.includes('.');
+                const bHasDot = b.s.includes('.');
+                if (aHasDot && !bHasDot) return 1;      // If only one has a dot, prioritize the one without the dot
+                if (!aHasDot && bHasDot) return -1;
+                return a.s.localeCompare(b.s);          // If both or neither have a dot, sort lexicographically
+            });
+        }
+
+        setOrderBookEvent(events);
+    })
+
+    const getEventPriority = useCallback((event) => {
+        let priority = 0;
+        for (const ask of event.a) {
+            priority += getTradePriority(ask);
+        }
+
+        for (const bid of event.b) {
+            priority += getTradePriority(bid);
+        }
+        return priority;
+    }, [])
+
+    const getTradePriority = useCallback((trade) => {
+        let level = trade[3];
+        switch (level) {
+            case 1: return 1;
+            case 2: return 11;
+            case 3: return 120;
+            case 4: return 1300;
+            default: return 0;
+        }
+    }, [])
 
     return (
-        <APIContext.Provider value={{orderBookEvent, openInterestEvent, maxOrdersUpdate}}>
+        <APIContext.Provider value={{ orderBookEvent, openInterestEvent }}>
             {children}
         </APIContext.Provider>
     )

@@ -2,9 +2,17 @@ import { BASE_WS_URL } from '../utils/EnvParams';
 import api from './AxiosConfig'
 
 const clientSideReason = "client initiated closure";
+const MAX_RECONNECT_ATTEMPTS = 20;
+const RECONNECT_BASE_DELAY = 1000; // in ms
+
 class ApiService {
     oiSocket = undefined;
     obSocket = undefined;
+    oiReconnectAttempts = 0;
+    obReconnectAttempts = 0;
+    oiReconnectTimeout = null;
+    obReconnectTimeout = null;
+
 
     handleMessage(event, callback) {
         try {
@@ -24,34 +32,95 @@ class ApiService {
 
     createOIConnection(callback, token) {
         const oiUrl = `${BASE_WS_URL}/bitget/openInterest?token=${token}`;
-
         this.oiSocket = new WebSocket(oiUrl);
 
         this.oiSocket.onmessage = (event) => this.handleMessage(event, callback);
-        this.oiSocket.onopen = () => console.log(`Connected to Open Interest websocket: ${oiUrl}`);
-        this.oiSocket.onclose = (event) => console.log('Disconnected from Open Interest', event.code, event.reason);
-        this.oiSocket.onerror = (error) => console.log('Open Interest websocket threw error: ', error);
+
+        this.oiSocket.onopen = () => {
+            console.log(`Connected to Open Interest websocket: ${oiUrl}`);
+            this.oiReconnectAttempts = 0;
+            if (this.oiReconnectTimeout) {
+                clearTimeout(this.oiReconnectTimeout);
+                this.oiReconnectTimeout = null;
+            }
+        }
+
+        this.oiSocket.onerror = (error) => {
+            console.warn('Open Interest websocket threw error: ', error);
+            this.closeOIConnection(3000, 'Open Interest websocket threw error');
+        }
+
+
+        this.oiSocket.onclose = (event) => {
+            console.log('Disconnected from Open Interest', event.code, event.reason);
+            if (event.code !== 1000 && event.reason !== clientSideReason && this.oiReconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                const delay = RECONNECT_BASE_DELAY * 2 ** this.oiReconnectAttempts; // Exponential backoff
+                this.oiReconnectAttempts++;
+
+                this.oiReconnectTimeout = setTimeout(() => {
+                    console.log(`Reconnecting... attempt ${this.oiReconnectAttempts}`);
+                    this.createOIConnection(callback, token);
+                }, delay);
+            }
+        }
     }
 
-    createOBConnection(marketTickers, callback, token) {
-        let obUrl = `${BASE_WS_URL}/binance/depth?token=${token}&symbols=`;
-        obUrl += marketTickers.join("/");
-
+    createOBConnection(callback, token) {
+        const obUrl = `${BASE_WS_URL}/binance/depth?token=${token}`;
         this.obSocket = new WebSocket(obUrl);
+
         this.obSocket.onmessage = (event) => this.handleMessage(event, callback);
-        this.obSocket.onopen = () => console.log(`Connected to order book: ${obUrl}`);
-        this.obSocket.onclose = (event) => console.log('Disconnected from order book', event.code, event.reason);
-        this.obSocket.onerror = (error) => console.log('Order book websocket threw error: ', error);
+
+        this.obSocket.onopen = () => {
+            console.log(`Connected to order book: ${obUrl}`);
+            this.obReconnectAttempts = 0;
+            if (this.obReconnectTimeout) {
+                clearTimeout(this.obReconnectTimeout);
+                this.obReconnectTimeout = null;
+            }
+        }
+
+        this.obSocket.onerror = (error) => {
+            console.log('Order book websocket threw error: ', error);
+            this.closeOBConnection(3000, 'Order book websocket threw error');
+        }
+
+        this.obSocket.onclose = (event) => {
+            console.log('Disconnected from order book', event.code, event.reason);
+            if (event.code !== 1000 && event.reason !== clientSideReason && this.obReconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                const delay = RECONNECT_BASE_DELAY * 2 ** this.obReconnectAttempts; // Exponential backoff
+                this.obReconnectAttempts++;
+
+                this.obReconnectTimeout = setTimeout(() => {
+                    console.log(`Reconnecting... attempt ${this.obReconnectAttempts}`);
+                    this.createOBConnection(callback, token);
+                }, delay);
+            }
+        }
     }
 
-    closeOIConnection(reason = clientSideReason) {
+    setOBCallback(callback) {
+        if (this.obSocket) {
+            this.obSocket.onmessage = (event) => this.handleMessage(event, callback);
+        }
+    }
+
+    closeOIConnection(code=1000, reason=clientSideReason) {
+        if (this.oiReconnectTimeout) {
+            clearTimeout(this.oiReconnectTimeout);
+            this.oiReconnectTimeout = null;
+        }
         if (this.oiSocket) {
-            this.oiSocket.close(1000, reason);
+            this.oiSocket.close(code, reason);
             this.oiSocket = undefined;
         }
     }
 
     closeOBConnection(reason = clientSideReason) {
+        if (this.obReconnectTimeout) {
+            clearTimeout(this.obReconnectTimeout);
+            this.obReconnectTimeout = null;
+        }
         if (this.obSocket) {
             this.obSocket.close(1000, reason);
             this.obSocket = undefined;
@@ -106,10 +175,10 @@ class ApiService {
 
     async fetchOpenInterest(token) {
         try {
-            const response = await api.get('/openInterest', { headers: { Authorization: `Bearer ${token}` }, });
+            const response = await api.get('/openInterest', { headers: { Authorization: `Bearer ${token}` } });
             return response.data;
         } catch (error) {
-            console.error("Erro while fetching open interest data: ", error);
+            console.error("Error while fetching open interest data: ", error);
         }
     }
 
@@ -118,8 +187,21 @@ class ApiService {
             const response = await api.get('/subscribe/plans');
             return response;
         } catch (error) {
-            console.error("Erro while fetching subscribe plans data: ", error);
+            console.error("Error while fetching subscribe plans data: ", error);
             return undefined;
+        }
+    }
+
+    async fetchAllTickers(token) {
+        try {
+            const response = await api.get('/tickers', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response;
+        } catch (error) {
+            console.error("Error while fetching tickers: ", error);
         }
     }
 };

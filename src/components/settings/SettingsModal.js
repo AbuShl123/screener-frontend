@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import './SettingsModal.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWrench, faSearch } from '@fortawesome/free-solid-svg-icons';
