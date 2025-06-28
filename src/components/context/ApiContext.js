@@ -27,8 +27,6 @@ export const ApiProvider = ({ children }) => {
     }, [sortingRule])
 
     const handleDepthEvents = useCallback((events, sortingRule) => {
-        console.log("sorting rule is ", sortingRule);
-
         if (sortingRule === SortingRule.alphabet) {
             events.sort((a, b) => a.s.localeCompare(b.s));
         }

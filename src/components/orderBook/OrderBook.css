@@ -32,6 +32,9 @@
 }
 
 .ob__icons {
+    background-color: inherit;
+    border: none;
+    color: inherit;
     display: flex;
     align-items: center;
 }

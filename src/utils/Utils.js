@@ -110,7 +110,6 @@ const getUtterance = (data, isDollar) => {
     if (googleVoice) russianFemaleVoice = googleVoice;
     else if (irinaVoice) russianFemaleVoice = irinaVoice;
     else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
-    console.log('Russian voices are ', russianVoices);
 
     // Speak the text
     const utterance = new SpeechSynthesisUtterance(message);
@@ -118,9 +117,6 @@ const getUtterance = (data, isDollar) => {
     utterance.voice = russianFemaleVoice; 
     utterance.pitch = 1; // Range: 0 to 2
     utterance.rate = 1; // Range: 0.1 to 10
-    utterance.onstart = () => console.log('starting to talk.');
-    console.log("Voicing: ", message);
-    console.log("Utterance is ", utterance);
     return utterance;
 }
 
@@ -151,7 +147,6 @@ const getUtteranceForPriceChange = (data) => {
     if (googleVoice) russianFemaleVoice = googleVoice;
     else if (irinaVoice) russianFemaleVoice = irinaVoice;
     else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
-    console.log('Russian voices are ', russianVoices);
 
     // Speak the text
     const utterance = new SpeechSynthesisUtterance(message);
@@ -159,7 +154,6 @@ const getUtteranceForPriceChange = (data) => {
     utterance.voice = russianFemaleVoice; 
     utterance.pitch = 1; // Range: 0 to 2
     utterance.rate = 1; // Range: 0.1 to 10
-    console.log("Voicing: ", message);
     return utterance;
 }
 
@@ -171,6 +165,7 @@ const convertSymbolToRussian = (symbolName) => {
         case 'bnb': return 'бинанс коин';
         case 'ltc': return 'лайткоин';
         case '1000sats': return '1000 сатс';
+        case '1000pepe': return '1000 пепе';
         case 'doge': return 'доге';
     }
 

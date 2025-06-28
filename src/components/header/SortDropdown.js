@@ -14,8 +14,8 @@ const SortDropdown = () => {
     };
 
     return (
-        <div className={'tooltip-clickable-container' + (isActive ? ' active' : 'closed')}>
-            <div className='sort-button menu-button multi-el-header-item header-item' onClick={() => setIsActive(prev => !prev)} >
+        <div className={'tooltip-clickable-container' + (isActive ? ' active' : ' closed')}>
+            <button className='sort-button menu-button multi-el-header-item header-item' onClick={() => setIsActive(prev => !prev)} >
                 <FontAwesomeIcon icon={faFilter} style={{fontSize: '13px'}}/>
                 <div> {sortingRule} </div>
                 { isActive ? (
@@ -23,7 +23,7 @@ const SortDropdown = () => {
                 ) : (
                     <FontAwesomeIcon icon={faChevronDown} style={{margin: '0 4px'}}/>
                 )}
-            </div>
+            </button>
             <div className="advanced-tooltip sort-container" 
                 style={{ 
                     fontSize: '14px', 

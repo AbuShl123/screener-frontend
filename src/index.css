@@ -101,7 +101,7 @@ input:focus {
 }
 
 .tooltip-clickable-container.active .advanced-tooltip {
-	animation: fadeInDown .1s linear .1s forwards;
+	animation: fadeInDown .05s linear .05s forwards;
 	visibility: visible;
 }
 

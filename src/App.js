@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--dynamic-bg',
-      `url('/images/dynamic${Math.floor(Math.random() * 2) + 1}.jpg')`
+      `url('/images/dynamic${Math.floor(Math.random() * 2) + 1}.webp')`
     );
   }, []);
 

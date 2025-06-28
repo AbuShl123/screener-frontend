@@ -63,11 +63,11 @@ const OrderBookBox = ({ ticker, bids, asks }) => {
                     <div>{ticker.replace(FUT_SIGN, "").toUpperCase().replace("USDT", "") + " / USDT"}</div>
                 </span>
 
-                <div className='ob__icons' onClick={() => handleSettingsToggle()}>
+                <button className='ob__icons' onClick={() => handleSettingsToggle()}>
                     <span className="material-symbols-outlined settings-icon">
                         Settings
                     </span>
-                </div>
+                </button>
             </div>
 
             <div className='ob__content'>

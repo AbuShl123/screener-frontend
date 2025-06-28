@@ -2,12 +2,13 @@ import { useCallback } from 'react'
 import { useState, useEffect } from 'react'
 import Menu from '../menu/Menu'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCoins, faDollarSign, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faCoins, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import './Header.css'
 import useCacheContext from '../context/Context';
 import useUserContext from '../context/UserContext';
 import SortDropdown from './SortDropdown';
+import cache from '../../utils/CacheUtils';
 
 const Header = ({ onMenuSelection, onSettings }) => {
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Header = ({ onMenuSelection, onSettings }) => {
     }
 
     const handleSignOut = useCallback(() => {
-        localStorage.removeItem('token');
+        cache.removeToken();
         navigate('/login');
     }, [localStorage]);
 
@@ -98,15 +99,15 @@ const Header = ({ onMenuSelection, onSettings }) => {
                         <SortDropdown />
                     </div>
                     <div className='header-right-elements'>
-                        <div className='toggle-icon header-item tooltip-container' onClick={handleDollarToggle}>
+                        <button className='toggle-icon header-item tooltip-container' onClick={handleDollarToggle}>
                             {isDollar ? (
                                 <FontAwesomeIcon icon={faDollarSign} style={{ color: "#FFD43B", }} />
                             ) : (
                                 <FontAwesomeIcon icon={faCoins} style={{ color: "#FFD43B", }} />
                             )}
                             <span className='simple-tooltip'> значения в долларах/монетах </span>
-                        </div>
-                        <div className='toggle-icon header-item tooltip-container' onClick={handleVoiceToggle}>
+                        </button>
+                        <button className='toggle-icon header-item tooltip-container' onClick={handleVoiceToggle} style={{ color: "white", }}>
                             {isVoiceOn ? (
                                 <span className="material-symbols-outlined volume-icon">
                                     volume_up
@@ -117,7 +118,7 @@ const Header = ({ onMenuSelection, onSettings }) => {
                                 </span>
                             )}
                             <span className='simple-tooltip'> озвучка плотностей </span>
-                        </div>
+                        </button>
 
                         <button className='menu-button header-item trns-border'
                             onClick={() => setActiveMenu(Menu.notifications)}
