@@ -17,22 +17,31 @@
     opacity: 1; 
 }
 
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .modal-overlay.open {
     opacity: 1; 
     transform: scale(1); 
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 10%;
-    left: 15%;
-    right: 0;
-    bottom: 0;
-    z-index: 100;
-    width: 70%;
-    height: 80%;
+    position: relative;
+    width: 75vw;
+    height: 45rem;
+    border: 1px solid #676869;
     border-radius: 10px;
     background-color: rgb(47 47 55);
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.8), -20px -20px 20px rgba(0, 0, 0, 0.8);
 
     display: flex;
     flex-direction: column;
@@ -41,6 +50,32 @@
     opacity: 0;
     transform: scale(0.9); 
     transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.modal-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 110;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.836);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid lightgray;
+  border-top: 4px solid #00000000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .modal-header {
@@ -85,6 +120,7 @@
     flex: 1;
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
     overflow: hidden;
     width: 100%;
 }
@@ -92,7 +128,8 @@
 .modal-left-content {
     flex: 1;
     display: flex;
-    flex-direction: column;   
+    flex-direction: column;
+    max-width: 1000px;
 }
 
 .modal-right-content {
@@ -101,9 +138,10 @@
     flex-direction: column;
     overflow: hidden;
 
-    background-color: rgba(0, 0, 0, 0.264);
+    background-color: rgb(35, 35, 41);
     border-radius: 20px;
     margin: 0 10px 10px 0;
+    min-width: 19vw;
 }
 
 .modal-content-title {
@@ -144,8 +182,8 @@ input.ticker-search-input {
 }
 
 input.ticker-search-input:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.6);
 }
 
 input.ticker-search-input:focus {
@@ -221,33 +259,31 @@ input.ticker-search-input:focus {
 
 /* right menu */
 
-.chosen-one {
-    padding: 0 10px;
+.modified-ticker-container {
+    padding: 5px 10px;
     border-radius: 10px;
     background-color: #3f3f3fa3;
     border: .1px solid #3f3f3fa3;
-    margin: 0 10px 10px 10px;
+    margin: 0 10px 5px 10px;
     cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.chosen-one:hover {
+.modified-ticker-container:hover {
     background-color: rgb(56, 53, 68);
 }
 
-.close-chosen-one {
-    border-radius: 30%;
-    transition: .1s linear;
-    margin-left: 0;
-    padding: 3px;
-}
-
-.close-chosen-one:hover {
-    background-color: #717171a3;
-}
-
-.chosen-one.selected {
+.modified-ticker-container.selected {
     background-color: rgb(68, 64, 85);
-    /* border: .1px solid rgb(179, 179, 179); */
+}
+
+.modified-ticker-name {
+    color: white;
+    font-size: 12px;
+    margin: 0;
 }
 
 /* settings */
@@ -274,7 +310,8 @@ input.ticker-search-input:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 4vw;
+    margin-bottom: 4vw;
 }
 
 .noTickerSelected-icons {
@@ -282,7 +319,7 @@ input.ticker-search-input:focus {
 }
 
 .settings-background {
-    font-size: 80px;
+    font-size: 10vw;
     color: #4b4b4b;
     cursor: default;
 }
@@ -296,12 +333,12 @@ input.ticker-search-input:focus {
 }
 
 .wrench-icon {
-    font-size: 70px;
+    font-size: 9vw;
     transform: scaleX(-1);
     color: rgb(177, 177, 177);
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 43%;
+    left: 43%;
 }
 
 .noTickerSelected-text {
@@ -310,6 +347,7 @@ input.ticker-search-input:focus {
     color: grey;
     cursor: default;
     margin: 0;
+    font-size: 1vw;
 }
 
 .settings-header {
@@ -317,7 +355,7 @@ input.ticker-search-input:focus {
 }
 
 .selected-ticker {
-    height: 55px;
+    height: 50px;
     display: flex;
     justify-content: space-between;
     gap: 20px;
@@ -337,9 +375,10 @@ input.ticker-search-input:focus {
 }
 
 .selected-ticker-name {
+    white-space: nowrap;
     color: rgb(250, 230, 97);
     font-weight: bold;
-    font-size: 15px;
+    font-size: 14px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -421,7 +460,7 @@ input.ticker-search-input:focus {
     flex: 1 1 auto;
     width: 100%;
     height: 100%;
-    padding: 20px;
+    padding: 20px 10px 10px 10px;
 
     display: flex;
     justify-content: space-evenly;
@@ -442,41 +481,53 @@ input.ticker-search-input:focus {
     background-color: rgb(35, 35, 41);
     border-radius: 20px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-.disable-cover {
+.medium-icon {
+    font-variation-settings: 
+    'FILL' 0, 
+    'wght' 200, 
+    'GRAD' 0, 
+    'opsz' 74;
+}
+
+.audio-icon-layer {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: 20px;
     height: 100%;
-    z-index: 2;
-    border-radius: 20px;
-    background-color: rgba(46, 46, 56, 0.712);
+    display: flex;
+    justify-content: start;
+    align-items: center;
 }
 
 .reset-icon-layer {
     position: absolute;
     top: 0;
-    right: 10px;
+    right: 20px;
     height: 100%;
-    width: 100%;
     display: flex;
     justify-content: end;
     align-items: center;
 }
 
-.reset-icon-container {
+.settings-icon-container {
     width: 30px;
     height: 30px;
+    padding: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     cursor: pointer;
+    border: none;
+    background-color: transparent;
+    color: white;
 }
 
-.reset-icon-container:hover {
+.settings-icon-container:hover {
     background-color: rgba(128, 128, 128, 0.3);
 }
 
@@ -492,49 +543,21 @@ input.ticker-search-input:focus {
 .settings-market-type {
     position: relative;
     text-align: center;
-    margin: 15px 0;
+    margin: 20px 0;
+    font-size: 15px;
 }
 
 .settings-section {
     padding: 0 20px;
-}
-
-.section-after {
-    margin-top: 30px;
+    font-size: 15px;
 }
 
 .setting-mini-title {
-    font-size: 15px;
+    font-size: 13px;
 }
 
-.modal-range-inputs {
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-input {
-    border-radius: 5px;
-    background-color: rgb(60, 59, 74);
-    border: none;
-    width: 100%;
-    min-height: 30px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.758);
-    font-size: 15px;
-}
-
-.modal-input:hover {
-    border: 1px solid rgb(113, 113, 113);
-}
-
-.modal-input:focus {
-    cursor: auto;
-}
-
-.range-input {
-    width: 80px;
+.small-circle-container {
+    padding: 0 10px;
 }
 
 .small-circle {
@@ -546,18 +569,29 @@ input.ticker-search-input:focus {
     background-color: white;
 }
 
-.form-container-2 {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    gap: 10px;
+.green-circle {
+    background-color: green;
 }
 
-.modal-dollar-coin-icon {
+.yellow-circle {
+    background-color: #bdbd07;
+}
+
+.red-circle {
+    background-color: #df3838;
+}
+
+.purple-circle {
+    background-color: #9c0bdf;
+}
+
+.dollar-coin-icon {
+    font-size: .8rem;
     cursor: pointer;
     min-width: 16px;
     display: flex;
     justify-content: center;
+    padding: 5px 10px;
 }
 
 .reset-settings-tooltip {
@@ -572,4 +606,57 @@ input.ticker-search-input:focus {
 .tooltip-container:hover .reset-settings-tooltip {
     animation: opacity-change .1s linear 1s forwards;
     visibility: visible;
+}
+
+.reset-settings {
+    width: 100%;
+    margin: 1vw 0;
+    display: flex;
+    justify-content: center;
+}
+
+.reset-settings-button {
+    padding: .5rem .8rem;
+    background-color: transparent;
+    color: rgb(255, 95, 95);
+    border-radius: .5vw;
+    border: 1px solid transparent;
+    transition: border .1s linear;
+}
+
+.reset-settings-button:hover {
+    border: 1px solid rgb(255, 95, 95);
+}
+
+.caption {
+    margin: 0;
+}
+
+.s-type {
+    display: flex;
+    justify-self: flex-start;
+    align-items: center;
+    gap: .5rem;
+}
+
+.s-type-dollar {
+    padding: 3px 7px;
+    font-weight: 300;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid rgb(27, 216, 27);
+    border-radius: 5px;
+    color: rgb(27, 216, 27);
+    transition: width .2s linear;
+}
+
+.s-type-coins {
+    padding: 3px 7px;
+    font-weight: 300;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid rgb(255, 203, 32);
+    border-radius: 5px;
+    color:  rgb(255, 203, 32);
+    transition: width .2s linear;
 }

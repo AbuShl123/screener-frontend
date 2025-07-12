@@ -1,42 +1,67 @@
 import React, { useState, useEffect } from 'react'
-import useWebSocket from 'react-use-websocket'
 import { getShortFormNumber, getDate } from '../../utils/Utils';
-import { BASE_WS_URL } from '../../utils/EnvParams';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
-import { useCacheContext } from '../context/Context';
+import apiService from '../../api/ApiService';
+import useCacheContext from '../context/Context';
+import useApiContext from '../context/ApiContext';
+import Menu from './Menu';
+import cache from '../../utils/CacheUtils';
 
-const OIMenu = () => {
-    const {token, isDollar} = useCacheContext();
-    const [notifications, setNotifications] = useState(JSON.parse(localStorage.getItem('openInterest')) || [])
-    const [level1, setLevel1] = useState(100_000);
-    const [level2, setLevel2] = useState(250_000);
-    const [level3, setLevel3] = useState(1_000_000);
-    
-    const wsUrl = `${BASE_WS_URL}/bitget/openInterest?token=${token}`;
-    const { lastJsonMessage } = useWebSocket(wsUrl, {
-        shouldReconnect: () => true,
-        onOpen: () => console.log('Connected to open interest websocket'),
-        onError: (error) => console.error('Error while connecting to open interest websocket: ', error),
-        onClose: () => console.warn('Disconnected from open interest websocket')
-    });
+const OIMenu = ({activeMenu}) => {
+    const [notifications, setNotifications] = useState([])
+    const {isDollar, addNotification} = useCacheContext();
+    const {openInterestEvent} = useApiContext();
+    const level0 = 100_000;
+    const level1 = 250_000;
+    const level2 = 1_000_000;
 
     useEffect(() => {
-        if (lastJsonMessage) {
-            const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
-            // remove notifications that appeared more than 30m ago:
-            let filteredNotifications = notifications.filter( n => !n || n.timestamp > thirtyMinutesAgo).slice(0, 50);
-            let newNotifications = [{
-                symbol: lastJsonMessage.symbol,
-                percentage: lastJsonMessage.deltaPercentage,
-                coins: lastJsonMessage.deltaCoins,
-                dollars: lastJsonMessage.deltaDollars,
-                timestamp: lastJsonMessage.timestamp
-            }, ...filteredNotifications];
-            setNotifications(newNotifications);
-            localStorage.setItem('openInterest', JSON.stringify(newNotifications));
+        const fetchOpenInterest = async () => {
+            const data = await apiService.fetchOpenInterest(cache.getToken());
+            let notifications = [];
+            try {
+                for (const event of data) {
+                    const newNotification = {
+                        symbol: event.symbol,
+                        percentage: event.deltaPercentage,
+                        coins: event.deltaCoins,
+                        dollars: event.deltaDollars,
+                        timestamp: event.timestamp
+                    };
+                    notifications = [newNotification, ...notifications];
+                }
+                setNotifications(notifications);
+            } catch (error) {
+                console.error(`Error while reading open interest: ${data}`, error);
+            }
         }
-    }, [lastJsonMessage]);
+        fetchOpenInterest();
+    }, [])
+
+    useEffect(() => {
+        if (!openInterestEvent) {
+            return;
+        }
+
+        if (openInterestEvent.n === 'price') {
+            addNotification(openInterestEvent);
+            return;
+        }
+        
+        const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+        const filteredNotifications = notifications.filter(n => !n || n.timestamp > thirtyMinutesAgo).slice(0, 50);
+        const newNotification = {
+            symbol: openInterestEvent.symbol,
+            percentage: openInterestEvent.deltaPercentage,
+            coins: openInterestEvent.deltaCoins,
+            dollars: openInterestEvent.deltaDollars,
+            timestamp: openInterestEvent.timestamp
+        };
+
+        let newNotifications = [newNotification, ...filteredNotifications];
+        setNotifications(newNotifications);
+    }, [openInterestEvent]);
 
     const getQty = (data) => {
         let coins = data.coins;
@@ -55,10 +80,10 @@ const OIMenu = () => {
 
     const getOILevelClass = (data) => {
         let dollars = Math.abs(parseFloat(data.dollars));
-        return dollars < level1 ? 'oi-level-1' :
-               dollars < level2 ? 'oi-level-2' :
-               dollars < level3 ? 'oi-level-3' :
-               'oi-level-4';
+        return dollars < level0 ? 'notif-level-0' :
+               dollars < level1 ? 'notif-level-1' :
+               dollars < level2 ? 'notif-level-2' :
+               'notif-level-3';
     }
 
     const getPercentage = (data) => {
@@ -68,14 +93,14 @@ const OIMenu = () => {
 
     return (
         <>
-            <div className='menu-container'>
+            <div className='menu-container' style={{ 'display': activeMenu !== Menu.oi ? 'none' : ''}}>
                 <div className='menu-title'>
                     Открытый Интерес - BitGet
                 </div>
-                <div className='menu-notification-container menu-invisible-scroller'>
+                <div className='menu-notification-container menu-scroller'>
                     {notifications.map((data, index) => (
                         <div key={index} className={'notification-container ' + getOILevelClass(data)}>
-                            <div className='notification-1'>
+                            <div className='notification-1 notification-line'>
                                 <div> {data.symbol?.replace("USDT", "") + "/USDT"} </div>
                                 <div> {getDate(data.timestamp)} </div>
                             </div>

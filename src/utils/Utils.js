@@ -1,35 +1,21 @@
-const SPOT_SIGN = '.p';
 const FUT_SIGN = '.f';
 
-const DEFAULT_SETTINGS = {
-    lowBound: -10,
-    highBound: 10,
-    level1: -1,
-    level2: -1,
-    level3: -1,
-    isDollar: false,
-    audio: true
-}
-const DEFAULT_TICKERS = ['btcusdt', 'bnbusdt', 'ethusdt', 'dogeusdt', 'xrpusdt', 'bnxusdt', 'avaxusdt'];
-const DEFAULT_MARKET_TICKERS = DEFAULT_TICKERS.map(t => t + SPOT_SIGN);
-const DEFAULT_SETTINGS_MAP = new Map(
-    DEFAULT_TICKERS.flatMap(t => [
-        [t + SPOT_SIGN, DEFAULT_SETTINGS],
-        [t + FUT_SIGN, DEFAULT_SETTINGS]
-    ])
-);
-
 const vowels = 'aeiou';
-window.utterances = [];
+const monthsInRussian = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 
 const roundNumber = (num, dec = 5) => {
+    let result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+    if (result === 0) return Number(num);
     return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
 }
 
 const getShortFormNumber = (number, dec = 1) => {
     let shortNumber = '';
     let value = Math.abs(number);
-    if (value >= 1_000_000) {
+    if (value >= 1_000_000_000) {
+        shortNumber = roundNumber((value / 1_000_000_000), dec) + 'B';
+    }
+    else if (value >= 1_000_000) {
         shortNumber = roundNumber((value / 1_000_000), dec) + 'M';
     } else if (value >= 1_000) {
         shortNumber = roundNumber((value / 1_000).toFixed(1), dec) + 'K';
@@ -39,28 +25,30 @@ const getShortFormNumber = (number, dec = 1) => {
     return number < 0 ? "-" + shortNumber : shortNumber;
 }
 
+const getDateTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const month = monthsInRussian[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month} ${day}, ${year} ${hours}:${minutes}`;
+}
+
 const getDate = (timestamp) => {
-    let date = new Date(timestamp);
+    let date = new Date(Number(timestamp));
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const militaryTime = `${hours}:${minutes}`;
     return militaryTime;
 }
 
-const getMarketStyle = (ticker, tickerProperties, marketTickers, isSpot=true) => {
-    let props = tickerProperties.get(ticker);
-    if (props) {
-        let marketExists = (props.hasSpot && isSpot) || (props.hasFut && !isSpot);
-        if (!marketExists) return 'disabled';
-    }
-
-    let marketSymbol = ticker + (isSpot ? SPOT_SIGN : FUT_SIGN);
-    if (marketTickers.includes(marketSymbol)) {
-        let classValue = (isSpot ? 'spot' : 'futures') + '-selected';
-        return classValue;
-    }
-
-    return '';
+const getCurrentDate = () => {
+    let date = new Date();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const militaryTime = `${hours}:${minutes}`;
+    return militaryTime;
 }
 
 function setSpeech() {
@@ -79,19 +67,16 @@ function setSpeech() {
     )
 }
 
-const speak = (data, isDollar) => {
-    // indexes:                              0       1      2     3      4        5      6
-    // notification content is following: [symbol, isAsk, price, qty, incline, density, time]
-    let symbol = data[0];
-    let symbolName = symbol.replace(SPOT_SIGN, "").replace(FUT_SIGN, "").replace('usdt', '');
+const getUtterance = (data, isDollar) => {
+    // notification content is following: [ticker, price, qty, distance, level, isAsk, life]
+    let symbol = data.ticker;
+    let symbolName = symbol.replace(FUT_SIGN, "").replace('usdt', '');
     let coin = convertSymbolToRussian(symbolName);
-    let spotFut = symbol.endsWith(SPOT_SIGN) ? 'спот' : 'фьючерс';
-    let longShort = data[1] ? 'шорт' : 'лонг';
+    let spotFut = symbol.endsWith(FUT_SIGN) ? 'фьючерс' :  'спот';
+    let longShort = data.isAsk ? 'шорт' : 'лонг';
 
-    let qty = data[3];
-    let price = data[2];
-    let value = isDollar ? getShortFormNumber(qty * price) : getShortFormNumber(qty);
-    let number = convertNumberToRussian(value);
+    let qty = data.qty;
+    let number = convertNumberToRussian(qty);
     let dollars = isDollar ? ' долларов' : '';
 
     // пример: моента биткоин спот - в лонг обнаружено 2тыс (долларов)
@@ -108,7 +93,6 @@ const speak = (data, isDollar) => {
     if (googleVoice) russianFemaleVoice = googleVoice;
     else if (irinaVoice) russianFemaleVoice = irinaVoice;
     else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
-    console.log('Russian voices are ', russianVoices);
 
     // Speak the text
     const utterance = new SpeechSynthesisUtterance(message);
@@ -116,11 +100,44 @@ const speak = (data, isDollar) => {
     utterance.voice = russianFemaleVoice; 
     utterance.pitch = 1; // Range: 0 to 2
     utterance.rate = 1; // Range: 0.1 to 10
-    utterance.onstart = () => console.log('starting to talk.');
-    console.log("Voicing: ", message);
-    console.log("Utterance is ", utterance);
-    window.utterances.push(utterance);
-    synth.speak(utterance);
+    return utterance;
+}
+
+const getUtteranceForPriceChange = (data) => {
+    // notification content is following: [s: symbol, d: pricechange in percentages]
+    let symbol = data.s;
+    let symbolName = symbol.replace('usdt', '');
+    let coin = convertSymbolToRussian(symbolName);
+
+    let action = 'выросла';
+    if (data.d < 0) {
+        action = 'упала';
+    }
+
+    let pricechange = Math.round(Math.abs(data.d));
+
+    // пример: цена на биткоин выросла на 3 процента
+    let message = 'цена на ' + coin + ' ' + action + ' на ' + pricechange + ' процентов';
+    
+    // Find the Russian female voice
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    let russianFemaleVoice = voices[0];
+
+    const russianVoices = voices.filter((voice) => voice.lang.startsWith('ru'));
+    const googleVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('google'));
+    const irinaVoice = russianVoices.find((voice) => voice.name.toLowerCase().includes('irina'));
+    if (googleVoice) russianFemaleVoice = googleVoice;
+    else if (irinaVoice) russianFemaleVoice = irinaVoice;
+    else if (russianVoices.length > 0) russianFemaleVoice = russianVoices[0];
+
+    // Speak the text
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'ru-RU';
+    utterance.voice = russianFemaleVoice; 
+    utterance.pitch = 1; // Range: 0 to 2
+    utterance.rate = 1; // Range: 0.1 to 10
+    return utterance;
 }
 
 const convertSymbolToRussian = (symbolName) => {
@@ -128,8 +145,11 @@ const convertSymbolToRussian = (symbolName) => {
     switch(symbolName) {
         case 'btc': return 'биткоин';
         case 'eth': return 'эфир';
-        case 'bnb': return 'байнанс коин';
+        case 'bnb': return 'бинанс коин';
         case 'ltc': return 'лайткоин';
+        case '1000sats': return '1000 сатс';
+        case '1000pepe': return '1000 пепе';
+        case 'doge': return 'доге';
     }
 
     // if symbol is easily readable, then just return it (ex: 'avax' -> 'авакс')
@@ -176,4 +196,8 @@ const isReadbable = (symbolName) => {
     return true;
 }
 
-export { SPOT_SIGN, FUT_SIGN, DEFAULT_SETTINGS, DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, setSpeech, roundNumber, getShortFormNumber, getDate, getMarketStyle, speak }
+export { 
+    FUT_SIGN, 
+    setSpeech, roundNumber, getShortFormNumber, 
+    getDateTime, getDate, getCurrentDate, getUtterance, getUtteranceForPriceChange
+}

@@ -27,4 +27,4 @@ class Cache {
 }
 
 const cache = new Cache();
-export { cache };
+export default cache;

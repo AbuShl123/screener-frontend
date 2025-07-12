@@ -1,215 +1,139 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS, DEFAULT_SETTINGS_MAP, SPOT_SIGN, FUT_SIGN } from "../../utils/Utils";
-import api from '../../api/AxiosConfig'
+import useUserContext from "./UserContext";
+import apiService from "../../api/ApiService";
+import ErrorCard from "../cards/ErrorCard";
+import LoadingCard from "../cards/LoadingCard";
+import SortingRule from "../header/SortingRule";
 
-const TOKEN_CACHE_ID = 'screener-auth-token';
-const SELECTED_TICKERS_CACHE_ID = 'screener-selectedTickers';
-const MARKET_TICKERS_CACHE_ID = 'screener-marketTickers';
-const SETTINGS_CACHE_ID = 'screener-settings';
 const IS_DOLLAR_CACHE_ID = 'screener-is-dollar';
+const IS_VOICE_ON_CACHE_ID = 'screener-isVoiceOn';
+const SORTING_RULE_CACHE_ID = 'screener-sortRule';
 
 export const ScreenerContext = createContext(undefined);
 
 export const CacheProvider = ({ children }) => {
-    const [token, updateToken] = useState('');
-    const [selectedTickers, updateSelectedTickers] = useState(DEFAULT_TICKERS);
-    const [marketTickers, updateMarketTickers] = useState(DEFAULT_MARKET_TICKERS);
-    const [settingsMap, updateSettingsMap] = useState(DEFAULT_SETTINGS_MAP);
+    const {token} = useUserContext();
+    const [appState, setAppState] = useState({isLoading: true, error: undefined});
+
+    const [sortingRule, updateSortingRule] = useState("");
     const [isDollar, updateIsDollar] = useState(true);
-    const [allTickers, updateAllTickers] = useState([]);
-    const [tickerProps, updateTickerProps] = useState(new Map());
+    const [isVoiceOn, updateIsVoiceOn] = useState(true);
+    const [tickers, updateTickers] = useState(new Map());
     const [notifications, setNotifications] = useState([]);
-    const [processedNotifications, setProcessedNotifications] = useState([]);
 
     useEffect(() => {
-        const initialTickers = getSelectedTickers() || DEFAULT_TICKERS;
-        updateSelectedTickers(initialTickers);
-
-        const initialMarketTickers = getMarketTickers() || DEFAULT_MARKET_TICKERS;
-        updateMarketTickers(initialMarketTickers);
-
-        const initialSettnings = getSettingsMap() || DEFAULT_SETTINGS_MAP;
-        updateSettingsMap(initialSettnings);
-
-        const initialToken = getToken() || '';
-        updateToken(initialToken);
+        let sortingRule = getSortingRule();
+        updateSortingRule(sortingRule ? sortingRule : SortingRule.futThenSpot);
 
         let isDollar = getIsDollar();
-        const initialIsDollar = isDollar === undefined ? true : isDollar;
-        updateIsDollar(initialIsDollar);
+        updateIsDollar(isDollar === undefined ? true : isDollar);
 
-        const setAllTickersAndProps = async () => {
-            const { fetchedTickers, fetchedProps } = await getAllTickersAndProps();
-            updateAllTickers(fetchedTickers);
-            updateTickerProps(fetchedProps);
+        let isVoiceOn = getIsVoiceOn();
+        updateIsVoiceOn(isVoiceOn === undefined ? true : isVoiceOn);
+
+        const fetchTickers = async () => setTickers();
+        fetchTickers();
+    }, []);
+
+    async function setTickers() {
+        const response = await apiService.fetchAllTickers(token);
+
+        if (!response || response.status !== 200) {
+            setAppState({
+                isLoading: false,
+                error: 'Что-то пошло не так.'
+            });
+            return;   
         }
 
-        setAllTickersAndProps();
-    }, []);
+        let fetchedTickers = new Map();
+        response.data.forEach(item => {
+            fetchedTickers.set(item.symbol, parseFloat(item.price));
+        });
+        updateTickers(fetchedTickers);
+
+        setAppState({
+            isLoading: false,
+            error: undefined
+        });
+    }
+
+    function setSortingRule(value) {
+        updateSortingRule(value);
+        localStorage.setItem(SORTING_RULE_CACHE_ID, value);
+    }
 
     function setIsDollar(value) {
         updateIsDollar(value);
         localStorage.setItem(IS_DOLLAR_CACHE_ID, value);
     }
 
-    function setToken(value) {
-        updateToken(value);
-        localStorage.setItem(TOKEN_CACHE_ID, value);
+    function setIsVoiceOn(value) {
+        updateIsVoiceOn(value);
+        localStorage.setItem(IS_VOICE_ON_CACHE_ID, value);
     }
 
-    function setSelectedTickers(value) {
-        updateSelectedTickers(value);
-        localStorage.setItem(SELECTED_TICKERS_CACHE_ID , JSON.stringify(value));
-    }
-
-    function setMarketTickers(value) {
-        updateMarketTickers(value);
-        localStorage.setItem(MARKET_TICKERS_CACHE_ID, JSON.stringify(value));
-    }
-
-    function setSettingsMap(value) {
-        updateSettingsMap(value);
-        localStorage.setItem(SETTINGS_CACHE_ID, JSON.stringify(Array.from(value)));
-    }
-
-    function setSettings(ticker, newSetting) {
-        let newSettingsMap = new Map(settingsMap);
-        newSettingsMap.set(ticker, newSetting);
-        setSettingsMap(newSettingsMap);
-    }
-
-    function getSettings(ticker) {
-        let setting = settingsMap.get(ticker);
-        if (setting === undefined) return DEFAULT_SETTINGS;
-        return setting;
-    }
-
-    async function getAllTickersAndProps() {
-        const token = getToken();
-        console.log("token is here: ", token);
-        let fetchedTickers = [];
-        let fetchedProps = new Map();
-
-        await api.get('/tickers', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(response => {
-                fetchedTickers = response.data.map(t => t.symbol);
-                response.data.forEach(item => {
-                    let symbol = item.symbol;
-                    let hasSpot = item.hasSpot;
-                    let hasFut = item.hasFut;
-                    fetchedProps.set(symbol, { hasSpot, hasFut });
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching tickers:', error);
-            });
-
-        return {fetchedTickers, fetchedProps}
-    }
-
-    // following getters retrieve values from a localstorage, but if they are not present, then they return undefined
-
-    function getToken() {
-        let token = localStorage.getItem(TOKEN_CACHE_ID);
-        if (token === 'undefined') return undefined;
-        return token;
+    function getSortingRule() {
+        let rawValue = localStorage.getItem(SORTING_RULE_CACHE_ID);
+        if (!rawValue || rawValue === 'undefined') return undefined;
+        return rawValue;
     }
 
     function getIsDollar() {
         let rawValue = localStorage.getItem(IS_DOLLAR_CACHE_ID);
-        if (rawValue === 'undefined') return undefined;
+        if (!rawValue || rawValue === 'undefined') return undefined;
         return rawValue === 'true';
     }
 
-    function getSelectedTickers() {
-        let rawValue = localStorage.getItem(SELECTED_TICKERS_CACHE_ID);
-        if (rawValue !== "undefined") {
-            return JSON.parse(rawValue);
-        } else {
-            return undefined;
-        };
+    function getIsVoiceOn() {
+        let rawValue = localStorage.getItem(IS_VOICE_ON_CACHE_ID);
+        if (!rawValue || rawValue === 'undefined') return undefined;
+        return rawValue === 'true';
     }
+
+    function addNotification(message) {
+        setNotifications((prev) => {
+            let notifs = [message, ...prev];
     
-    function getMarketTickers() {
-        let rawValue = localStorage.getItem(MARKET_TICKERS_CACHE_ID);
-        if (rawValue !== "undefined") {
-            return JSON.parse(rawValue);
-        } else {
-            return undefined;
-        }
+            if (notifs.length > 40) {
+                notifs = notifs.slice(0, 40);
+            }
+    
+            return notifs;
+        });
+    };
+
+    if (appState.error) {
+        return (
+            <ErrorCard />
+        )
     }
 
-    function getSettingsMap() {
-        let rawValue = localStorage.getItem(SETTINGS_CACHE_ID);
-        if (rawValue === 'undefined') return undefined;
-
-        let map = new Map(JSON.parse(localStorage.getItem(SETTINGS_CACHE_ID)));
-        if (map.size === 0) return undefined;
-
-        const selectedTickers = getSelectedTickers();
-        if (selectedTickers === undefined) return map;
-
-        for (const ticker of selectedTickers) {
-            if (!map.has(ticker + SPOT_SIGN)) {
-                map.set(ticker + SPOT_SIGN, DEFAULT_SETTINGS);
-            }
-            if (!map.has(ticker + FUT_SIGN)) {
-                map.set(ticker + FUT_SIGN, DEFAULT_SETTINGS);
-            }
-        }
-        return map;
+    if (appState.isLoading) {
+        return (
+            <LoadingCard />
+        )
     }
 
     return (
         <ScreenerContext.Provider value={{ 
-            token, setToken,
-            allTickers, tickerProps,
-            selectedTickers, setSelectedTickers, 
-            marketTickers, setMarketTickers, 
-            settingsMap, setSettingsMap, getSettings, setSettings,
+            tickers,
+            sortingRule, setSortingRule,
             isDollar, setIsDollar,
-            notifications, setNotifications,
-            processedNotifications, setProcessedNotifications
+            isVoiceOn, setIsVoiceOn,
+            notifications, addNotification
         }}>
             {children}
         </ScreenerContext.Provider>
     )
 }
 
-export function useCacheContext() {
+export default function useCacheContext() {
     const context = useContext(ScreenerContext);
 
     if (!context) {
         throw new Error("useCacheContext must be used within a CacheProvider.");
     }
 
-    const { 
-        token, setToken,
-        allTickers, tickerProps,
-        selectedTickers, setSelectedTickers, 
-        marketTickers, setMarketTickers,
-        settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar,
-        notifications, setNotifications,
-        processedNotifications, setProcessedNotifications
-    } = context;
-
-    if (selectedTickers === undefined || marketTickers === undefined || settingsMap === undefined) {
-        throw new Error("context variables have not beed initialized yet.");
-    }
-
-    return {
-        token, setToken,
-        allTickers, tickerProps,
-        selectedTickers, setSelectedTickers, 
-        marketTickers, setMarketTickers, 
-        settingsMap, setSettingsMap, getSettings, setSettings,
-        isDollar, setIsDollar,
-        notifications, setNotifications,
-        processedNotifications, setProcessedNotifications
-    };
+    return context;
 }

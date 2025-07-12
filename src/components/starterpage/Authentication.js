@@ -1,39 +1,23 @@
 import axios from '../../api/AxiosConfig.js'
 import { jwtDecode } from 'jwt-decode';
-import { cache } from '../../utils/CacheUtils.js'
+import cache from '../../utils/CacheUtils.js'
 
 const signUpUser = async (firstname, lastname, email, password) => {
-    try {
-        const response = await axios.post('/auth/register', {
-            firstname,
-            lastname,
-            email,
-            password,
-        });
-
-        let token = response.data.token;
-        cache.setToken(token);
-        window.location.href = '/main';
-
-    } catch (error) {
-        console.log('Sign-up failed: ', error);
-    }
+    const response = await axios.post('/auth/register', {
+        firstname,
+        lastname,
+        email,
+        password,
+    });
+    return response;
 }
 
 const logInUser = async (email, password) => {
-    try {   
-        const response = await axios.post('/auth/authenticate', {
-            email,
-            password,
-        });
-
-        let token = response.data.token;
-        cache.setToken(token);
-        window.location.href = '/main';
-
-    } catch (error) {
-        console.log('Login failed: ', error);
-    }
+    const response = await axios.post('/auth/authenticate', {
+        email,
+        password,
+    });
+    return response;
 };
 
 const checkTokenExpiration = () => {

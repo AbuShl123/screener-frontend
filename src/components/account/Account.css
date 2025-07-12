@@ -1,0 +1,130 @@
+
+.modal-layout {
+    --account-page-primary-color: #2F2F37;
+    --form-grey-color: grey;
+
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: calc(.6rem + .3vw);
+    position: relative;
+}
+
+.full-width-container {
+    width: 100%;
+}
+
+.header-footer-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.rel-top-left-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: inherit;
+}
+
+.green-highlighted-text {
+    margin: 0;
+    background-color: rgba(117, 252, 76, 0.3);
+    border-radius: .2vw;
+    padding: 3px 5px;
+}
+
+.red-highlighted-text {
+    margin: 0;
+    background-color: rgba(255, 0, 0, 0.2);
+    border-radius: .2vw;
+    padding: 3px 5px;
+}
+
+.yellow-highlighted-text {
+    margin: 0;
+    background-color: rgba(238, 255, 0, 0.2);
+    border-radius: .2vw;
+    padding: 3px 5px;
+}
+
+.open-screener-button {
+    font-size: 13px;
+    font-weight: 500;
+    border: 3px solid var(--large-button-color);
+    transition: .1s linear;
+}
+
+.open-screener-button:hover {
+    background-color: transparent;
+    color: var(--large-button-color);
+}
+
+.black-button {
+    padding: 7px;
+    background-color: var(--screener-container-color);
+    border: none;
+    border-radius: 5px;
+    color: white;
+}
+
+.black-button:hover {
+    background-color: #393557;
+}
+
+/* profile data */
+
+.profile-data {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.profile-field {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #00000058;
+}
+
+/* header */
+
+.account-header {
+    width: 100%;
+    min-height: 100px;
+    padding-left: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 20px;
+}
+
+.a-header-item {
+    height: 40px;
+}
+
+.modal-content-2 {
+    padding: 30px;
+}
+
+.logo-title-container {
+    --logo-color: rgb(184, 185, 255);
+    color: var(--logo-color);
+    font-size: 15px;
+}
+
+.logo-title {
+    margin: 0;
+    padding: 10px;
+    border: 1px solid var(--logo-color);
+    border-radius: 5px;
+    text-shadow: 0 0 20px var(--logo-color), /* Inner glow */
+                 0 0 0px var(--logo-color), /* Medium glow */
+                 0 0 0px var(--logo-color), /* Outer glow */
+                 0 0 0px var(--logo-color); /* Extra outer glow */
+}
