@@ -1,23 +1,6 @@
 const FUT_SIGN = '.f';
 
-const DEFAULT_SETTINGS = {
-    level1: -1,
-    level2: -1,
-    level3: -1,
-    isDollar: false,
-    audio: true
-}
-const DEFAULT_TICKERS = ['btcusdt', 'bnbusdt', 'ethusdt', 'dogeusdt', 'xrpusdt', 'bnxusdt', 'avaxusdt'];
-const DEFAULT_MARKET_TICKERS = DEFAULT_TICKERS;
-const DEFAULT_SETTINGS_MAP = new Map(
-    DEFAULT_TICKERS.flatMap(t => [
-        [t, DEFAULT_SETTINGS],
-        [t + FUT_SIGN, DEFAULT_SETTINGS]
-    ])
-);
-
 const vowels = 'aeiou';
-
 const monthsInRussian = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 
 const roundNumber = (num, dec = 5) => {
@@ -53,7 +36,7 @@ const getDateTime = (timestamp) => {
 }
 
 const getDate = (timestamp) => {
-    let date = new Date(timestamp);
+    let date = new Date(Number(timestamp));
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const militaryTime = `${hours}:${minutes}`;
@@ -214,8 +197,7 @@ const isReadbable = (symbolName) => {
 }
 
 export { 
-    FUT_SIGN, DEFAULT_SETTINGS, 
-    DEFAULT_TICKERS, DEFAULT_MARKET_TICKERS, DEFAULT_SETTINGS_MAP, 
+    FUT_SIGN, 
     setSpeech, roundNumber, getShortFormNumber, 
     getDateTime, getDate, getCurrentDate, getUtterance, getUtteranceForPriceChange
 }

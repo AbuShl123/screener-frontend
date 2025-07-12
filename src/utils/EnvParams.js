@@ -1,6 +1,6 @@
 
-// const IP_ADDRESS = 'tc-screener.com';
-const IP_ADDRESS = 'localhost:1105';
+const IP_ADDRESS = 'tc-screener.com';
+// const IP_ADDRESS = 'localhost:1105';
 
 const SSL = '';
 

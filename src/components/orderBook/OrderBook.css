@@ -52,11 +52,12 @@
 .settings-icon {
     font-size: 26px;
     cursor: pointer;
+    transform: translateZ(0);
     transition: transform 0.3s ease;
 }
 
 .settings-icon:hover {
-    transform: rotate(45deg);
+    transform: rotateZ(45deg);
 }
 
 .delete-cup-icon {
@@ -84,6 +85,8 @@
 
 .ob__data-container {
     padding: 3px 10px;
+    will-change: opacity;
+    contain: layout paint;
 }
 
 .data-section {
@@ -231,29 +234,90 @@
       'opsz' 40
 }
 
+.level-entry-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* level entry */
+
 .level-entry {
-    --level-entry-color: #18181C;
-    --level-entry-hover-color: #121212;
+    --level-entry-color: #313139; 
+    --level-entry-hover-color: #454550;
 
     background-color: var(--level-entry-color);
-    border: 1px solid black;
+    border: none;
     color: white;
     display: flex;
     align-items: center;
     border-radius: 5px;
+    border: 1px solid transparent;
 }
 
 .level-entry:hover {
     background-color: var(--level-entry-hover-color);
 }
 
+.level-entry:has(input:focus) {
+    background-color: var(--level-entry-color);
+    border: 1px solid rgba(255, 255, 255, 0.418);
+}
+
+.level-entry input {
+  caret-color: white;
+}
+
+.level-entry input:-webkit-autofill,
+.level-entry input:-webkit-autofill:hover, 
+.level-entry input:-webkit-autofill:focus, 
+.level-entry input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #ffffff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #0000;
+}
+
+/* level-entry > distance  */
+
+.distance-input {
+    background-color: var(--level-entry-color);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    width: 4vw;
+    font-size: 13px;
+    padding: .6rem 0;
+    text-align: center;
+}
+
+.distance-input:hover {
+    background-color: var(--level-entry-hover-color);
+}
+
+.distance-input:focus {
+    border: none;
+    background-color: var(--level-entry-color); 
+}
+
+.level-entry:hover .distance-input {
+    background-color: var(--level-entry-hover-color);
+}
+
+.level-entry:hover .distance-input:focus {
+    background-color: var(--level-entry-color);
+}
+
+/* level-entry > settings */
+
 .settings-input {
     background-color: var(--level-entry-color);
     border: none;
+    border-radius: 5px;
     color: white;
     width: 100%;
     font-size: 13px;
-    padding: 5px 0;
+    padding: .6rem 0;
 }
 
 .settings-input:hover {
@@ -261,7 +325,11 @@
 }
 
 .level-entry:hover .settings-input {
-    background-color: var(--level-entry-hover-color) !important;
+    background-color: var(--level-entry-hover-color);
+}
+
+.level-entry:hover .settings-input:focus {
+    background-color: var(--level-entry-color);
 }
 
 .settings-input:focus {
@@ -283,16 +351,34 @@
     padding: 0;
     border-radius: 5px;
     border: 1px solid #38383F;
-    background-color: #38383F;
+    background-color: #4a4a6d;
     color: white;
-    min-width: 120px;
-    height: 35px;
-    font-size: 12px;
+    min-width: 10vw;
+    height: 2.5rem;
+    font-size: 13px;
     position: relative;
 }
 
 .settings-submit-button:hover {
-    background-color: #4F4F54;  
+    background-color: #67678d;  
+    transition: .2s;
+}
+
+.settings-reset-button {
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    border: 1px solid #575757;
+    background-color: #575757;
+    color: white;
+    min-width: 5vw;
+    height: 2.5rem;
+    font-size: 13px;
+    position: relative;
+}
+
+.settings-reset-button:hover {
+    background-color: #838383;  
     transition: .2s;
 }
 

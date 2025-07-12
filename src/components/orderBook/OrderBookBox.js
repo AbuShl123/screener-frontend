@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { FUT_SIGN } from '../../utils/Utils.js'
 import { processDensities, balanceFigures, getVolume } from './OBUtils.js'
 import apiService from '../../api/ApiService.js'
-import OrderBookSettings from './OrderBookSettings.js'
 import useCacheContext from '../context/Context.js'
 import DataSection from './DataSection.js'
+import useUserContext from '../context/UserContext.js'
 
-const OrderBookBox = ({ ticker, bids, asks }) => {
+const OrderBookBox = ({ onTickerSettings, ticker, bids, asks }) => {
 
     const isSpot = !ticker.endsWith(FUT_SIGN);
     
@@ -18,18 +18,18 @@ const OrderBookBox = ({ ticker, bids, asks }) => {
     */
     const [densities, setDensities] = useState([]);
 
-    // volumeData: {volume, price}
+    // volumeData: {price, volume}
     const [volumeData, setVolumeData] = useState({price: 0.0, volume: 0.0});
 
-    // cup properties: isSettings & severity
-    const [isSettings, setIsSettings] = useState(false);
-
     // function to get settings for a ticker and isDollar
-    const {getSettings, isDollar} = useCacheContext();
+    const { isDollar } = useCacheContext();
+
+    // authentication token
+    const {token} = useUserContext();
 
     useEffect(() => {
         const fetchVolumeData = async () => {
-            const volumeUpdate = await apiService.fetch5MVolume(ticker.replace(FUT_SIGN, ''))
+            const volumeUpdate = await apiService.fetch5MVolume(ticker, token);
             if (!volumeUpdate) return;
             let price = volumeUpdate[0][4];
             let volume = volumeUpdate[0][5];
@@ -38,22 +38,17 @@ const OrderBookBox = ({ ticker, bids, asks }) => {
         fetchVolumeData();
         const interval = setInterval(fetchVolumeData, 300_000);
         return () => {clearInterval(interval)};
-    }, []);
+    }, [ticker]);
 
     useEffect(() => {
         let densities;
         try {
-            const settings = getSettings(ticker);
-            densities = processDensities(asks, bids, settings, isDollar);
+            densities = processDensities(asks, bids, isDollar);
             setDensities(balanceFigures(densities));
         } catch (error) {
             console.error(`couldn't process orderbook event ${densities}`, error);
         }
     }, [asks, bids]);
-
-    const handleSettingsToggle = () => {
-        setIsSettings(prev => !prev);
-    };
 
     return (
         <>
@@ -63,7 +58,7 @@ const OrderBookBox = ({ ticker, bids, asks }) => {
                     <div>{ticker.replace(FUT_SIGN, "").toUpperCase().replace("USDT", "") + " / USDT"}</div>
                 </span>
 
-                <button className='ob__icons' onClick={() => handleSettingsToggle()}>
+                <button className='ob__icons' onClick={() => onTickerSettings(ticker.replace(FUT_SIGN, ""))}>
                     <span className="material-symbols-outlined settings-icon">
                         Settings
                     </span>
@@ -71,7 +66,6 @@ const OrderBookBox = ({ ticker, bids, asks }) => {
             </div>
 
             <div className='ob__content'>
-                {isSettings && <OrderBookSettings ticker={ticker} onSubmit={() => setIsSettings(false)}/>}
                 <div>
                     <hr className='ob__line'></hr>
                     <div className='ob__data-container'>

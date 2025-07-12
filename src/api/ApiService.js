@@ -1,5 +1,5 @@
 import { BASE_WS_URL } from '../utils/EnvParams';
-import api from './AxiosConfig'
+import api from './AxiosConfig.js'
 
 const clientSideReason = "client initiated closure";
 const MAX_RECONNECT_ATTEMPTS = 20;
@@ -147,8 +147,10 @@ class ApiService {
         }
     }
 
-    async subscribe(email, planId) {
-        return await api.post(`subscribe/${planId}/${email}`);
+    async subscribe(token, planId) {
+        return await api.post(`subscribe/${planId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
     }
 
     async fetchMaxOrders(callback, token) {
@@ -163,10 +165,9 @@ class ApiService {
         }
     }
 
-    async fetch5MVolume(symbol) {
+    async fetch5MVolume(symbol, token) {
         try {
-            let baseUrl = 'https://api.binance.com/api/v3';
-            const response = await api.get(`${baseUrl}/klines?symbol=${symbol.toUpperCase()}&interval=5m&limit=1`)
+            const response = await api.get(`/kilnes/5m-volume/` + symbol, { headers: { Authorization: `Bearer ${token}` } });
             return response.data;
         } catch (error) {
             console.error("Error whilte fetching klines data: ", error);
@@ -182,16 +183,6 @@ class ApiService {
         }
     }
 
-    async fetchSubscriptionPlans() {
-        try {
-            const response = await api.get('/subscribe/plans');
-            return response;
-        } catch (error) {
-            console.error("Error while fetching subscribe plans data: ", error);
-            return undefined;
-        }
-    }
-
     async fetchAllTickers(token) {
         try {
             const response = await api.get('/tickers', {
@@ -203,6 +194,26 @@ class ApiService {
         } catch (error) {
             console.error("Error while fetching tickers: ", error);
         }
+    }
+
+    async fetchCurrentSettings(token) {
+        return await api.get('/settings', { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    async postSettings(token, settingsRequest) {
+        return await api.post('/settings', settingsRequest, { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    async resetSettings(token) {
+        return await api.post('/settings/reset', {}, { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    async resetOneSettings(token, mSymbol) {
+        return await api.post('/settings/reset/' + mSymbol, {}, { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    async deleteSettings(token, mSymbol) {
+        return await api.delete('/settings/' + mSymbol, { headers: { Authorization: `Bearer ${token}` } });
     }
 };
 

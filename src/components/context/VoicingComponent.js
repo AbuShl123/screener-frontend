@@ -1,12 +1,14 @@
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import { setSpeech, getUtterance, getUtteranceForPriceChange } from '../../utils/Utils'
 import useCacheContext from "./Context";
+import useApiContext from "./ApiContext";
 
 const synth = window.speechSynthesis
 
 const VoicingComponent = ({children}) => {
 
-    const {notifications, getSettings, isDollar, isVoiceOn} = useCacheContext();
+    const {settings} = useApiContext();
+    const {notifications, isDollar, isVoiceOn} = useCacheContext();
 
     useEffect(() => {
         const waitForVoicesToLoad = async () => await setSpeech();
@@ -24,9 +26,9 @@ const VoicingComponent = ({children}) => {
             if (notif.n === 'price') {
                 utterance = getUtteranceForPriceChange(notif);
             } else {
-                const ticker = notif.ticker;
-                const settings = getSettings(ticker);
-                if (!settings.audio) continue;
+                const mSymbol = notif.ticker;
+                const setting = settings.get(mSymbol) || settings.get('all');
+                if (!setting.audio) continue;
                 utterance = getUtterance(notif, isDollar);
             }
 

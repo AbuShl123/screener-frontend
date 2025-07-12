@@ -39,7 +39,7 @@ const Main = () => {
             <div className='main'>
                 <div className='content-left menu-invisible-scroller'>
                     <Header onMenuSelection={setActiveMenu} onSettings={openSettingsModal} />
-                    <OrderBook />
+                    <OrderBook onTickerSettings={openSettingsModalForTicker}/>
                 </div>
                 <div className='content-right'>
                     {activeMenu === Menu.tickers &&

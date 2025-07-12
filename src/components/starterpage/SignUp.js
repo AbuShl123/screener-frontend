@@ -34,7 +34,7 @@ const SignUp = ({plan}) => {
 
             if (response.data?.message === 'Email is sent successfully.') {
                 try {
-                    await apiService.subscribe(username, plan.id)
+                    await apiService.subscribe(token, plan.id)
                 } catch (error) {
                 } finally { 
                     localStorage.removeItem('token');

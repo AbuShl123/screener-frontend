@@ -5,7 +5,7 @@ import useApiContext from '../context/ApiContext'
 import useCacheContext from '../context/Context'
 import { getQty } from './OBUtils'
 
-const OrderBook = () => {
+const OrderBook = ({onTickerSettings}) => {
 
      // listening to orderbook events
     const {orderBookEvent} = useApiContext();
@@ -88,7 +88,7 @@ const OrderBook = () => {
             <div className='order-book'>
                 {orderBookEvent && orderBookEvent.map((event) => (
                     <div className='order-book-cup' key={event.s}>
-                        <OrderBookBox ticker={event.s} bids={event.b} asks={event.a} />
+                        <OrderBookBox onTickerSettings={onTickerSettings} ticker={event.s} bids={event.b} asks={event.a} />
                     </div>
                 ))}
             </div>

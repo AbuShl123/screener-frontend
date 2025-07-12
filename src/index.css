@@ -250,3 +250,61 @@ input:focus {
   font-weight: 300;
   font-style: normal;
 }
+
+
+/* Error and success messages */
+.message-container {
+	position: absolute;
+	top: 3rem;
+	right: 1rem;
+	z-index: 100000;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: end;
+	gap: 1rem;
+}
+
+.message {
+	border-radius: 2vw;
+	border-top-right-radius: 0px;
+	padding: 1rem 0 1rem 1rem;
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3), -10px -10px 20px rgba(0, 0, 0, 0.3);
+	font-weight: 500;
+	font-size: 14px;
+}
+
+.message-inner {
+	position: relative;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: .5rem;
+}
+
+.message.success-message {
+	--success-message-color: #92b592;
+    background-color: #1d1e29;
+    border: 1px solid var(--success-message-color);
+    color: var(--success-message-color);
+}
+
+.message.error-message {
+    --error-message-color: #db5c5c;
+    background-color: #1d1e29;
+    border: 1px solid #b94242;
+    color: var(--error-message-color);
+}
+
+.message-content {
+	margin: 0 4rem 0 0;
+}
+
+.message-close {
+	font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+	padding: 5px;
+}
+
+.message-icon {
+	font-size: 1.2rem;
+}

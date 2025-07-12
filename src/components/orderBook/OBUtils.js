@@ -4,15 +4,15 @@ export {
     processDensities, balanceFigures, getVolume, getLevelStyle, getTickerLife, getQty
 }
 
-function processDensities(asks, bids, settings, isDollar) {
-    const asksData = processTrades(asks, settings, true, isDollar);
-    const bidsData = processTrades(bids, settings, false, isDollar);
+function processDensities(asks, bids, isDollar) {
+    const asksData = processTrades(asks, true, isDollar);
+    const bidsData = processTrades(bids, false, isDollar);
     return [...asksData, ...bidsData];
 }
 
 // indexes:                       0     1       2       3      4
 // output: bid/ask array ===== [price, qty, distance, level, life]
-function processTrades(trades, settings, isAsk, isDollar) {
+function processTrades(trades, isAsk, isDollar) {
     let densities = [];
     let dataArray = sortTrades(trades, isAsk);
 
@@ -22,7 +22,7 @@ function processTrades(trades, settings, isAsk, isDollar) {
         let q = data[1];
         let l = data[3];
 
-        const level = getLevel(p, q, l, settings);
+        const level = data[3];
         const qty = getQty(p, q, isDollar);
 
         let density = {
@@ -107,32 +107,6 @@ function roundToDigits(num, digits) {
     if (digitsToFix <= 0) return num;
     let result = num.toFixed(digitsToFix);
     return result;
-}
-
-function getLevel(price, qty, level, settings) {
-    const lev1 = settings.level1;
-    const lev2 = settings.level2;
-    const lev3 = settings.level3;
-    const isDollar = settings.isDollar;
-
-    if (lev1 < 0 || lev2 < 0 || lev3 < 0) {
-        return level;
-    }
-
-    // if is dollar, then value = qty * price, else value = qty;
-    let value = isDollar ? qty * price : qty;
-
-    if (value < lev1) {
-        return 0;
-    }
-    if (value < lev2) {
-        return 1;
-    }
-    if (value < lev3) {
-        return 2;
-    }
-
-    return 3;
 }
 
 function getLevelStyle(data) {

@@ -9,13 +9,15 @@ export const APIContext = createContext(undefined);
 export const ApiProvider = ({ children }) => {
     const [orderBookEvent, setOrderBookEvent] = useState([]);
     const [openInterestEvent, setOpenInterestEvent] = useState([]);
+    const [settings, setSettings] = useState(new Map());
+    const [settingsUpdate, setSettingsUpdate] = useState(true);
+
     const { token } = useUserContext();
     const { sortingRule } = useCacheContext();
 
     useEffect(() => {
         apiService.createOBConnection((e) => handleDepthEvents(e, sortingRule), token);
         apiService.createOIConnection(setOpenInterestEvent, token);
-
         return () => {
             apiService.closeOBConnection();
             apiService.closeOIConnection();
@@ -23,8 +25,36 @@ export const ApiProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
+        fetchSettings();
+        apiService.closeOBConnection();
+        apiService.createOBConnection((e) => handleDepthEvents(e, sortingRule), token);
+    }, [settingsUpdate]);
+
+    useEffect(() => {
         apiService.setOBCallback((e) => handleDepthEvents(e, sortingRule));
     }, [sortingRule])
+
+    const refreshSettings = useCallback(() => {
+        setSettingsUpdate(prev => !prev);
+    });
+
+    const fetchSettings = useCallback(async () => {
+        try {
+            const response = await apiService.fetchCurrentSettings(token);
+            const responseData = response.data;
+            if (responseData?.settings && Array.isArray(responseData?.settings)) {
+                const settingsMap = new Map();
+                for (const settings of response.data.settings) {
+                    if (settings?.msymbol != null) {
+                        settingsMap.set(settings.msymbol, settings);
+                    }
+                }
+                setSettings(settingsMap);
+            }
+        } catch (error) {
+            console.error("Couldn't fetch user settings", error);
+        }
+    }, [token]);
 
     const handleDepthEvents = useCallback((events, sortingRule) => {
         if (sortingRule === SortingRule.alphabet) {
@@ -73,7 +103,7 @@ export const ApiProvider = ({ children }) => {
     }, [])
 
     const getTradePriority = useCallback((trade) => {
-        let level = trade[3];
+        let level = Number(trade[3]);
         switch (level) {
             case 1: return 1;
             case 2: return 11;
@@ -84,7 +114,7 @@ export const ApiProvider = ({ children }) => {
     }, [])
 
     return (
-        <APIContext.Provider value={{ orderBookEvent, openInterestEvent }}>
+        <APIContext.Provider value={{ orderBookEvent, openInterestEvent, settings, refreshSettings }}>
             {children}
         </APIContext.Provider>
     )
