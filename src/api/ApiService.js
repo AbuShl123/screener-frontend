@@ -196,6 +196,8 @@ class ApiService {
         }
     }
 
+    // Settings endpoints
+
     async fetchCurrentSettings(token) {
         return await api.get('/settings', { headers: { Authorization: `Bearer ${token}` } });
     }
@@ -214,6 +216,12 @@ class ApiService {
 
     async deleteSettings(token, mSymbol) {
         return await api.delete('/settings/' + mSymbol, { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    // kline endpoints
+
+    async fetchGVolume(token) {
+        return await api.get('/klines/gvolume', { headers: { Authorization: `Bearer ${token}` } });
     }
 };
 

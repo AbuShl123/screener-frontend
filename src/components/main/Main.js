@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './Main.css'
 import Header from '../header/Header'
-import Menu from '../menu/Menu'
-import TickersMenu from '../menu/TickersMenu'
-import NotificationsMenu from '../menu/NotificationsMenu'
-import OIMenu from '../menu/OIMenu'
 import OrderBook from '../orderBook/OrderBook'
 import SettingsModal from '../settings/SettingsModal'
 import useCacheContext from '../context/Context'
+import RightMenu from '../menu/RightMenu'
+import Mode from '../context/Mode'
+import Charts from '../chart/Charts'
+import SingleChart from '../chart/SingleChart'
 
 const Main = () => {
-    const [activeMenu, setActiveMenu] = useState(Menu.tickers);
     const [settingsModal, setSettingsModal] = useState({isOpen: false, desiredTicker: ''});
-    const {isVoiceOn} = useCacheContext();
+    const {isVoiceOn, mode, isRightMenu, singleChart} = useCacheContext();
 
     useEffect(() => {
         if (!isVoiceOn) {
@@ -38,15 +37,17 @@ const Main = () => {
 
             <div className='main'>
                 <div className='content-left menu-invisible-scroller'>
-                    <Header onMenuSelection={setActiveMenu} onSettings={openSettingsModal} />
-                    <OrderBook onTickerSettings={openSettingsModalForTicker}/>
+                    <Header onSettings={openSettingsModal} />
+                    { singleChart ? (
+                        <SingleChart />
+                    ) : mode === Mode.cups ? (
+                        <OrderBook onTickerSettings={openSettingsModalForTicker}/>
+                    ) : (
+                        <Charts />
+                    )}
                 </div>
-                <div className='content-right'>
-                    {activeMenu === Menu.tickers &&
-                        <TickersMenu onTickerSettings={openSettingsModalForTicker}/>
-                    }
-                    <NotificationsMenu activeMenu={activeMenu} />
-                    <OIMenu activeMenu={activeMenu}/>
+                <div className={'content-right' + (isRightMenu ? '' : ' closed')}>
+                    <RightMenu onSettings={openSettingsModalForTicker}/>
                 </div>
             </div>
         </>

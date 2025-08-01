@@ -11,6 +11,7 @@ export const ApiProvider = ({ children }) => {
     const [openInterestEvent, setOpenInterestEvent] = useState([]);
     const [settings, setSettings] = useState(new Map());
     const [settingsUpdate, setSettingsUpdate] = useState(true);
+    const [gVolume, setGVolume] = useState();
 
     const { token } = useUserContext();
     const { sortingRule } = useCacheContext();
@@ -25,6 +26,10 @@ export const ApiProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
+        fetchGVolume();
+    }, [token]);
+
+    useEffect(() => {
         fetchSettings();
         apiService.closeOBConnection();
         apiService.createOBConnection((e) => handleDepthEvents(e, sortingRule), token);
@@ -37,6 +42,18 @@ export const ApiProvider = ({ children }) => {
     const refreshSettings = useCallback(() => {
         setSettingsUpdate(prev => !prev);
     });
+
+    const fetchGVolume = useCallback(async () => {
+        try {
+            const response = await apiService.fetchGVolume(token);
+            const responseData = response.data;
+            if (responseData) {
+                setGVolume(responseData);
+            }
+        } catch (error) {
+            console.error("Couldn't fetch gVolume", error);
+        }
+    }, [token]);
 
     const fetchSettings = useCallback(async () => {
         try {
@@ -114,7 +131,11 @@ export const ApiProvider = ({ children }) => {
     }, [])
 
     return (
-        <APIContext.Provider value={{ orderBookEvent, openInterestEvent, settings, refreshSettings }}>
+        <APIContext.Provider value={{
+            orderBookEvent, openInterestEvent, 
+            settings, refreshSettings, 
+            gVolume, setGVolume
+        }}>
             {children}
         </APIContext.Provider>
     )

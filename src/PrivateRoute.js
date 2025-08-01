@@ -3,6 +3,7 @@ import { checkTokenExpiration } from './components/starterpage/Authentication'
 import cache from './utils/CacheUtils';
 import { UserProvider } from './components/context/UserContext';
 import SubscribedRoute from './SubscribedRoute';
+import { GlobalContext, GlobalContextProvider } from './components/context/GlobalContext';
 
 const PrivateRoute = ({ Component }) => {
 	const token = cache.getToken();
@@ -14,16 +15,20 @@ const PrivateRoute = ({ Component }) => {
 
 	if (Component.displayName?.includes('Account')) {
 		return (
-			<UserProvider>
-				<Component />
-			</UserProvider>
+			<GlobalContextProvider>
+				<UserProvider>
+					<Component />
+				</UserProvider>
+			</GlobalContextProvider>
 		)
 	}
 
 	return (
-		<UserProvider>
-			<SubscribedRoute Component={Component}/>
-		</UserProvider>
+		<GlobalContextProvider>
+			<UserProvider>
+				<SubscribedRoute Component={Component}/>
+			</UserProvider>
+		</GlobalContextProvider>
 	);
 };
 

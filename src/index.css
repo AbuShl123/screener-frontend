@@ -1,5 +1,5 @@
 :root {
-	--dynamic-bg: url('../public/images/dynamic1.jpg');
+	--dynamic-bg: url('../public/images/dynamic1.webp');
 }
 
 html {
@@ -79,14 +79,37 @@ input:focus {
 
 .tooltip-container {
 	position: relative;
+	transition: background-color 0s ease 0s; 
 }
 
 .tooltip-container:hover .tooltip {
+	display: inline;
+	animation: opacity-change .1s linear .5s forwards;
+	visibility: visible;
+}
+
+.tooltip-container:hover .tooltip-up {
+	display: inline;
+	animation: opacity-change .1s linear .5s forwards;
+	visibility: visible;
+}
+
+.tooltip-container:has(.tooltip):hover {
+	background-color: rgba(255, 255, 255, 0.09);
+	transition: background-color 0s ease 0.5s;
+}
+
+.tooltip-container:has(.tooltip-up):hover {
+	background-color: rgba(255, 255, 255, 0.09);
+	transition: background-color 0s ease 0.5s;
+}
+
+.tooltip-container:hover .simple-tooltip {
 	animation: opacity-change .1s linear 1s forwards;
 	visibility: visible;
 }
 
-.tooltip-container:hover .simple-tooltip {
+.tooltip-container:hover .simple-tooltip-lefty {
 	animation: opacity-change .1s linear 1s forwards;
 	visibility: visible;
 }
@@ -106,9 +129,10 @@ input:focus {
 }
 
 .tooltip {
+	display: none;
 	visibility: hidden;
 	opacity: 0;
-	z-index: 1;
+	z-index: 1000000;
 
 	position: absolute;
 	top: 110%;
@@ -123,10 +147,29 @@ input:focus {
 	white-space: nowrap;
 }
 
+.tooltip-up {
+	display: none;
+	visibility: hidden;
+	opacity: 0;
+	z-index: 1000000;
+
+	position: absolute;
+	top: -110%;
+	left: 10%;
+
+	background-color: rgb(227, 227, 227);
+	color: #000;
+	text-align: center;
+	font-size: 14px;
+	padding: 5px;
+	border-radius: 5px;
+	white-space: nowrap;
+}
+
 .simple-tooltip {
 	visibility: hidden;
 	opacity: 0;
-	z-index: 1;
+	z-index: 1000000;
 
 	position: absolute;
 	top: 110%;
@@ -141,18 +184,36 @@ input:focus {
 	white-space: nowrap;
 }
 
+.simple-tooltip-lefty {
+	visibility: hidden;
+	opacity: 0;
+	z-index: 1000000;
+
+	position: absolute;
+	top: 110%;
+	right: 0%;
+
+	background-color: rgb(50 61 120);
+	color: #ffff;
+	text-align: center;
+	font-size: 12px;
+	padding: 5px;
+	border-radius: 0px;
+	white-space: nowrap;
+}
+
 .advanced-tooltip {
 	visibility: hidden;
 	opacity: 0;
-	z-index: 1;
+	z-index: 1000000;
 
 	position: absolute;
 	top: 100%;
-	left: -50%;
+	right: -20%;
 
 	border-radius: 10px;
 	border: 1.5px solid rgb(51 52 55);
-	background-color: #212227;
+	background-color: #1c1c1e;
 	color: #ffff;
 	font-size: 12px;
 	white-space: nowrap;

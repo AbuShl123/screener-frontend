@@ -4,6 +4,7 @@ import apiService from "../../api/ApiService";
 import ErrorCard from "../cards/ErrorCard";
 import LoadingCard from "../cards/LoadingCard";
 import SortingRule from "../header/SortingRule";
+import Mode from "./Mode";
 
 const IS_DOLLAR_CACHE_ID = 'screener-is-dollar';
 const IS_VOICE_ON_CACHE_ID = 'screener-isVoiceOn';
@@ -20,6 +21,9 @@ export const CacheProvider = ({ children }) => {
     const [isVoiceOn, updateIsVoiceOn] = useState(true);
     const [tickers, updateTickers] = useState(new Map());
     const [notifications, setNotifications] = useState([]);
+    const [mode, setMode] = useState(Mode.cups);
+    const [singleChart, setSingleChart] = useState();
+    const [isRightMenu, setIsRightMenu] = useState(true);
 
     useEffect(() => {
         let sortingRule = getSortingRule();
@@ -121,7 +125,10 @@ export const CacheProvider = ({ children }) => {
             sortingRule, setSortingRule,
             isDollar, setIsDollar,
             isVoiceOn, setIsVoiceOn,
-            notifications, addNotification
+            notifications, addNotification,
+            mode, setMode,
+            isRightMenu, setIsRightMenu,
+            singleChart, setSingleChart
         }}>
             {children}
         </ScreenerContext.Provider>

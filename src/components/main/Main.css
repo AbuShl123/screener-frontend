@@ -1,22 +1,33 @@
-
 .main {
-    display: grid;
-    grid-template-columns: 11fr 19rem;
+    display: flex;
 }
 
 .content-left {
+    flex: 1;
     display: flex;
     flex-flow: column;
     max-height: 100vh;
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
 }
 
 .content-right {
+    width: 18rem;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    opacity: 1;
+
     position: sticky;
     top: 0;
     right: 0;
     padding-bottom: 20px;
     height: 100vh;
     max-height: 100vh;
+}
+
+.content-right.closed {
+    width: 0rem;
+    opacity: 0;
 }

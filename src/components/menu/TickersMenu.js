@@ -32,7 +32,7 @@ const TickersMenu = ({ onTickerSettings }) => {
         )
     }, []);
 
-    
+
     const getAudioIcon = useCallback((symbol) => {
         const setting = settings.get(symbol) || settings.get('all');
         return (
@@ -52,28 +52,23 @@ const TickersMenu = ({ onTickerSettings }) => {
 
     return (
         <>
-            <div className='menu-container'>
-                <div className='menu-title'>
-                    Нынешние тикеры
-                </div>
-                <div className='connected-tickers-list menu-scroller'>
-                    {[...currentSymbols].map(([symbol, number]) => (
-                        <div key={symbol} className='connected-ticker-container'>
+            <div className='connected-tickers-list menu-scroller'>
+                {[...currentSymbols].map(([symbol, number]) => (
+                    <div key={symbol} className='connected-ticker-container'>
 
-                            <div className='ticker-action-buttons ticker-name-audio'>
-                                {getAudioIcon(symbol)}
-                                <p className='ticker-name'> {symbol.toUpperCase().replace("USDT", "") + "/USDT"} </p>
-                            </div>
-
-                            <div className='ticker-action-buttons'>
-                                {getMarketDots(number)}
-                                <span className="material-symbols-outlined ticker-settings settings-icon" onClick={() => onTickerSettings(symbol)}>
-                                    Settings
-                                </span>
-                            </div>
+                        <div className='ticker-action-buttons ticker-name-audio'>
+                            {getAudioIcon(symbol)}
+                            <p className='ticker-name'> {symbol.toUpperCase().replace("USDT", "") + "/USDT"} </p>
                         </div>
-                    ))}
-                </div>
+
+                        <div className='ticker-action-buttons'>
+                            {getMarketDots(number)}
+                            <span className="material-symbols-outlined ticker-settings settings-icon" onClick={() => onTickerSettings(symbol)}>
+                                Settings
+                            </span>
+                        </div>
+                    </div>
+                ))}
             </div>
         </>
     )

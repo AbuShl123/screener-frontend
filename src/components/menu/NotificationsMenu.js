@@ -14,23 +14,18 @@ const NotificationsMenu = ({ activeMenu }) => {
 
     return (
         <>
-            <div className='menu-container' style={{ 'display': activeMenu !== Menu.notifications ? 'none' : '' }}>
-                <div className='menu-title'>
-                    Уведомления
-                </div>
-                <div className='menu-notification-container menu-scroller'>
-                    {notifications.map((data, index) => (
-                        data.n ? (
-                            <div className={'notification-container ' + getNotifLevel(data)} key={index}>
-                                <PriceChangeNotification notif={data}/>
-                            </div>
-                        ) : (
-                            <div className={'notification-container ' + getNotifLevel(data)} key={index}>
-                                <DensityNotification data={data} isDollar={isDollar} />
-                            </div>
-                        )
-                    ))}
-                </div>
+            <div className='menu-notification-container menu-scroller' style={{ 'display': activeMenu !== Menu.notifications ? 'none' : '' }}>
+                {notifications.map((data, index) => (
+                    data.n ? (
+                        <div className={'notification-container ' + getNotifLevel(data)} key={index}>
+                            <PriceChangeNotification notif={data} />
+                        </div>
+                    ) : (
+                        <div className={'notification-container ' + getNotifLevel(data)} key={index}>
+                            <DensityNotification data={data} isDollar={isDollar} />
+                        </div>
+                    )
+                ))}
             </div>
         </>
     )

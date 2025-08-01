@@ -14,10 +14,8 @@
     position: relative;
     display: flex;
     justify-content: start;
-    gap: 10px;
+    gap: 1rem;
     align-items: center;
-
-    width: 100%;
     height: 100%;
     padding: 0 20px;
 }
@@ -30,7 +28,7 @@
     align-items: center;
 
     height: 100%;
-    padding: 0 20px;
+    padding: 0 10px 0 20px;
 }
 
 .header-item {
@@ -53,6 +51,12 @@
     font-size: 18px;
     vertical-align: middle;
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
+.menu-arrow-icon {
+    font-size: 18px;
+    vertical-align: middle;
+    font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48;
 }
 
 .toggle-icon {
@@ -238,4 +242,104 @@
 
 .sort-button:hover {
     background-color: rgb(49 65 81);
+}
+
+/* MODE Selection */
+
+.mode-container {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    border-radius: 1vw;
+    background-color: rgb(0, 0, 0);
+    border: 2px solid rgb(53 50 0);
+}
+
+.cup-icon {
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 600,
+        'GRAD' 0,
+        'opsz' 48;
+    font-size: 18px;
+}
+
+.chart-icon {
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 600,
+        'GRAD' 0,
+        'opsz' 48;
+    font-size: 18px;
+}
+
+.mode-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 4rem;
+    height: 2rem;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.slider {
+    width: 100%;
+    position: relative;
+    display: block;
+    height: 100%;
+    /* background-color: #22242e;
+    border: 1px solid rgb(89 88 101); */
+    background-color: #2d2e22;
+    border: 1px solid rgb(101 98 88);
+    border-radius: 34px;
+    transition: background-color 0.4s;
+    cursor: pointer;
+}
+
+.knob {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 2rem;
+    height: 2rem;
+
+    background-color: #22222b;
+    border: 1.4px solid #ffea5d;
+    color: #ffea5d;
+
+    border-radius: 50%;
+    transition: transform 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.icon {
+    font-size: 16px;
+}
+
+.switch input:checked + .slider {
+    background-color: #232e22;
+    border: 1px solid rgb(88, 101, 89);
+}
+
+.switch input:checked + .slider .knob {
+    transform: translateX(33px);
+    background-color: #22222b;
+    border: 1.4px solid #98ff96;
+    color: #98ff96;
 }

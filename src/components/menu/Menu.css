@@ -1,22 +1,80 @@
 .menu-container {
+    --menu-bck-color: #24262B;
     display: flex;
     flex-flow: column;
     height: 96vh;
 
     margin: 2vh 1vh 2vh 0px;
     border-radius: 20px;
-    background-color: rgb(255 255 255 / 5%);
 }
 
 .menu-title {
     flex: 0 0 auto;
     font-size: 15px;
-    height: 50px;  
     color: rgba(255, 255, 255, 0.747);
-
+    background-color: var(--menu-bck-color);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding-bottom: 10px;
+    
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+}
+
+.menu-title p {
+    margin: 0;
+    color: white;
+    margin-left: 1rem;
+    font-size: 14px;
+    text-wrap: nowrap;
+}
+
+.menu-headers {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+}
+
+.menu-header {
+    border: none;
+    background-color: transparent;
+    color: #9f9f9f;
+    padding: .5rem .6rem;
+    margin: .2rem;
+    border-radius: 5px;
+    text-wrap: nowrap;
+}
+
+.menu-header > span {
+    font-size: 13px;
+    margin-right: 3px;
+}
+
+.menu-header.active {
+    color: rgb(255, 212, 59);
+    background-color: #54546f;
+}
+
+.menu-header.last {
+    border-top-right-radius: 20px;
+}
+
+.menu-header:not(.active):hover {
+    background-color: #ffffff12;
+}
+
+.menu-content-container {
+    height: 100%;
+    background-color: var(--menu-bck-color);
+    border-radius: 20px;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    /* padding-top: 1rem; */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* connected symbols */
